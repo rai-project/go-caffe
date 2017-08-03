@@ -1,0 +1,8 @@
+*.d
+*.o
+
+examples/vectorAdd/vec
+
+
+libzipkin.a
+prof.so
