@@ -65,7 +65,7 @@ before_install:
   - cd $HOME
   - git clone --depth 1 https://github.com/BVLC/caffe.git caffe
   - pip install --upgrade pip
-  - mkdir build && cd build
+  - mkdir ${DEPS_DIR}/caffe_build && cd ${DEPS_DIR}/caffe_build
   - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${DEPS_DIR}/caffe
   - make
   - make install
