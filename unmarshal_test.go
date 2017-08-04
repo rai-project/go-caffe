@@ -18,4 +18,6 @@ func TestUnmarshalModel(t *testing.T) {
 
 	assert.Equal(t, int32(256), blob.GetWidth())
 	assert.Equal(t, int32(256), blob.GetHeight())
+	assert.Equal(t, int32(3), blob.GetChannels())
+
 }
