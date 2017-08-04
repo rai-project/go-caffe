@@ -32,7 +32,7 @@ func New(modelFile, trainFile string) (*Predictor, error) {
 	}, nil
 }
 
-func (p *Predictor) Predict(imageData []float32) ([]Prediction, error) {
+func (p *Predictor) Predict(imageData []float32) (Predictions, error) {
 	ptr := (*C.float)(unsafe.Pointer(&imageData[0]))
 	r := C.Predict(p.ctx, ptr)
 	defer C.free(unsafe.Pointer(r))
