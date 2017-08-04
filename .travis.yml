@@ -69,6 +69,7 @@ addons:
     - python-pip
     - python-setuptools
     - python-scip
+    - caffe-cpu
 before_install:
   - echo ${TRAVIS_NODE_VERSION}
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | bash)"
@@ -115,3 +116,5 @@ after_script:
 
 env:
   - CLONE_TAG=1.0
+  - WITH_CUDA=false
+  - WITH_CMAKE=true
