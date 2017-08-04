@@ -7,14 +7,15 @@ extern "C" {
 
 #include <stddef.h>
 
-typedef struct PredictorContext PredictorContext;
+typedef void *PredictorContext;
 
-PredictorContext *New(char *model_file, char *trained_file, char *mean_file,
-                      char *label_file);
+PredictorContext *New(char *model_file, char *trained_file);
 
 const char *Predict(PredictorContext *pred, char *buffer, size_t length);
 
 void Delete(PredictorContext *pred);
+
+void SetMode(int mode);
 
 #ifdef __cplusplus
 }
