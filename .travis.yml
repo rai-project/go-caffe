@@ -1,27 +1,32 @@
 language: cpp
 sudo: false
 
+env: &env
+  - BUILD_TYPE='Release'
+  - WITH_CUDA=false
+  - WITH_CMAKE=true
+  - CPU_ONLY=1
+addons: &addons
+  - build-essential
+  - git
+  - wget
+  - libatlas-base-dev
+  - libboost-all-dev
+  - libgflags-dev
+  - libgoogle-glog-dev
+  - libhdf5-serial-dev
+  - libleveldb-dev
+  - liblmdb-dev
+  - libopencv-dev
+  - libprotobuf-dev
+  - libsnappy-dev
+  - protobuf-compiler
+  - python-dev
+  - python-numpy
+  - python-pip
+  - python-setuptools
 matrix:
   include:
-    - addons: &addons
-      - build-essential
-      - git
-      - wget
-      - libatlas-base-dev
-      - libboost-all-dev
-      - libgflags-dev
-      - libgoogle-glog-dev
-      - libhdf5-serial-dev
-      - libleveldb-dev
-      - liblmdb-dev
-      - libopencv-dev
-      - libprotobuf-dev
-      - libsnappy-dev
-      - protobuf-compiler
-      - python-dev
-      - python-numpy
-      - python-pip
-      - python-setuptools
     # Linux C++14 GCC builds
     - os: linux
       compiler: gcc6
@@ -29,16 +34,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - ppa:masterminds/glide
           packages:
             - g++-6
             - *addons
       env:
-        - COMPILER='g++-6'
-        - BUILD_TYPE='Release'
-        - WITH_CUDA=false
-        - WITH_CMAKE=true
-        - CPU_ONLY=1
+        - *env
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
     - os: linux
       compiler: clang
@@ -51,12 +51,15 @@ matrix:
             - clang-3.9
             - *addons
       env:
-        - COMPILER='g++-6'
-        - BUILD_TYPE='Release'
-        - WITH_CUDA=false
-        - WITH_CMAKE=true
-        - CPU_ONLY=1
+        - *env
         - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
+
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env:
+        - *env
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
   - eval "${MATRIX_EVAL}"
