@@ -1,6 +1,11 @@
 language: cpp
 sudo: false
 
+
+cache:
+  directories:
+  - $HOME/caffe
+
 addons: &addons
   - build-essential
   - git
@@ -74,11 +79,11 @@ before_install:
       which cmake || brew install cmake
     fi
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb homebrew/science/opencv; fi
-  - cd ${DEPS_DIR}
-  - git clone --depth 1 https://github.com/BVLC/caffe.git ${DEPS_DIR}/caffe
+  - cd ${HOME}
+  - git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe
   - pip install --upgrade pip
-  - mkdir ${DEPS_DIR}/caffe_build && cd ${DEPS_DIR}/caffe_build
-  - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${DEPS_DIR}/caffe
+  - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
+  - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
   - make
   - make install
   - mv install /opt/caffe
