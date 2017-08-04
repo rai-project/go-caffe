@@ -16,6 +16,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	CPUMode = 0
+	GPUMode = 1
+)
+
 type Predictor struct {
 	ctx C.PredictorContext
 }
@@ -51,11 +56,13 @@ func (p *Predictor) Close() {
 }
 
 func SetUseCPU() {
-	e := SolverParameter_SolverMode_value["CPU"]
-	C.SetMode(C.int(e))
+	C.SetMode(C.int(CPUMode))
 }
 
 func SetUseGPU() {
-	e := SolverParameter_SolverMode_value["GPU"]
-	C.SetMode(C.int(e))
+	C.SetMode(C.int(GPUMode))
+}
+
+func init() {
+	C.Init()
 }

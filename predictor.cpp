@@ -73,8 +73,6 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
 
 PredictorContext New(char* model_file, char* trained_file) {
   try {
-    ::google::InitGoogleLogging("inference_server");
-
     const auto ctx = new Predictor(model_file, trained_file);
     return (void*)ctx;
   } catch (const std::invalid_argument& ex) {
@@ -83,6 +81,8 @@ PredictorContext New(char* model_file, char* trained_file) {
     return nullptr;
   }
 }
+
+void Init() { ::google::InitGoogleLogging("inference_server"); }
 
 const char* Predict(PredictorContext pred, float* imageData) {
   auto predictor = (Predictor*)pred;

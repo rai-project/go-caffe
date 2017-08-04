@@ -17,6 +17,8 @@ void Delete(PredictorContext pred);
 
 void SetMode(int mode);
 
+void Init();
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus
