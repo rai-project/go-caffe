@@ -24,22 +24,20 @@ matrix:
       - python-setuptools
     # Linux C++14 GCC builds
     - os: linux
-      compiler: gcc
-      addons: &gcc6
+      compiler: clang
+      addons: &clang39
         apt:
           sources:
+            - llvm-toolchain-precise-3.8
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
-            - *addons
+            - clang-3.9
       env:
         - COMPILER='g++-6'
         - BUILD_TYPE='Release'
         - WITH_CUDA=false
         - WITH_CMAKE=true
         - CPU_ONLY=1
-
-
 
 before_install:
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | bash)"
