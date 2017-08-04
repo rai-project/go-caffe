@@ -36,10 +36,6 @@ matrix:
             - *addons
       env: COMPILER='g++-6' BUILD_TYPE='Release'
 
-    - os: linux
-      compiler: gcc
-      addons: *gcc6
-      env: COMPILER='g++-6' BUILD_TYPE='Debug'
 
     # Linux C++14 Clang builds
     - os: linux
@@ -55,17 +51,7 @@ matrix:
             - *addons
       env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
 
-    - os: linux
-      compiler: clang
-      addons: *clang39
-      env: COMPILER='clang++-3.9' BUILD_TYPE='Debug'
-
     # OSX C++14 Clang Builds
-
-    - os: osx
-      osx_image: xcode8.3
-      compiler: clang
-      env: COMPILER='clang++' BUILD_TYPE='Debug'
 
     - os: osx
       osx_image: xcode8.3
