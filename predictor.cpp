@@ -21,12 +21,7 @@ class Predictor {
  public:
   Predictor(const string& model_file, const string& trained_file);
 
-  std::vector<Prediction> Predict(const char* imageData, int imageRows,
-                                  int imageCols, int imageChannels);
-
- private:
-  std::vector<float> iPredict(const char* imageData, int imageRows,
-                              int imageCols, int imageChannels);
+  std::vector<Prediction> Predict(float* imageData);
 
  private:
   shared_ptr<Net<float> > net_;
@@ -47,38 +42,25 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
   height_ = input_layer->height();
   channel_ = input_layer->channels();
 
+  printf("width = %d\n", width_);
+  printf("height_ = %d\n", height_);
+  printf("channel_ = %d\n", channel_);
+
   CHECK(channel_ == 3 || channel_ == 1)
       << "Input layer should have 1 or 3 channels.";
 }
 
-std::vector<float> Predictor::iPredict(const char* imageData, int imageRows,
-                                       int imageCols, int imageChannels) {
+/* Return the top N predictions. */
+std::vector<Prediction> Predictor::Predict(float* imageData) {
 
-  const auto imageSize = imageRows * imageCols * imageChannels;
-  std::vector<float> data;
-  data.reserve(imageSize);
-  std::transform(imageData, imageData + imageSize, data.begin() ,
-                 [](const char pixel) -> float { return pixel / 255.0f; });
-
-  caffe::Blob<float> blob{1, channel_, height_, width_};
-  blob.set_cpu_data(data.data());
-  std::vector<caffe::Blob<float>*> bottom;
-  bottom.push_back(&blob);
-
-  net_->Forward(bottom);
+  net_->Forward(imageData);
 
   /* Copy the output layer to a std::vector */
   Blob<float>* output_layer = net_->output_blobs()[0];
   const float* begin = output_layer->cpu_data();
   const float* end = begin + output_layer->channels();
-  return std::vector<float>(begin, end);
-}
+  const auto output = std::vector<float>(begin, end);
 
-/* Return the top N predictions. */
-std::vector<Prediction> Predictor::Predict(const char* imageData, int imageRows,
-                                           int imageCols, int imageChannels) {
-  std::vector<float> output =
-      iPredict(imageData, imageRows, imageCols, imageChannels);
   const auto outputSize = output.size();
 
   std::vector<Prediction> predictions;
@@ -103,11 +85,9 @@ PredictorContext New(char* model_file, char* trained_file) {
   }
 }
 
-const char* Predict(PredictorContext pred, const char* imageData,
-                    int imageRows, int imageCols, int imageChannels) {
+const char* Predict(PredictorContext pred, float* imageData) {
   auto predictor = (Predictor*)pred;
-  auto predictions =
-      predictor->Predict(imageData, imageRows, imageCols, imageChannels);
+  auto predictions = predictor->Predict(imageData);
 
   json j;
   j["predictions"] = predictions;
@@ -120,4 +100,4 @@ void Delete(PredictorContext pred) {
   delete predictor;
 }
 
-void SetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew) mode); }
+void SetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }

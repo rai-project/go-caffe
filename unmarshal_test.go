@@ -10,7 +10,7 @@ import (
 
 func TestUnmarshalModel(t *testing.T) {
 
-	caffeModelFile = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "imagenet_mean.binaryproto")
+	caffeModelFile := filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "imagenet_mean.binaryproto")
 
 	blob, err := ReadBlob(caffeModelFile)
 	assert.NoError(t, err)

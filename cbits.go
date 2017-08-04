@@ -9,6 +9,8 @@ package caffe
 // #include "cbits/predictor.hpp"
 import "C"
 import (
+	"unsafe"
+
 	"github.com/Unknwon/com"
 	"github.com/pkg/errors"
 )
@@ -27,6 +29,13 @@ func New(modelFile, trainFile string) (*Predictor, error) {
 	return &Predictor{
 		ctx: C.New(C.CString(modelFile), C.CString(trainFile)),
 	}, nil
+}
+
+func (p *Predictor) Predict(imageData []float32) ([]Prediction, error) {
+	ptr := (*C.float)(unsafe.Pointer(&imageData[0]))
+	r := C.Predict(p.ctx, ptr)
+	js := C.GoString(r)
+	return nil, nil
 }
 
 func (p *Predictor) Close() {

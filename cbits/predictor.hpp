@@ -11,7 +11,7 @@ typedef void *PredictorContext;
 
 PredictorContext New(char *model_file, char *trained_file);
 
-const char *Predict(PredictorContext pred, char *buffer, size_t length);
+const char *Predict(PredictorContext pred, float *imageData);
 
 void Delete(PredictorContext pred);
 

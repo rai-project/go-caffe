@@ -8,3 +8,4 @@ libzipkin.a
 prof.so
 
 _obj
+*-test-leveldb
