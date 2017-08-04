@@ -65,7 +65,7 @@ before_install:
   - git clone --depth 1 https://github.com/BVLC/caffe.git caffe
   - pip install --upgrade pip
   - mkdir build && cd build
-  - cmake -DCPU_ONLY=1 caffe
+  - cmake -DCPU_ONLY=1 ${DEPS_DIR}/caffe
   - make -j"$(nproc)"
 
 before_script:
