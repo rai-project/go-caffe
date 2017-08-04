@@ -9,8 +9,32 @@ matrix:
       compiler: gcc
       addons: &gcc6
         apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-6']
+          sources:
+            - ubuntu-toolchain-r-test
+            - ppa:masterminds/glide
+          packages:
+            - g++-6
+            - glide
+            - build-essential
+            - git
+            - wget
+            - libatlas-base-dev
+            - libboost-all-dev
+            - libgflags-dev
+            - libgoogle-glog-dev
+            - libhdf5-serial-dev
+            - libleveldb-dev
+            - liblmdb-dev
+            - libopencv-dev
+            - libprotobuf-dev
+            - libsnappy-dev
+            - protobuf-compiler
+            - python-dev
+            - python-numpy
+            - python-pip
+            - python-setuptools
+            - python-scip
+            - caffe-cpu
       env: COMPILER='g++-6' BUILD_TYPE='Release'
 
     - os: linux
@@ -23,8 +47,33 @@ matrix:
       compiler: clang
       addons: &clang39
         apt:
-          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.9']
+          sources:
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+            - ppa:masterminds/glide
+          packages:
+            - clang-3.9
+            - glide
+            - build-essential
+            - git
+            - wget
+            - libatlas-base-dev
+            - libboost-all-dev
+            - libgflags-dev
+            - libgoogle-glog-dev
+            - libhdf5-serial-dev
+            - libleveldb-dev
+            - liblmdb-dev
+            - libopencv-dev
+            - libprotobuf-dev
+            - libsnappy-dev
+            - protobuf-compiler
+            - python-dev
+            - python-numpy
+            - python-pip
+            - python-setuptools
+            - python-scip
+            - caffe-cpu
       env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
 
     - os: linux
@@ -64,7 +113,6 @@ before_install:
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
     fi
-  - if [ $TRAVIS_OS_NAME == linux ]; then ${TRAVIS_BUILD_DIR}/scripts/install_dependencies.sh; fi
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb homebrew/science/opencv
   - git clone --depth 1 https://github.com/BVLC/caffe.git .
   - pip install --upgrade pip
