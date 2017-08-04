@@ -1,9 +1,9 @@
 package caffe
 
-// #cgo LDFLAGS: -lcaffe -lstdc++ -lglog -lboost_system -L/usr/local/lib
-// #cgo CXXFLAGS: -std=c++14 -I/usr/local/include/ -I${SRCDIR}/cbits -O3 -Wall -DCPU_ONLY=1
-// #cgo darwin CXXFLAGS: -DBLAS=open -I/usr/local/opt/openblas/include -I/opt/caffe/include
-// #cgo darwin LDFLAGS: -L/usr/local/opt/openblas/lib -L/opt/caffe/lib
+// #cgo LDFLAGS: -lcaffe -lstdc++ -lglog -lboost_system -L/usr/local/lib  -L/opt/caffe/lib
+// #cgo CXXFLAGS: -std=c++11 -I/usr/local/include/ -I${SRCDIR}/cbits -O3 -Wall -DCPU_ONLY=1 -I/opt/caffe/include
+// #cgo darwin CXXFLAGS: -DBLAS=open -I/usr/local/opt/openblas/include
+// #cgo darwin LDFLAGS: -L/usr/local/opt/openblas/lib
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include "cbits/predictor.hpp"

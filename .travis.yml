@@ -70,6 +70,7 @@ before_install:
   - make
   - make install
   - mv install /opt/caffe
+  - ls -l /opt/caffe
   - go get github.com/Masterminds/glide
 
 
