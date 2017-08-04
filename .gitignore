@@ -6,3 +6,5 @@ examples/vectorAdd/vec
 
 libzipkin.a
 prof.so
+
+_obj

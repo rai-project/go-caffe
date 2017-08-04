@@ -44,34 +44,7 @@ matrix:
       compiler: clang
       env: COMPILER='clang++' BUILD_TYPE='Release'
 
-addons:
-  apt:
-    sources:
-    - sourceline: ppa:masterminds/glide
-    packages:
-    - glide
-    - build-essential
-    - git
-    - wget
-    - libatlas-base-dev
-    - libboost-all-dev
-    - libgflags-dev
-    - libgoogle-glog-dev
-    - libhdf5-serial-dev
-    - libleveldb-dev
-    - liblmdb-dev
-    - libopencv-dev
-    - libprotobuf-dev
-    - libsnappy-dev
-    - protobuf-compiler
-    - python-dev
-    - python-numpy
-    - python-pip
-    - python-setuptools
-    - python-scip
-    - caffe-cpu
 before_install:
-  - echo ${TRAVIS_NODE_VERSION}
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | bash)"
   - go env
   - export GOPATH=$HOME/gopath
@@ -91,6 +64,8 @@ before_install:
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
     fi
+  - if [ $TRAVIS_OS_NAME == linux ]; then ./scripts/install_dependencies.sh; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb homebrew/science/opencv
   - git clone --depth 1 https://github.com/BVLC/caffe.git .
   - pip install --upgrade pip
   - mkdir build && cd build

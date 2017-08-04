@@ -9,11 +9,11 @@ extern "C" {
 
 typedef void *PredictorContext;
 
-PredictorContext *New(char *model_file, char *trained_file);
+PredictorContext New(char *model_file, char *trained_file);
 
-const char *Predict(PredictorContext *pred, char *buffer, size_t length);
+const char *Predict(PredictorContext pred, char *buffer, size_t length);
 
-void Delete(PredictorContext *pred);
+void Delete(PredictorContext pred);
 
 void SetMode(int mode);
 
