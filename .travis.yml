@@ -79,7 +79,7 @@ before_install:
   - mkdir -p $HOME/gopath/src/github.com/rai-project/go-caffe
   - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/rai-project/go-caffe/
   - export TRAVIS_BUILD_DIR=$HOME/gopath/src/github.com/rai-project/go-caffe
-  - cd $HOME/gopath/src/github.com/rai-project/carml
+  - cd $HOME/gopath/src/github.com/rai-project/go-caffe
   - eval "${MATRIX_EVAL}"
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
