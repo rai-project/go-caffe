@@ -21,16 +21,16 @@ matrix:
     # Linux C++14 Clang builds
     - os: linux
       compiler: clang
-      addons: &clang38
+      addons: &clang39
         apt:
           sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.8']
-      env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
+          packages: ['clang-3.9']
+      env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
 
     - os: linux
       compiler: clang
-      addons: *clang38
-      env: COMPILER='clang++-3.8' BUILD_TYPE='Debug'
+      addons: *clang39
+      env: COMPILER='clang++-3.9' BUILD_TYPE='Debug'
 
     # OSX C++14 Clang Builds
 
@@ -91,7 +91,7 @@ before_install:
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
     fi
-  - git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git .
+  - git clone --depth 1 https://github.com/BVLC/caffe.git .
   - pip install --upgrade pip
   - mkdir build && cd build
   - cmake -DCPU_ONLY=1 ..
@@ -115,6 +115,5 @@ after_script:
   - go test -race -v $(glide novendor)
 
 env:
-  - CLONE_TAG=1.0
   - WITH_CUDA=false
   - WITH_CMAKE=true
