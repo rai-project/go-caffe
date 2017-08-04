@@ -1,0 +1,117 @@
+language: cpp
+sudo: false
+
+matrix:
+  include:
+
+    # Linux C++14 GCC builds
+    - os: linux
+      compiler: gcc
+      addons: &gcc6
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6']
+      env: COMPILER='g++-6' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: gcc
+      addons: *gcc6
+      env: COMPILER='g++-6' BUILD_TYPE='Debug'
+
+    # Linux C++14 Clang builds
+    - os: linux
+      compiler: clang
+      addons: &clang38
+        apt:
+          sources: ['llvm-toolchain-precise-3.8', 'ubuntu-toolchain-r-test']
+          packages: ['clang-3.8']
+      env: COMPILER='clang++-3.8' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: clang
+      addons: *clang38
+      env: COMPILER='clang++-3.8' BUILD_TYPE='Debug'
+
+    # OSX C++14 Clang Builds
+
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Debug'
+
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env: COMPILER='clang++' BUILD_TYPE='Release'
+
+addons:
+  apt:
+    sources:
+    - sourceline: ppa:masterminds/glide
+    packages:
+    - glide
+    - build-essential
+    - git
+    - wget
+    - libatlas-base-dev
+    - libboost-all-dev
+    - libgflags-dev
+    - libgoogle-glog-dev
+    - libhdf5-serial-dev
+    - libleveldb-dev
+    - liblmdb-dev
+    - libopencv-dev
+    - libprotobuf-dev
+    - libsnappy-dev
+    - protobuf-compiler
+    - python-dev
+    - python-numpy
+    - python-pip
+    - python-setuptools
+    - python-scip
+before_install:
+  - echo ${TRAVIS_NODE_VERSION}
+  - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | bash)"
+  - go env
+  - export GOPATH=$HOME/gopath
+  - export PATH=$HOME/gopath/bin:$PATH
+  - mkdir -p $HOME/gopath/src/github.com/rai-project/go-caffe
+  - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/rai-project/go-caffe/
+  - export TRAVIS_BUILD_DIR=$HOME/gopath/src/github.com/rai-project/go-caffe
+  - cd $HOME/gopath/src/github.com/rai-project/carml
+  - eval "${MATRIX_EVAL}"
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://cmake.org/files/v3.9/cmake-3.9.0-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      which cmake || brew install cmake
+    fi
+  - git clone -b ${CLONE_TAG} --depth 1 https://github.com/BVLC/caffe.git .
+  - pip install --upgrade pip
+  - mkdir build && cd build
+  - cmake -DCPU_ONLY=1 ..
+  - make -j"$(nproc)"
+
+before_script:
+  - export CXX=${COMPILER}
+  - cd ${TRAVIS_BUILD_DIR}
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Wdev
+  - cd Build
+
+install:
+  - glide install --force
+  - rm -fr vendor/github.com/Sirupsen
+  - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
+  - go build
+
+script:
+  - echo "Skip tests..."
+after_script:
+  - go test -race -v $(glide novendor)
+
+env:
+  - CLONE_TAG=1.0
