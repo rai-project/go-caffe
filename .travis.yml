@@ -78,7 +78,7 @@ before_install:
     elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       which cmake || brew install cmake
     fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb homebrew/science/opencv; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb; fi
   - cd ${HOME}
   - git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe
   - pip install --upgrade pip
