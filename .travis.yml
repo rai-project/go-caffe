@@ -62,10 +62,10 @@ before_install:
       which cmake || brew install cmake
     fi
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb homebrew/science/opencv; fi
-  - git clone --depth 1 https://github.com/BVLC/caffe.git .
+  - git clone --depth 1 https://github.com/BVLC/caffe.git caffe
   - pip install --upgrade pip
   - mkdir build && cd build
-  - cmake -DCPU_ONLY=1 ..
+  - cmake -DCPU_ONLY=1 caffe
   - make -j"$(nproc)"
 
 before_script:
