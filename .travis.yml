@@ -24,6 +24,23 @@ matrix:
       - python-setuptools
     # Linux C++14 GCC builds
     - os: linux
+      compiler: gcc6
+      addons: &gcc6
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - ppa:masterminds/glide
+          packages:
+            - g++-6
+            - *addons
+      env:
+        - COMPILER='g++-6'
+        - BUILD_TYPE='Release'
+        - WITH_CUDA=false
+        - WITH_CMAKE=true
+        - CPU_ONLY=1
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    - os: linux
       compiler: clang
       addons: &clang39
         apt:
@@ -32,14 +49,17 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - clang-3.9
+            - *addons
       env:
         - COMPILER='g++-6'
         - BUILD_TYPE='Release'
         - WITH_CUDA=false
         - WITH_CMAKE=true
         - CPU_ONLY=1
+        - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | bash)"
   - go env
   - export GOPATH=$HOME/gopath
@@ -48,7 +68,6 @@ before_install:
   - rsync -az ${TRAVIS_BUILD_DIR}/ $HOME/gopath/src/github.com/rai-project/go-caffe/
   - export TRAVIS_BUILD_DIR=$HOME/gopath/src/github.com/rai-project/go-caffe
   - cd $HOME/gopath/src/github.com/rai-project/go-caffe
-  - eval "${MATRIX_EVAL}"
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
   - |
