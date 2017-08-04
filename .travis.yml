@@ -4,7 +4,6 @@ sudo: true
 matrix:
   include:
     - addons: &addons
-      - glide
       - build-essential
       - git
       - wget
@@ -30,7 +29,6 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - ppa:masterminds/glide
           packages:
             - g++-6
             - *addons
