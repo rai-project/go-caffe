@@ -23,8 +23,6 @@ matrix:
       - python-numpy
       - python-pip
       - python-setuptools
-      - python-scip
-      - caffe-cpu
     # Linux C++14 GCC builds
     - os: linux
       compiler: gcc
