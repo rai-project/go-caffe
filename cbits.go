@@ -9,6 +9,7 @@ package caffe
 // #include "cbits/predictor.hpp"
 import "C"
 import (
+	"encoding/json"
 	"unsafe"
 
 	"github.com/Unknwon/com"
@@ -34,8 +35,15 @@ func New(modelFile, trainFile string) (*Predictor, error) {
 func (p *Predictor) Predict(imageData []float32) ([]Prediction, error) {
 	ptr := (*C.float)(unsafe.Pointer(&imageData[0]))
 	r := C.Predict(p.ctx, ptr)
+	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
-	return nil, nil
+
+	predictions := []Prediction{}
+	err := json.Unmarshal([]byte(js), &predictions)
+	if err != nil {
+		return nil, err
+	}
+	return predictions, nil
 }
 
 func (p *Predictor) Close() {

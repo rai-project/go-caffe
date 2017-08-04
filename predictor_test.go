@@ -70,5 +70,8 @@ func TestCreatePredictor(t *testing.T) {
 	imageData, err := getImageData(image)
 	assert.NoError(t, err)
 
-	predictor.Predict(imageData)
+	predictions, err := predictor.Predict(imageData)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, predictions)
+	assert.Equal(t, 1000, len(predictions))
 }

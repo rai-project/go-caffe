@@ -52,7 +52,6 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-
   net_->Forward(imageData);
 
   /* Copy the output layer to a std::vector */
@@ -87,11 +86,14 @@ PredictorContext New(char* model_file, char* trained_file) {
 
 const char* Predict(PredictorContext pred, float* imageData) {
   auto predictor = (Predictor*)pred;
-  auto predictions = predictor->Predict(imageData);
+  auto predictionsTuples = predictor->Predict(imageData);
 
-  json j;
-  j["predictions"] = predictions;
-  auto res = strdup(j.dump().c_str());
+  json predictions = json::array();
+  for (const auto prediction : predictionsTuples) {
+    predictions.push_back(
+        {{"index", prediction.first}, {"probability", prediction.second}});
+  }
+  auto res = strdup(predictions.dump().c_str());
   return res;
 }
 
