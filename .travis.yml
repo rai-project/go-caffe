@@ -3,7 +3,28 @@ sudo: false
 
 matrix:
   include:
-
+    - addons: &addons
+      - glide
+      - build-essential
+      - git
+      - wget
+      - libatlas-base-dev
+      - libboost-all-dev
+      - libgflags-dev
+      - libgoogle-glog-dev
+      - libhdf5-serial-dev
+      - libleveldb-dev
+      - liblmdb-dev
+      - libopencv-dev
+      - libprotobuf-dev
+      - libsnappy-dev
+      - protobuf-compiler
+      - python-dev
+      - python-numpy
+      - python-pip
+      - python-setuptools
+      - python-scip
+      - caffe-cpu
     # Linux C++14 GCC builds
     - os: linux
       compiler: gcc
@@ -14,27 +35,7 @@ matrix:
             - ppa:masterminds/glide
           packages:
             - g++-6
-            - glide
-            - build-essential
-            - git
-            - wget
-            - libatlas-base-dev
-            - libboost-all-dev
-            - libgflags-dev
-            - libgoogle-glog-dev
-            - libhdf5-serial-dev
-            - libleveldb-dev
-            - liblmdb-dev
-            - libopencv-dev
-            - libprotobuf-dev
-            - libsnappy-dev
-            - protobuf-compiler
-            - python-dev
-            - python-numpy
-            - python-pip
-            - python-setuptools
-            - python-scip
-            - caffe-cpu
+            - *addons
       env: COMPILER='g++-6' BUILD_TYPE='Release'
 
     - os: linux
@@ -53,27 +54,7 @@ matrix:
             - ppa:masterminds/glide
           packages:
             - clang-3.9
-            - glide
-            - build-essential
-            - git
-            - wget
-            - libatlas-base-dev
-            - libboost-all-dev
-            - libgflags-dev
-            - libgoogle-glog-dev
-            - libhdf5-serial-dev
-            - libleveldb-dev
-            - liblmdb-dev
-            - libopencv-dev
-            - libprotobuf-dev
-            - libsnappy-dev
-            - protobuf-compiler
-            - python-dev
-            - python-numpy
-            - python-pip
-            - python-setuptools
-            - python-scip
-            - caffe-cpu
+            - *addons
       env: COMPILER='clang++-3.9' BUILD_TYPE='Release'
 
     - os: linux
