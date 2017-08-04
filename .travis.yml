@@ -65,16 +65,14 @@ before_install:
   - git clone --depth 1 https://github.com/BVLC/caffe.git caffe
   - pip install --upgrade pip
   - mkdir build && cd build
-  - cmake -DCPU_ONLY=1 ${DEPS_DIR}/caffe
+  - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${DEPS_DIR}/caffe
   - make -j"$(nproc)"
+  - make install
+  - go get github.com/Masterminds/glide
 
-before_script:
-  - export CXX=${COMPILER}
-  - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -Wdev
-  - cd Build
 
 install:
+  - cd ${TRAVIS_BUILD_DIR}
   - glide install --force
   - rm -fr vendor/github.com/Sirupsen
   - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
