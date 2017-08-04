@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/k0kubun/pp"
+
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -71,6 +73,9 @@ func TestCreatePredictor(t *testing.T) {
 	assert.NoError(t, err)
 
 	predictions, err := predictor.Predict(imageData)
+	predictions.Sort()
+	pp.Println(predictions[0:2])
+
 	assert.NoError(t, err)
 	assert.NotEmpty(t, predictions)
 	assert.Equal(t, 1000, len(predictions))
