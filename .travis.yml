@@ -69,6 +69,7 @@ before_install:
   - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${DEPS_DIR}/caffe
   - make
   - make install
+  - mv install /opt/caffe
   - go get github.com/Masterminds/glide
 
 
