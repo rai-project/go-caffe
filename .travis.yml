@@ -66,7 +66,7 @@ before_install:
   - pip install --upgrade pip
   - mkdir build && cd build
   - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${DEPS_DIR}/caffe
-  - make -j"$(nproc)"
+  - make
   - make install
   - go get github.com/Masterminds/glide
 
