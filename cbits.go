@@ -32,3 +32,13 @@ func New(modelFile, trainFile string) (*Predictor, error) {
 func (p *Predictor) Close() {
 	C.Delete(p.ctx)
 }
+
+func SetUseCPU() {
+	e := SolverParameter_SolverMode_value["CPU"]
+	C.SetMode(C.int(e))
+}
+
+func SetUseGPU() {
+	e := SolverParameter_SolverMode_value["GPU"]
+	C.SetMode(C.int(e))
+}
