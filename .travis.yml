@@ -21,6 +21,8 @@ addons: &addons
   - python-pip
   - python-setuptools
 matrix:
+  allow_failures:
+    - os: osx
   include:
     # Linux C++14 GCC builds
     - os: linux
