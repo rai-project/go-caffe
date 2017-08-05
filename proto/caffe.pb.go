@@ -5719,7 +5719,7 @@ func (m *PReLUParameter) GetChannelShared() bool {
 	return Default_PReLUParameter_ChannelShared
 }
 
-func init() {
+func disabled_init() {
 	proto1.RegisterType((*BlobShape)(nil), "caffe.BlobShape")
 	proto1.RegisterType((*BlobProto)(nil), "caffe.BlobProto")
 	proto1.RegisterType((*BlobProtoVector)(nil), "caffe.BlobProtoVector")
@@ -26165,7 +26165,7 @@ var (
 	ErrIntOverflowCaffe   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto1.RegisterFile("caffe.proto", fileDescriptorCaffe) }
+func disabled_init() { proto1.RegisterFile("caffe.proto", fileDescriptorCaffe) }
 
 var fileDescriptorCaffe = []byte{
 	// 6556 bytes of a gzipped FileDescriptorProto

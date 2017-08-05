@@ -1,3 +1,11 @@
+UNAME := $(shell uname -s)
+
+ifeq ($(UNAME), Darwin)
+	SED='gsed'
+else
+	SED="sed"
+endif
+
 all: generate
 
 fmt:
@@ -21,6 +29,7 @@ logrus-fix:
 
 generate: clean
 	protoc --gogofaster_out=import_path=proto:proto -Iproto -I$(GOPATH)/src proto/caffe.proto
+	cd proto && ${SED} -i 's/func init/func disabled_init/g' caffe.pb.go
 	go fmt proto/...
 
 
