@@ -36,30 +36,28 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
 
-  Blob<float>* input_layer = net_->input_blobs()[0];
+  const auto input_layer = net_->input_blobs()[0];
 
   width_ = input_layer->width();
   height_ = input_layer->height();
   channel_ = input_layer->channels();
 
-  input_layer->Reshape(1, channel_, height_, width_);
-  net_->Reshape();
-
   CHECK(channel_ == 3 || channel_ == 1)
       << "Input layer should have 1 or 3 channels.";
+
+  input_layer->Reshape(1, channel_, height_, width_);
+  net_->Reshape();
 }
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-  caffe::Blob<float>* blob =
-      new caffe::Blob<float>(1, channel_, height_, width_);
-
+  auto blob = new caffe::Blob<float>(1, channel_, height_, width_);
   blob->set_cpu_data(imageData);
-  std::vector<caffe::Blob<float>*> bottom{blob};
+
+  const std::vector<caffe::Blob<float>*> bottom{blob};
 
   const auto rr = net_->Forward(bottom);
-
-  Blob<float>* output_layer = rr[0];
+  const auto output_layer = rr[0];
 
   const auto outputSize = output_layer->channels();
   const float* outputData = output_layer->cpu_data();
@@ -84,11 +82,11 @@ PredictorContext New(char* model_file, char* trained_file) {
   }
 }
 
-void Init() { ::google::InitGoogleLogging("inference_server"); }
+void Init() { ::google::InitGoogleLogging("go-caffe"); }
 
 const char* Predict(PredictorContext pred, float* imageData) {
   auto predictor = (Predictor*)pred;
-  auto predictionsTuples = predictor->Predict(imageData);
+  const auto predictionsTuples = predictor->Predict(imageData);
 
   json predictions = json::array();
   for (const auto prediction : predictionsTuples) {
