@@ -29,7 +29,11 @@ logrus-fix:
 
 generate: clean
 	protoc --gogofaster_out=import_path=proto:proto -Iproto -I$(GOPATH)/src proto/caffe.proto
-	cd proto && ${SED} -i 's/func init/func disabled_init/g' caffe.pb.go
+	${SED} -i '0,/func init/ s/func init/func disabled_init1/' proto/caffe.pb.go
+	${SED} -i '0,/func init/ s/func init/func disabled_init2/' proto/caffe.pb.go
+	${SED} -i '0,/func init/ s/func init/func disabled_init3/' proto/caffe.pb.go
+	${SED} -i '0,/func init/ s/func init/func disabled_init4/' proto/caffe.pb.go
+	${SED} -i '0,/func init/ s/func init/func disabled_init5/' proto/caffe.pb.go
 	go fmt proto/...
 
 
