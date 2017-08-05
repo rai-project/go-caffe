@@ -11,6 +11,9 @@
 	"C_Cpp.clang_format_sortIncludes": true,
 	"C_Cpp.clang_format_formatOnSave": true,
 	"files.associations": {
+		"*.mc": "cpp",
+		"*.cu": "cpp",
+		"*.m": "mathematica",
 		"xmemory0": "cpp",
 		"xstring": "cpp",
 		"xutility": "cpp",
@@ -53,7 +56,9 @@
 		"cstddef": "cpp",
 		"new": "cpp",
 		"stdexcept": "cpp",
-		"typeinfo": "cpp"
+		"typeinfo": "cpp",
+		"bitset": "cpp",
+		"utility": "cpp"
 	},
 	"editor.insertSpaces": true
 }

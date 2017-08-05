@@ -42,9 +42,9 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
   height_ = input_layer->height();
   channel_ = input_layer->channels();
 
-  printf("width = %d\n", width_);
-  printf("height_ = %d\n", height_);
-  printf("channel_ = %d\n", channel_);
+  // printf("width = %d\n", width_);
+  // printf("height_ = %d\n", height_);
+  // printf("channel_ = %d\n", channel_);
 
   CHECK(channel_ == 3 || channel_ == 1)
       << "Input layer should have 1 or 3 channels.";
@@ -52,21 +52,23 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-  net_->Forward(imageData);
+  const auto rr = net_->Forward(imageData);
 
   /* Copy the output layer to a std::vector */
-  Blob<float>* output_layer = net_->output_blobs()[0];
-  const float* begin = output_layer->cpu_data();
-  const float* end = begin + output_layer->channels();
-  const auto output = std::vector<float>(begin, end);
+  Blob<float>* output_layer = rr[0];
 
-  const auto outputSize = output.size();
+  const auto outputSize = output_layer->channels();
+  const float* outputData = output_layer->cpu_data();
 
   std::vector<Prediction> predictions;
   predictions.reserve(outputSize);
   for (int idx = 0; idx < outputSize; idx++) {
-    predictions.emplace_back(std::make_pair(idx, output[idx]));
+    predictions.emplace_back(std::make_pair(idx, outputData[idx]));
   }
+
+  // for (const auto pred : predictions) {
+  //   std::cout << pred.first << "  " << pred.second << std::endl;
+  // }
 
   return predictions;
 }

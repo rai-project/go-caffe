@@ -13,7 +13,6 @@ import (
 	_ "image/png"
 
 	sourcepath "github.com/GeertJohan/go-sourcepath"
-	"github.com/anthonynsimon/bild/parallel"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/stretchr/testify/assert"
 )
@@ -22,30 +21,53 @@ var (
 	// caffeModelFile = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "cifar10_nin.caffemodel")
 	// trainVal       = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "nin_model.prototxt")
 	homeDir, _         = homedir.Dir()
+	caffeModelURL      = "http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel"
+	trailValURL        = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt"
 	caffeModelFileName = filepath.Join(homeDir, "Downloads", "bvlc_reference_caffenet.caffemodel")
 	trainValFileName   = filepath.Join(homeDir, "Downloads", "deploy.txt")
-	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "banana.png")
+	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "cat.jpg")
+	meanImage          = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "imagenet_mean.binaryproto")
 )
 
-func getImageData(img image.Image) ([]float32, error) {
+func getImageData(t *testing.T, img image.Image) ([]float32, error) {
 
 	b := img.Bounds()
 	height := b.Max.Y - b.Min.Y // image height
 	width := b.Max.X - b.Min.X  // image width
 
-	res := make([]float32, 3*height*width)
-	parallel.Line(height, func(start, end int) {
-		w := width
-		h := height
-		for y := start; y < end; y++ {
-			for x := 0; x < width; x++ {
-				r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
-				res[y*w+x] = float32(r >> 8)
-				res[w*h+y*w+x] = float32(g >> 8)
-				res[2*w*h+y*w+x] = float32(b >> 8)
+	meanBlob, err := ReadBlob(meanImage)
+	assert.NoError(t, err)
+
+	// mean := make([]float32, len(meanBlob.Data))
+	meanData := meanBlob.Data
+	mean := [3]float32{}
+	for cc := 0; cc < 3; cc++ {
+		accum := float32(0)
+		offset := cc * width * height
+		for ii := 0; ii < height; ii++ {
+			for jj := 0; jj < width; jj++ {
+				accum += meanData[offset+ii*width+jj]
 			}
 		}
-	})
+		mean[cc] = accum / float32(width*height)
+	}
+
+	pp.Println(mean)
+	res := make([]float32, 3*height*width)
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
+			// res[3*y*width+3*x] = (float32(r>>8) - mean[2])   / float32(255)
+			// res[3*y*width+3*x+1] = (float32(g>>8) - mean[1]) / float32(255)
+			// res[3*y*width+3*x+2] = (float32(b>>8) - mean[0]) / float32(255)
+
+			res[y*width+x] = (float32(r>>8) - mean[2])                // float32(255)
+			res[width*height+y*width+x] = (float32(g>>8) - mean[1])   // float32(255)
+			res[2*width*height+y*width+x] = (float32(b>>8) - mean[0]) // float32(255)
+			// pp.Println(res[3*y*width+3*x], res[3*y*width+3*x+1], res[3*y*width+3*x+2])
+		}
+	}
 
 	return res, nil
 }
@@ -69,7 +91,7 @@ func TestCreatePredictor(t *testing.T) {
 	assert.Equal(t, 227, imageWidth)
 	assert.Equal(t, 227, imageHeight)
 
-	imageData, err := getImageData(image)
+	imageData, err := getImageData(t, image)
 	assert.NoError(t, err)
 
 	predictions, err := predictor.Predict(imageData)
@@ -79,4 +101,8 @@ func TestCreatePredictor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, predictions)
 	assert.Equal(t, 1000, len(predictions))
+}
+
+func init() {
+	SetUseCPU()
 }
