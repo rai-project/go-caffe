@@ -80,7 +80,7 @@ before_install:
     fi
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb; fi
   - cd ${HOME}
-  - git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe
+  - if [ ! -d "${HOME}/caffe" ]; then git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe; fi
   - pip install --upgrade pip
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
   - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
