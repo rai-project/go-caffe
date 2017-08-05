@@ -80,8 +80,12 @@ before_install:
   - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
   - make
   - make install
-  - mv install /opt/caffe
-  - ls -l /opt/caffe
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      mv install /opt/caffe
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      cp -r install/* /usr/local/
+    fi
   - go get github.com/Masterminds/glide
 
 
