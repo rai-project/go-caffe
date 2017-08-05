@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/anthonynsimon/bild/parallel"
 	"github.com/k0kubun/pp"
 
 	"image"
@@ -25,7 +26,7 @@ var (
 	trailValURL        = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt"
 	caffeModelFileName = filepath.Join(homeDir, "Downloads", "bvlc_reference_caffenet.caffemodel")
 	trainValFileName   = filepath.Join(homeDir, "Downloads", "deploy.txt")
-	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "cat.jpg")
+	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "chicken.jpg")
 	meanImage          = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "imagenet_mean.binaryproto")
 )
 
@@ -52,22 +53,48 @@ func getImageData(t *testing.T, img image.Image) ([]float32, error) {
 		mean[cc] = accum / float32(width*height)
 	}
 
-	pp.Println(mean)
+	// pp.Println(mean)
 	res := make([]float32, 3*height*width)
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
-			// res[3*y*width+3*x] = (float32(r>>8) - mean[2])   / float32(255)
-			// res[3*y*width+3*x+1] = (float32(g>>8) - mean[1]) / float32(255)
-			// res[3*y*width+3*x+2] = (float32(b>>8) - mean[0]) / float32(255)
+	parallel.Line(height, func(start, end int) {
+		w := width
+		h := height
+		for y := start; y < end; y++ {
+			for x := 0; x < width; x++ {
+				r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
+				// res[y*w+x] = float32(r >> 8)       - meanData[2*w*h+y*w+x]
+				// res[w*h+y*w+x] = float32(g >> 8)   - meanData[w*h+y*w+x]
+				// res[2*w*h+y*w+x] = float32(b >> 8) - meanData[y*w+x]
 
-			res[y*width+x] = (float32(r>>8) - mean[2])                // float32(255)
-			res[width*height+y*width+x] = (float32(g>>8) - mean[1])   // float32(255)
-			res[2*width*height+y*width+x] = (float32(b>>8) - mean[0]) // float32(255)
-			// pp.Println(res[3*y*width+3*x], res[3*y*width+3*x+1], res[3*y*width+3*x+2])
+				res[y*w+x] = float32(r>>8) - mean[2]
+				res[w*h+y*w+x] = float32(g>>8) - mean[1]
+				res[2*w*h+y*w+x] = float32(b>>8) - mean[0]
+			}
 		}
-	}
+	})
+
+	// for y := 0; y < height; y++ {
+	// 	for x := 0; x < width; x++ {
+	// 		r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
+	// 		// res[3*y*width+3*x] = (float32(r>>8) - mean[2]) / float32(255)
+	// 		// res[3*y*width+3*x+1] = (float32(g>>8) - mean[1]) / float32(255)
+	// 		// res[3*y*width+3*x+2] = (float32(b>>8) - mean[0]) / float32(255)
+
+	// 		// res[y*width+x] = (float32(r>>8) - mean[2]) / float32(255)
+	// 		// res[width*height+y*width+x] = (float32(g>>8) - mean[1]) / float32(255)
+	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - mean[0]) / float32(255)
+
+	// 		// res[y*width+x] = (float32(r>>8) - meanData[0])
+	// 		// res[width*height+y*width+x] = (float32(g>>8) - meanData[1])
+	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - meanData[2])
+
+	// 		// res[y*width+x] = (float32(r>>8) - meanData[2]) / float32(255)
+	// 		// res[width*height+y*width+x] = (float32(g>>8) - meanData[1]) / float32(255)
+	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - meanData[0]) / float32(255)
+
+	// 		// pp.Println(res[3*y*width+3*x], res[3*y*width+3*x+1], res[3*y*width+3*x+2])
+	// 	}
+	// }
 
 	return res, nil
 }

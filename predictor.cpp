@@ -42,6 +42,9 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
   height_ = input_layer->height();
   channel_ = input_layer->channels();
 
+  input_layer->Reshape(1, channel_, height_, width_);
+  net_->Reshape();
+
   // printf("width = %d\n", width_);
   // printf("height_ = %d\n", height_);
   // printf("channel_ = %d\n", channel_);
@@ -52,9 +55,30 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-  const auto rr = net_->Forward(imageData);
+  // for (int ii = 0; ii < width_ * height_ * channel_; ii++) {
+  //   std::cout << imageData[ii] << "   ";
+  // }
+  // std::cout << std::endl;
 
-  /* Copy the output layer to a std::vector */
+  // Blob<float>* input_layer = net_->input_blobs()[0];
+  // std::cout << "input_layer width = " << input_layer->width() << std::endl;
+  // std::cout << "input_layer height = " << input_layer->height() << std::endl;
+  // std::cout << "input_layer channels = " << input_layer->channels()
+  //           << std::endl;
+  // std::cout << "input shape = " << input_layer->shape()[3] << " "
+  //           << input_layer->shape()[2] << " " << input_layer->shape()[1] << "
+  //           "
+  //           << std::endl;
+  caffe::Blob<float>* blob =
+      new caffe::Blob<float>(1, channel_, height_, width_);
+
+  // std::cout << "blob shape = " << blob->shape()[3] << " " << blob->shape()[2]
+  //           << " " << blob->shape()[1] << " " << std::endl;
+  blob->set_cpu_data(imageData);
+  std::vector<caffe::Blob<float>*> bottom{blob};
+
+  const auto rr = net_->Forward(bottom);
+
   Blob<float>* output_layer = rr[0];
 
   const auto outputSize = output_layer->channels();

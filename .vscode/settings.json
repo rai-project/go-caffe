@@ -58,7 +58,8 @@
 		"stdexcept": "cpp",
 		"typeinfo": "cpp",
 		"bitset": "cpp",
-		"utility": "cpp"
+		"utility": "cpp",
+		"ios": "cpp"
 	},
 	"editor.insertSpaces": true
 }
