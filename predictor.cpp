@@ -45,35 +45,15 @@ Predictor::Predictor(const string& model_file, const string& trained_file) {
   input_layer->Reshape(1, channel_, height_, width_);
   net_->Reshape();
 
-  // printf("width = %d\n", width_);
-  // printf("height_ = %d\n", height_);
-  // printf("channel_ = %d\n", channel_);
-
   CHECK(channel_ == 3 || channel_ == 1)
       << "Input layer should have 1 or 3 channels.";
 }
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-  // for (int ii = 0; ii < width_ * height_ * channel_; ii++) {
-  //   std::cout << imageData[ii] << "   ";
-  // }
-  // std::cout << std::endl;
-
-  // Blob<float>* input_layer = net_->input_blobs()[0];
-  // std::cout << "input_layer width = " << input_layer->width() << std::endl;
-  // std::cout << "input_layer height = " << input_layer->height() << std::endl;
-  // std::cout << "input_layer channels = " << input_layer->channels()
-  //           << std::endl;
-  // std::cout << "input shape = " << input_layer->shape()[3] << " "
-  //           << input_layer->shape()[2] << " " << input_layer->shape()[1] << "
-  //           "
-  //           << std::endl;
   caffe::Blob<float>* blob =
       new caffe::Blob<float>(1, channel_, height_, width_);
 
-  // std::cout << "blob shape = " << blob->shape()[3] << " " << blob->shape()[2]
-  //           << " " << blob->shape()[1] << " " << std::endl;
   blob->set_cpu_data(imageData);
   std::vector<caffe::Blob<float>*> bottom{blob};
 
@@ -89,10 +69,6 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
   for (int idx = 0; idx < outputSize; idx++) {
     predictions.emplace_back(std::make_pair(idx, outputData[idx]));
   }
-
-  // for (const auto pred : predictions) {
-  //   std::cout << pred.first << "  " << pred.second << std::endl;
-  // }
 
   return predictions;
 }

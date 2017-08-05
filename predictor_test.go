@@ -39,7 +39,6 @@ func getImageData(t *testing.T, img image.Image) ([]float32, error) {
 	meanBlob, err := ReadBlob(meanImage)
 	assert.NoError(t, err)
 
-	// mean := make([]float32, len(meanBlob.Data))
 	meanData := meanBlob.Data
 	mean := [3]float32{}
 	for cc := 0; cc < 3; cc++ {
@@ -53,48 +52,19 @@ func getImageData(t *testing.T, img image.Image) ([]float32, error) {
 		mean[cc] = accum / float32(width*height)
 	}
 
-	// pp.Println(mean)
 	res := make([]float32, 3*height*width)
-
 	parallel.Line(height, func(start, end int) {
 		w := width
 		h := height
 		for y := start; y < end; y++ {
 			for x := 0; x < width; x++ {
 				r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
-				// res[y*w+x] = float32(r >> 8)       - meanData[2*w*h+y*w+x]
-				// res[w*h+y*w+x] = float32(g >> 8)   - meanData[w*h+y*w+x]
-				// res[2*w*h+y*w+x] = float32(b >> 8) - meanData[y*w+x]
-
 				res[y*w+x] = float32(r>>8) - mean[2]
 				res[w*h+y*w+x] = float32(g>>8) - mean[1]
 				res[2*w*h+y*w+x] = float32(b>>8) - mean[0]
 			}
 		}
 	})
-
-	// for y := 0; y < height; y++ {
-	// 	for x := 0; x < width; x++ {
-	// 		r, g, b, _ := img.At(x+b.Min.X, y+b.Min.Y).RGBA()
-	// 		// res[3*y*width+3*x] = (float32(r>>8) - mean[2]) / float32(255)
-	// 		// res[3*y*width+3*x+1] = (float32(g>>8) - mean[1]) / float32(255)
-	// 		// res[3*y*width+3*x+2] = (float32(b>>8) - mean[0]) / float32(255)
-
-	// 		// res[y*width+x] = (float32(r>>8) - mean[2]) / float32(255)
-	// 		// res[width*height+y*width+x] = (float32(g>>8) - mean[1]) / float32(255)
-	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - mean[0]) / float32(255)
-
-	// 		// res[y*width+x] = (float32(r>>8) - meanData[0])
-	// 		// res[width*height+y*width+x] = (float32(g>>8) - meanData[1])
-	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - meanData[2])
-
-	// 		// res[y*width+x] = (float32(r>>8) - meanData[2]) / float32(255)
-	// 		// res[width*height+y*width+x] = (float32(g>>8) - meanData[1]) / float32(255)
-	// 		// res[2*width*height+y*width+x] = (float32(b>>8) - meanData[0]) / float32(255)
-
-	// 		// pp.Println(res[3*y*width+3*x], res[3*y*width+3*x+1], res[3*y*width+3*x+2])
-	// 	}
-	// }
 
 	return res, nil
 }
