@@ -25,7 +25,7 @@ var (
 	caffeModelURL      = "http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel"
 	trailValURL        = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt"
 	caffeModelFileName = filepath.Join(homeDir, "Downloads", "bvlc_reference_caffenet.caffemodel")
-	trainValFileName   = filepath.Join(homeDir, "Downloads", "deploy.txt")
+	trainValFileName   = filepath.Join(homeDir, "Downloads", "deploy.prototxt")
 	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "chicken.jpg")
 	meanImage          = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "imagenet_mean.binaryproto")
 )
@@ -84,6 +84,7 @@ func TestCreatePredictor(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, image)
 
+	// caffenet dim is 227
 	imageWidth, imageHeight := image.Bounds().Dx(), image.Bounds().Dy()
 	assert.Equal(t, 227, imageWidth)
 	assert.Equal(t, 227, imageHeight)
