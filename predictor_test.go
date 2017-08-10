@@ -23,7 +23,7 @@ var (
 	// trainVal       = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "nin_model.prototxt")
 	homeDir, _         = homedir.Dir()
 	caffeModelURL      = "http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel"
-	trailValURL        = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt"
+	trainlValURL       = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt"
 	caffeModelFileName = filepath.Join(homeDir, "Downloads", "bvlc_reference_caffenet.caffemodel")
 	trainValFileName   = filepath.Join(homeDir, "Downloads", "deploy.prototxt")
 	imageFileName      = filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures", "chicken.jpg")

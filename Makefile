@@ -36,7 +36,6 @@ generate: clean
 	${SED} -i '0,/func init/ s/func init/func disabled_init5/' proto/caffe.pb.go
 	go fmt proto/...
 
-
 clean-models:
 	rm -fr builtin_models_static.go
 
