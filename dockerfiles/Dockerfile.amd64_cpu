@@ -80,6 +80,10 @@ ENV GIMME_GO_VERSION "1.8.3"
 ENV GIMME_OS "linux"
 ENV GIMME_ARCH $ARCH
 
+LABEL org.golang.version=$GIMME_GO_VERSION
+LABEL org.golang.os=$GIMME_OS
+LABEL org.golang.arch=$GIMME_ARCH
+
 ADD https://raw.githubusercontent.com/travis-ci/gimme/master/gimme /usr/bin/gimme
 RUN chmod +x /usr/bin/gimme
 RUN gimme
