@@ -9,7 +9,7 @@ ARG VERSION
 ARG ARCH
 ARG FRAMEWORK_VERSION
 LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
-      org.carml.go-caffe.name="go-caffe bindings for go support" \
+      org.carml.go-caffe.name="go-caffe bindings for go" \
       org.carml.go-caffe.description="" \
       org.carml.go-caffe.url="https://www.carml.org/" \
       org.carml.go-caffe.vcs-ref=$VCS_REF \

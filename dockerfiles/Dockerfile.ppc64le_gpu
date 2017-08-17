@@ -1,59 +1,88 @@
 FROM nvidia/cuda-ppc64le:8.0-cudnn6-devel-ubuntu16.04
 MAINTAINER Abdul Dakkak <dakkak@illinois.edu>
 
-# caffe2 install with cpu support
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+ARG ARCH
+ARG FRAMEWORK_VERSION
+LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
+      org.carml.go-caffe.name="go-caffe bindings for go with cuda support" \
+      org.carml.go-caffe.description="" \
+      org.carml.go-caffe.url="https://www.carml.org/" \
+      org.carml.go-caffe.vcs-ref=$VCS_REF \
+      org.carml.go-caffe.vcs-url="https://github.com/rai-project/go-caffe" \
+      org.carml.go-caffe.vendor="CarML" \
+      org.carml.go-caffe.arch=$ARCH \
+      org.carml.go-caffe.version=$VERSION \
+      org.carml.go-caffe.framework_version=$FRAMEWORK_VERSION \
+      org.carml.go-caffe.schema-version="1.0"
+
+
+
+# caffe install with gpu support
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    cmake \
-    curl \
-    git \
-    libgoogle-glog-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
-    libgflags-dev \
-    libgflags-dev \
-    libgtest-dev \
-    libiomp-dev \
-    libleveldb-dev \
-    liblmdb-dev \
-    libopenmpi-dev \
-    libsnappy-dev \
-    libopenblas-dev \
-    libopenblas-base \
-    openmpi-bin \
-    openmpi-doc \
-    libeigen3-dev \
-    wget \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    software-properties-common && \
+    add-apt-repository ppa:ubuntu-toolchain-r/test -y && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        gcc-7 \
+        g++-7  \
+        build-essential \
+        git \
+        libopenblas-dev \
+        libopenblas-base \
+        python-dev \
+        libcurl4-openssl-dev \
+        libgtest-dev \
+        cmake \
+        wget \
+        unzip \
+        ca-certificates \
+        libboost-all-dev \
+        libgflags-dev \
+        libgoogle-glog-dev \
+        libhdf5-serial-dev \
+        libleveldb-dev \
+        liblmdb-dev \
+        libopencv-dev \
+        libprotobuf-dev \
+        libsnappy-dev \
+        protobuf-compiler && \
+    rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7 && \
+    update-alternatives --config gcc && \
+    gcc -v
 
-########## INSTALLATION STEPS ###################
-RUN git clone  --single-branch --depth 1 --recursive https://github.com/caffe2/caffe2.git  && \
-    cd caffe2 && \
-    cd third_party/benchmark && \
-    git checkout master && \
-    git pull && \
-    cd ../..
-RUN cd caffe2 && mkdir build && cd build \
+# ########## INSTALLATION STEPS ###################
+ENV CAFFE_ROOT=/opt/caffe
+RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
+    mkdir build && cd build \
     && cmake .. \
-    -DCUDA_ARCH_NAME=Manual \
-    -DCUDA_ARCH_BIN="35 52 60 61" \
-    -DCUDA_ARCH_PTX="61" \
-    -DUSE_NNPACK=OFF \
-    -DUSE_ROCKSDB=OFF \
-    -DUSE_OPENCV=OFF \
-    -DBUILD_PYTHON=OFF \
+      -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
+      -DUSE_ROCKSDB=OFF \
+      -DBUILD_python=OFF \
+      -DUSE_OPENCV=OFF \
+      -DBLAS=open \
+      -DUSE_CUDNN=1 \
+      -DUSE_NCCL=1 \
     && make -j"$(nproc)" install \
     && ldconfig \
     && make clean \
     && cd .. \
     && rm -rf build
 
-#Install Go
+# Install Go
 ENV GIMME_GO_VERSION "1.8.3"
 ENV GIMME_OS "linux"
-ENV GIMME_ARCH "ppc64le"
+ENV GIMME_ARCH $ARCH
+
+LABEL org.golang.version=$GIMME_GO_VERSION
+LABEL org.golang.os=$GIMME_OS
+LABEL org.golang.arch=$GIMME_ARCH
 
 ADD https://raw.githubusercontent.com/travis-ci/gimme/master/gimme /usr/bin/gimme
 RUN chmod +x /usr/bin/gimme
@@ -65,11 +94,11 @@ ENV PATH ${GOROOT}/bin:${PATH}
 ENV GOPATH "/go"
 ENV PATH $GOPATH/bin:$PATH
 
-#Install Glide
+# Install Glide
 RUN go get github.com/Masterminds/glide
 
 # Get Go bindings
-ENV PKG github.com/rai-project/go-caffe2
+ENV PKG github.com/rai-project/go-caffe
 WORKDIR $GOPATH/src/$PKG
 
 RUN git clone --depth=1 --branch=master https://${PKG}.git . && \
@@ -79,17 +108,3 @@ RUN git clone --depth=1 --branch=master https://${PKG}.git . && \
     go build -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"&& \
     go install && \
     rm -fr vendor
-
- # Build-time metadata as defined at http://label-schema.org
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-LABEL org.carml.go-caffe2.build-date=$BUILD_DATE \
-      org.carml.go-caffe2.name="go-caffe2 bindings for go with cuda support" \
-      org.carml.go-caffe2.description="" \
-      org.carml.go-caffe2.url="https://www.carml.org/" \
-      org.carml.go-caffe2.vcs-ref=$VCS_REF \
-      org.carml.go-caffe2.vcs-url="https://github.com/rai-project/go-caffe2" \
-      org.carml.go-caffe2.vendor="CarML" \
-      org.carml.go-caffe2.version=$VERSION \
-      org.carml.go-caffe2.schema-version="1.0"

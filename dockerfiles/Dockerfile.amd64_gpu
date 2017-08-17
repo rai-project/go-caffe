@@ -1,7 +1,28 @@
 FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
 MAINTAINER Abdul Dakkak <dakkak@illinois.edu>
 
-# caffe install with cpu support
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+ARG ARCH
+ARG FRAMEWORK_VERSION
+LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
+      org.carml.go-caffe.name="go-caffe bindings for go with cuda support" \
+      org.carml.go-caffe.description="" \
+      org.carml.go-caffe.url="https://www.carml.org/" \
+      org.carml.go-caffe.vcs-ref=$VCS_REF \
+      org.carml.go-caffe.vcs-url="https://github.com/rai-project/go-caffe" \
+      org.carml.go-caffe.vendor="CarML" \
+      org.carml.go-caffe.arch=$ARCH \
+      org.carml.go-caffe.version=$VERSION \
+      org.carml.go-caffe.framework_version=$FRAMEWORK_VERSION \
+      org.carml.go-caffe.schema-version="1.0"
+
+
+
+# caffe install with gpu support
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -37,28 +58,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc -v
 
 # ########## INSTALLATION STEPS ###################
-ENV CLONE_TAG=1.0
 ENV CAFFE_ROOT=/opt/caffe
-RUN git clone  --single-branch -b ${CLONE_TAG} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
+RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
     mkdir build && cd build \
     && cmake .. \
-    -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
-    -DUSE_ROCKSDB=OFF \
-    -DBUILD_python=OFF \
-    -DUSE_OPENCV=OFF \
-    -DBLAS=open \
-    -DUSE_CUDNN=1 \
-    -DUSE_NCCL=1 \
+      -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
+      -DUSE_ROCKSDB=OFF \
+      -DBUILD_python=OFF \
+      -DUSE_OPENCV=OFF \
+      -DBLAS=open \
+      -DUSE_CUDNN=1 \
+      -DUSE_NCCL=1 \
     && make -j"$(nproc)" install \
     && ldconfig \
     && make clean \
     && cd .. \
     && rm -rf build
 
-#Install Go
+# Install Go
 ENV GIMME_GO_VERSION "1.8.3"
 ENV GIMME_OS "linux"
-ENV GIMME_ARCH "amd64"
+ENV GIMME_ARCH $ARCH
+
+LABEL org.golang.version=$GIMME_GO_VERSION
+LABEL org.golang.os=$GIMME_OS
+LABEL org.golang.arch=$GIMME_ARCH
 
 ADD https://raw.githubusercontent.com/travis-ci/gimme/master/gimme /usr/bin/gimme
 RUN chmod +x /usr/bin/gimme
@@ -70,7 +94,7 @@ ENV PATH ${GOROOT}/bin:${PATH}
 ENV GOPATH "/go"
 ENV PATH $GOPATH/bin:$PATH
 
-#Install Glide
+# Install Glide
 RUN go get github.com/Masterminds/glide
 
 # Get Go bindings
@@ -84,17 +108,3 @@ RUN git clone --depth=1 --branch=master https://${PKG}.git . && \
     go build -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"&& \
     go install && \
     rm -fr vendor
-
- # Build-time metadata as defined at http://label-schema.org
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
-      org.carml.go-caffe.name="go-caffe bindings for go with cuda support" \
-      org.carml.go-caffe.description="" \
-      org.carml.go-caffe.url="https://www.carml.org/" \
-      org.carml.go-caffe.vcs-ref=$VCS_REF \
-      org.carml.go-caffe.vcs-url="https://github.com/rai-project/go-caffe" \
-      org.carml.go-caffe.vendor="CarML" \
-      org.carml.go-caffe.version=$VERSION \
-      org.carml.go-caffe.schema-version="1.0"
