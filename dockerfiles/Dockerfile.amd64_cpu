@@ -63,7 +63,7 @@ ENV CAFFE_ROOT=/opt/caffe
 RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
     mkdir build && cd build \
     && cmake .. \
-      -DCPU_ONLY=on \
+      -DCPU_ONLY=ON \
       -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
       -DUSE_ROCKSDB=OFF \
       -DBUILD_python=OFF \
@@ -75,6 +75,8 @@ RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive htt
     && make clean \
     && cd .. \
     && rm -rf build
+
+RUN echo "$CAFFE_ROOT/build/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
 
 # Install Go
 ENV GIMME_GO_VERSION "1.8.3"
