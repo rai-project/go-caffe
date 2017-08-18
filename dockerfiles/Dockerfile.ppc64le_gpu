@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libjpeg-turbo8-dev \
         libturbojpeg \
         libvips-dev \
-        libvips42 \-5  \
+        libvips42 \
         libjpeg-turbo8-dev \
         libturbojpeg \
         libvips-dev \
