@@ -69,8 +69,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ########## INSTALLATION STEPS ###################
 ENV CAFFE_ROOT=/opt/caffe
 RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
-    mkdir build && cd build \
-    && cmake .. \
+    mkdir build && cd build && \
+    git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
+    cmake .. \
       -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
       -DUSE_ROCKSDB=OFF \
       -DBUILD_python=OFF \
