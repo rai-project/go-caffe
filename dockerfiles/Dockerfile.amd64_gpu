@@ -65,20 +65,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ########## INSTALLATION STEPS ###################
 ENV CAFFE_ROOT=/opt/caffe
 RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
-    mkdir build && cd build \
-    && cmake .. \
+    mkdir build && cd build && \
+    git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
+    cmake .. \
       -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
-      -DUSE_ROCKSDB=OFF \
       -DBUILD_python=OFF \
       -DUSE_OPENCV=OFF \
       -DBLAS=open \
-      -DUSE_CUDNN=1 \
-      -DUSE_NCCL=1 \
+      -DUSE_CUDNN=ON \
+      -DUSE_NCCL=ON \
+      -DCPU_ONLY=OFF \
     && make -j"$(nproc)" install \
     && ldconfig \
     && make clean \
     && cd .. \
     && rm -rf build
+
+
+RUN echo "$CAFFE_ROOT/build/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
 
 # Install Go
 ENV GIMME_GO_VERSION "1.8.3"
