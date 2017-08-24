@@ -80,6 +80,8 @@ RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive htt
     && cd .. \
     && rm -rf build
 
+RUN echo "$CAFFE_ROOT/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
+
 # Install Go
 ENV GIMME_GO_VERSION "1.8.3"
 ENV GIMME_OS "linux"
