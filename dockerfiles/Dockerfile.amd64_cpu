@@ -20,8 +20,20 @@ LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
       org.carml.go-caffe.framework_version=$FRAMEWORK_VERSION \
       org.carml.go-caffe.schema-version="1.0"
 
-########## INSTALLATION STEPS ###################
+########## DEPENDENCIES INSTALLATION ###################
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libboost-all-dev \
+        libgflags-dev \
+        libgoogle-glog-dev \
+        libhdf5-serial-dev \
+        libleveldb-dev \
+        liblmdb-dev \
+        libprotobuf-dev \
+        libsnappy-dev \
+        protobuf-compiler && \
+    rm -rf /var/lib/apt/lists/*
 
+########## LIBRARY INSTALLATION ###################
 ENV CAFFE_ROOT=/opt/caffe
 RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
     mkdir build && cd build \
@@ -41,7 +53,7 @@ RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive htt
 
 RUN echo "$CAFFE_ROOT/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
 
-# Get Go bindings
+########## GO BINDING INSTALLATION ###################
 ENV PKG github.com/rai-project/go-caffe
 WORKDIR $GOPATH/src/$PKG
 
