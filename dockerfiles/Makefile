@@ -24,9 +24,6 @@ CODE_VERSION = v$(strip $(shell cat ../VERSION))
 
 # Find out if the working directory is clean
 GIT_NOT_CLEAN_CHECK = $(shell git status --porcelain)
-ifneq (x$(GIT_NOT_CLEAN_CHECK), x)
-DOCKER_TAG_SUFFIX = "-dirty"
-endif
 
 
 
@@ -43,11 +40,6 @@ endif
 VERSION_COMMIT = $(strip $(shell git rev-list $(CODE_VERSION) -n 1 | cut -c1-7))
 ifneq ($(VERSION_COMMIT), $(GIT_COMMIT))
 $(error echo You are trying to push a build based on commit $(GIT_COMMIT) but the tagged release version is $(VERSION_COMMIT))
-endif
-
-# Don't push to Docker Hub if this isn't a clean repo
-ifneq (x$(GIT_NOT_CLEAN_CHECK), x)
-$(error echo You are trying to release a build based on a dirty repo)
 endif
 
 else
