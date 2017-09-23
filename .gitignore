@@ -2,7 +2,7 @@
 *.o
 
 *.DS_Store
-
+tmp
 
 libzipkin.a
 prof.so
