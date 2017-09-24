@@ -3,9 +3,3 @@
 
 *.DS_Store
 tmp
-
-libzipkin.a
-prof.so
-
-_obj
-*-test-leveldb

@@ -25,7 +25,7 @@ type Predictor struct {
 	ctx C.PredictorContext
 }
 
-func New(modelFile, trainFile string, batch int) (*Predictor, error) {
+func New(modelFile, trainFile string, batch uint32) (*Predictor, error) {
 	if !com.IsFile(modelFile) {
 		return nil, errors.Errorf("file %s not found", modelFile)
 	}
@@ -33,7 +33,7 @@ func New(modelFile, trainFile string, batch int) (*Predictor, error) {
 		return nil, errors.Errorf("file %s not found", trainFile)
 	}
 	return &Predictor{
-		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.int(batch)),
+		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.uint(batch)),
 	}, nil
 }
 

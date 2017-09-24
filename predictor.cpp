@@ -19,7 +19,8 @@ using Prediction = std::pair<int, float>;
 
 class Predictor {
  public:
-  Predictor(const string& model_file, const string& trained_file, int batch);
+  Predictor(const string& model_file, const string& trained_file,
+            unsigned int batch);
 
   std::vector<Prediction> Predict(float* imageData);
 
@@ -30,7 +31,7 @@ class Predictor {
 };
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
-                     int batch) {
+                     unsigned int batch) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -78,7 +79,7 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
   return predictions;
 }
 
-PredictorContext New(char* model_file, char* trained_file, int batch) {
+PredictorContext New(char* model_file, char* trained_file, unsigned batch) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch);
     return (void*)ctx;
