@@ -21,16 +21,16 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/k0kubun/pp"
-
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
+	"github.com/k0kubun/pp"
 	"github.com/rai-project/config"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
 )
 
 var (
+	batch        = 10
 	graph_url    = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/deploy.prototxt"
 	weights_url  = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -76,29 +76,45 @@ func main() {
 		os.Exit(-1)
 	}
 
+	var input []float32
+	cnt := 0
+
+	imgDir, _ := filepath.Abs("../_fixtures")
+	err := filepath.Walk(imgDir, func(path string, info os.FileInfo, err error) error {
+		if path == imgDir || filepath.Ext(path) != ".jpg" || cnt >= batch {
+			return nil
+		}
+
+		img, err := imgio.Open(path)
+		if err != nil {
+			return err
+		}
+		resized := transform.Resize(img, 227, 227, transform.Linear)
+		res, err := cvtImageTo1DArray(resized, 128)
+		if err != nil {
+			panic(err)
+		}
+		input = append(input, res...)
+		cnt++
+
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	padding := make([]float32, (batch-cnt)*3*224*224)
+	input = append(input, padding...)
+
 	// create predictor
 	caffe.SetUseCPU()
-	predictor, err := caffe.New(graph, weights, 1)
+	predictor, err := caffe.New(graph, weights, batch)
 	if err != nil {
 		panic(err)
 	}
 	defer predictor.Close()
 
-	// load test image for predction
-	img, err := imgio.Open("../_fixtures/platypus.jpg")
-	if err != nil {
-		panic(err)
-	}
-
-	// preprocess
-	resized := transform.Resize(img, 227, 227, transform.Linear)
-	res, err := cvtImageTo1DArray(resized, 128)
-	if err != nil {
-		panic(err)
-	}
-
-	predictions, err := predictor.Predict(res)
-	predictions.Sort()
+	predictions, err := predictor.Predict(input)
 
 	var labels []string
 	f, err := os.Open(features)
@@ -112,8 +128,13 @@ func main() {
 		labels = append(labels, line)
 	}
 
-	pp.Println(predictions[0].Probability)
-	pp.Println(labels[predictions[0].Index])
+	len := len(predictions) / batch
+	for i := 0; i < cnt; i++ {
+		res := predictions[i*len : (i+1)*len]
+		res.Sort()
+		pp.Println(res[0].Probability)
+		pp.Println(labels[res[0].Index])
+	}
 
 	// os.RemoveAll(dir)
 }
