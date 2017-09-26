@@ -10,6 +10,7 @@ package caffe
 import "C"
 import (
 	"encoding/json"
+	"fmt"
 	"unsafe"
 
 	"github.com/Unknwon/com"
@@ -37,8 +38,26 @@ func New(modelFile, trainFile string, batch uint32) (*Predictor, error) {
 	}, nil
 }
 
-func (p *Predictor) Predict(imageData []float32) (Predictions, error) {
-	ptr := (*C.float)(unsafe.Pointer(&imageData[0]))
+func (p *Predictor) Predict(data []float32) (Predictions, error) {
+	// check input
+	if data == nil || len(data) < 1 {
+		return nil, fmt.Errorf("intput data nil or empty")
+	}
+
+	batchSize := C.PredictorGetBatchSize(p.ctx)
+	if batchSize != 1 {
+		width := C.PredictorGetWidth(p.ctx)
+		height := C.PredictorGetHeight(p.ctx)
+		channel := C.PredictorGetChannel(p.ctx)
+
+		dataLen := int64(len(data))
+		shapeLen := int64(width * height * channel)
+		inputCount := dataLen / shapeLen
+		padding := make([]float32, (int64(batchSize)-inputCount)*shapeLen)
+		data = append(data, padding...)
+	}
+
+	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 	r := C.Predict(p.ctx, ptr)
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)

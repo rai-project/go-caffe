@@ -13,6 +13,14 @@ PredictorContext New(char *model_file, char *trained_file, unsigned int batch);
 
 const char *Predict(PredictorContext pred, float *imageData);
 
+int PredictorGetChannel(PredictorContext pred);
+
+int PredictorGetWidth(PredictorContext pred);
+
+int PredictorGetHeight(PredictorContext pred);
+
+int PredictorGetBatchSize(PredictorContext pred);
+
 void Delete(PredictorContext pred);
 
 void SetMode(int mode);

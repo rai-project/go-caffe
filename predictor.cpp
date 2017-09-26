@@ -24,7 +24,6 @@ class Predictor {
 
   std::vector<Prediction> Predict(float* imageData);
 
- private:
   shared_ptr<Net<float> > net_;
   int width_, height_, channel_;
   int batch_;
@@ -104,6 +103,26 @@ const char* Predict(PredictorContext pred, float* imageData) {
   auto res = strdup(predictions.dump().c_str());
 
   return res;
+}
+
+int PredictorGetChannel(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  return predictor->channel_;
+}
+
+int PredictorGetWidth(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  return predictor->width_;
+}
+
+int PredictorGetHeight(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  return predictor->height_;
+}
+
+int PredictorGetBatchSize(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  return predictor->batch_;
 }
 
 void Delete(PredictorContext pred) {
