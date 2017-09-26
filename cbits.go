@@ -34,7 +34,7 @@ func New(modelFile, trainFile string, batch uint32) (*Predictor, error) {
 		return nil, errors.Errorf("file %s not found", trainFile)
 	}
 	return &Predictor{
-		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.uint(batch)),
+		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.int(batch)),
 	}, nil
 }
 
@@ -44,16 +44,16 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
 
-	batchSize := C.PredictorGetBatchSize(p.ctx)
+	batchSize := int64(C.PredictorGetBatchSize(p.ctx))
 	if batchSize != 1 {
 		width := C.PredictorGetWidth(p.ctx)
 		height := C.PredictorGetHeight(p.ctx)
-		channel := C.PredictorGetChannel(p.ctx)
+		channels := C.PredictorGetChannels(p.ctx)
 
 		dataLen := int64(len(data))
-		shapeLen := int64(width * height * channel)
+		shapeLen := int64(width * height * channels)
 		inputCount := dataLen / shapeLen
-		padding := make([]float32, (int64(batchSize)-inputCount)*shapeLen)
+		padding := make([]float32, (batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
 	}
 

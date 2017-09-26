@@ -19,18 +19,17 @@ using Prediction = std::pair<int, float>;
 
 class Predictor {
  public:
-  Predictor(const string& model_file, const string& trained_file,
-            unsigned int batch);
+  Predictor(const string& model_file, const string& trained_file, int batch);
 
   std::vector<Prediction> Predict(float* imageData);
 
   shared_ptr<Net<float> > net_;
-  int width_, height_, channel_;
+  int width_, height_, channels_;
   int batch_;
 };
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
-                     unsigned int batch) {
+                     int batch) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -42,19 +41,19 @@ Predictor::Predictor(const string& model_file, const string& trained_file,
 
   width_ = input_layer->width();
   height_ = input_layer->height();
-  channel_ = input_layer->channels();
+  channels_ = input_layer->channels();
   batch_ = batch;
 
-  CHECK(channel_ == 3 || channel_ == 1)
+  CHECK(channels_ == 3 || channels_ == 1)
       << "Input layer should have 1 or 3 channels.";
 
-  input_layer->Reshape(batch_, channel_, height_, width_);
+  input_layer->Reshape(batch_, channels_, height_, width_);
   net_->Reshape();
 }
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float* imageData) {
-  auto blob = new caffe::Blob<float>(batch_, channel_, height_, width_);
+  auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
   blob->set_cpu_data(imageData);
 
   const std::vector<caffe::Blob<float>*> bottom{blob};
@@ -78,7 +77,7 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
   return predictions;
 }
 
-PredictorContext New(char* model_file, char* trained_file, unsigned batch) {
+PredictorContext New(char* model_file, char* trained_file, int batch) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch);
     return (void*)ctx;
@@ -105,9 +104,9 @@ const char* Predict(PredictorContext pred, float* imageData) {
   return res;
 }
 
-int PredictorGetChannel(PredictorContext pred) {
+int PredictorGetChannels(PredictorContext pred) {
   auto predictor = (Predictor*)pred;
-  return predictor->channel_;
+  return predictor->channels_;
 }
 
 int PredictorGetWidth(PredictorContext pred) {
