@@ -27,6 +27,15 @@ void SetMode(int mode);
 
 void Init();
 
+void StartProfiling(PredictorContext pred, const char *name,
+                    const char *metadata);
+
+void EndProfiling(PredictorContext pred);
+
+void DisableProfiling(PredictorContext pred);
+
+char *ReadProfile(PredictorContext pred);
+
 #ifdef __cplusplus
 }
 #endif  // __cplusplus

@@ -9,6 +9,8 @@
 
 #include "json.hpp"
 #include "predictor.hpp"
+#include "timer.h"
+#include "timer.impl.hpp"
 
 using namespace caffe;
 using std::string;
@@ -17,15 +19,49 @@ using json = nlohmann::json;
 /* Pair (label, confidence) representing a prediction. */
 using Prediction = std::pair<int, float>;
 
+template <typename Dtype>
+class StartProfile : public Net<Dtype>::Callback {
+ public:
+  explicit StartProfile(profile* prof, const shared_ptr<Net<Dtype>>& net)
+      : prof_(prof), net_(net) {}
+
+ protected:
+  virtual void run(int layer) {
+    auto e = new profile_entry(net_->layer_names()[layer].c_str(),
+                               net_->layers()[layer]->type());
+    prof_->add(layer, e);
+  }
+
+ private:
+  profile* prof_;
+  const shared_ptr<Net<Dtype>> net_;
+};
+
+template <typename Dtype>
+class EndProfile : public Net<Dtype>::Callback {
+ public:
+  explicit EndProfile(profile* prof) : prof_(prof) {}
+
+ protected:
+  virtual void run(int layer) {
+    auto e = prof_->get(layer);
+    e->end();
+  }
+
+ private:
+  profile* prof_;
+};
+
 class Predictor {
  public:
   Predictor(const string& model_file, const string& trained_file, int batch);
 
   std::vector<Prediction> Predict(float* imageData);
 
-  shared_ptr<Net<float> > net_;
+  shared_ptr<Net<float>> net_;
   int width_, height_, channels_;
   int batch_;
+  profile* prof_{nullptr};
 };
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
@@ -58,6 +94,11 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
 
   const std::vector<caffe::Blob<float>*> bottom{blob};
 
+  if (prof_ != nullptr) {
+    net_->add_before_forward(new StartProfile<float>(prof_, net_));
+    net_->add_after_forward(new EndProfile<float>(prof_));
+  }
+
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
 
@@ -89,6 +130,41 @@ PredictorContext New(char* model_file, char* trained_file, int batch) {
 }
 
 void Init() { ::google::InitGoogleLogging("go-caffe"); }
+
+void StartProfiling(PredictorContext pred, const char* name,
+                    const char* metadata) {
+  auto predictor = (Predictor*)pred;
+  if (name == nullptr) {
+    name = "";
+  }
+  if (metadata == nullptr) {
+    metadata = "";
+  }
+  predictor->prof_ = new profile(name, metadata);
+}
+
+void EndProfiling(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  if (predictor->prof_) {
+    predictor->prof_->end();
+  }
+}
+
+void DisableProfiling(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  if (predictor->prof_) {
+    predictor->prof_->reset();
+    delete predictor->prof_;
+  }
+  predictor->prof_ = nullptr;
+}
+
+char* ReadProfile(PredictorContext pred) {
+  auto predictor = (Predictor*)pred;
+  const auto s = predictor->prof_->read();
+  const auto cstr = s.c_str();
+  return strdup(cstr);
+}
 
 const char* Predict(PredictorContext pred, float* imageData) {
   auto predictor = (Predictor*)pred;
@@ -126,6 +202,11 @@ int PredictorGetBatchSize(PredictorContext pred) {
 
 void Delete(PredictorContext pred) {
   auto predictor = (Predictor*)pred;
+  if (predictor->prof_) {
+    predictor->prof_->reset();
+    delete predictor->prof_;
+    predictor->prof_ = nullptr;
+  }
   delete predictor;
 }
 

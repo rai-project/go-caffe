@@ -6153,7 +6153,7 @@ class serializer {
             // check that the additional bytes are present
             assert(i + bytes < s.size());
 
-            // to use \uxxxx escaping, we first need to caluclate
+            // to use \uxxxx escaping, we first need to caluclate
             // the codepoint from the UTF-8 bytes
             int codepoint = 0;
 

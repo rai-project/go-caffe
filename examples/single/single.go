@@ -83,7 +83,12 @@ func main() {
 		panic(err)
 	}
 
+	predictor.StartProfiling("test", "")
 	predictions, err := predictor.Predict(res)
+	predictor.EndProfiling()
+	profile, _ := predictor.ReadProfile()
+	pp.Println(profile)
+	predictor.DisableProfiling()
 	predictions.Sort()
 
 	var labels []string

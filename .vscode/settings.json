@@ -6,7 +6,8 @@
 		"**/CVS": true,
 		"**/.DS_Store": true,
 		"**/node_modules": true,
-		"Build": true
+    "Build": true,
+    ".vscode": true
 	},
 	"C_Cpp.clang_format_sortIncludes": true,
 	"C_Cpp.clang_format_formatOnSave": true,

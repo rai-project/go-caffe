@@ -1,7 +1,7 @@
 package caffe
 
-// #cgo LDFLAGS: -lcaffe -lstdc++ -lglog -lboost_system -L/usr/local/lib  -L/opt/caffe/lib
-// #cgo CXXFLAGS: -DBLAS=open -std=c++11 -I/usr/local/include/ -I${SRCDIR}/cbits -O3 -Wall -DCPU_ONLY=1 -I/opt/caffe/include
+// #cgo LDFLAGS: -lcaffe -lstdc++ -lglog -lboost_system  -L/opt/caffe/lib
+// #cgo CXXFLAGS: -DBLAS=open -std=c++11 -I${SRCDIR}/cbits -O3 -Wall -DCPU_ONLY=1 -I/opt/caffe/include
 // #cgo darwin CXXFLAGS: -I/usr/local/opt/openblas/include
 // #cgo darwin LDFLAGS: -L/usr/local/opt/openblas/lib
 // #include <stdio.h>
@@ -36,6 +36,34 @@ func New(modelFile, trainFile string, batch uint32) (*Predictor, error) {
 	return &Predictor{
 		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.int(batch)),
 	}, nil
+}
+
+func (p *Predictor) StartProfiling(name, metadata string) error {
+	cname := C.CString(name)
+	cmetadata := C.CString(metadata)
+	defer C.free(unsafe.Pointer(cname))
+	defer C.free(unsafe.Pointer(cmetadata))
+	C.StartProfiling(p.ctx, cname, cmetadata)
+	return nil
+}
+
+func (p *Predictor) EndProfiling() error {
+	C.EndProfiling(p.ctx)
+	return nil
+}
+
+func (p *Predictor) DisableProfiling() error {
+	C.DisableProfiling(p.ctx)
+	return nil
+}
+
+func (p *Predictor) ReadProfile() (string, error) {
+	cstr := C.ReadProfile(p.ctx)
+	if cstr == nil {
+		return "", errors.New("failed to read nil profile")
+	}
+	defer C.free(unsafe.Pointer(cstr))
+	return C.GoString(cstr), nil
 }
 
 func (p *Predictor) Predict(data []float32) (Predictions, error) {
