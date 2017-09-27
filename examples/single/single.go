@@ -87,6 +87,7 @@ func main() {
 	predictions, err := predictor.Predict(res)
 	predictor.EndProfiling()
 	profile, _ := predictor.ReadProfile()
+	// out, _ := json.MarshalIndent(profile, "", "    ")
 	pp.Println(profile)
 	predictor.DisableProfiling()
 	predictions.Sort()

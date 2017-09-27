@@ -3,9 +3,9 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <thread>
-#include <map>
 #include <type_traits>
 #include <vector>
 
@@ -14,9 +14,9 @@
 
 using json = nlohmann::json;
 
-using timestamp_t = std::chrono::time_point<std::chrono::high_resolution_clock>;
+using timestamp_t = std::chrono::time_point<std::chrono::system_clock>;
 
-static timestamp_t now() { return std::chrono::high_resolution_clock::now(); }
+static timestamp_t now() { return std::chrono::system_clock::now(); }
 
 static double elapsed_time(timestamp_t start, timestamp_t end) {
   const auto elapsed =
@@ -62,7 +62,7 @@ struct profile_entry {
     std::cout << j.dump(2) << "\n";
   }
 
-private:
+ private:
   std::string name_{""};
   std::string metadata_{""};
   timestamp_t start_{}, end_{};
@@ -100,7 +100,7 @@ struct profile {
     return success;
   }
 
-  profile_entry* get(int layer) {
+  profile_entry *get(int layer) {
     std::lock_guard<std::mutex> lock(mut_);
     auto p = entries_.find(layer);
     if (p == entries_.end()) {
@@ -111,7 +111,7 @@ struct profile {
 
   json to_json() {
     std::lock_guard<std::mutex> lock(mut_);
-    
+
     const auto start_ns = to_nanoseconds(start_);
     const auto end_ns = to_nanoseconds(end_);
 
@@ -135,7 +135,7 @@ struct profile {
     return j.dump();
   }
 
-private:
+ private:
   std::string name_{""};
   std::string metadata_{""};
   std::map<int, profile_entry *> entries_{};
