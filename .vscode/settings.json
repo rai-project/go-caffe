@@ -15,6 +15,7 @@
 		"*.mc": "cpp",
 		"*.cu": "cpp",
 		"*.m": "mathematica",
+		"*.mt": "mathematica",
 		"xmemory0": "cpp",
 		"xstring": "cpp",
 		"xutility": "cpp",
@@ -60,7 +61,8 @@
 		"typeinfo": "cpp",
 		"bitset": "cpp",
 		"utility": "cpp",
-		"ios": "cpp"
+		"ios": "cpp",
+		"iosfwd": "cpp"
 	},
 	"editor.insertSpaces": true
 }
