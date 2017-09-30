@@ -26,15 +26,18 @@ class StartProfile : public Net<Dtype>::Callback {
       : prof_(prof), net_(net) {}
 
  protected:
-  virtual void run(int layer) {
+  virtual void run(int layer) final {
+    if (prof_ == nullptr || net_ == nullptr) {
+        return ;
+    }
     auto e = new profile_entry(net_->layer_names()[layer].c_str(),
                                net_->layers()[layer]->type());
     prof_->add(layer, e);
   }
 
  private:
-  profile* prof_;
-  const shared_ptr<Net<Dtype>> net_;
+  profile* prof_{nullptr};
+  const shared_ptr<Net<Dtype>> net_{nullptr};
 };
 
 template <typename Dtype>
@@ -43,13 +46,19 @@ class EndProfile : public Net<Dtype>::Callback {
   explicit EndProfile(profile* prof) : prof_(prof) {}
 
  protected:
-  virtual void run(int layer) {
+  virtual void run(int layer) final {
+    if (prof_ == nullptr) {
+        return ;
+    }
     auto e = prof_->get(layer);
+    if (e == nullptr) {
+       return ;
+    }
     e->end();
   }
 
  private:
-  profile* prof_;
+  profile* prof_{nullptr};
 };
 
 class Predictor {
@@ -94,9 +103,13 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
 
   const std::vector<caffe::Blob<float>*> bottom{blob};
 
+  StartProfile<float> * start_profile = nullptr;
+  EndProfile<float> * end_profile = nullptr;
   if (prof_ != nullptr) {
-    net_->add_before_forward(new StartProfile<float>(prof_, net_));
-    net_->add_after_forward(new EndProfile<float>(prof_));
+    start_profile =  new StartProfile<float>(prof_, net_);
+    end_profile = new EndProfile<float>(prof_);
+    net_->add_before_forward(start_profile);
+    net_->add_after_forward(end_profile);
   }
 
   const auto rr = net_->Forward(bottom);
@@ -114,6 +127,15 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
   }
+
+/*
+if (start_profile) {
+  delete start_profile;
+}
+if (end_profile) {
+  delete end_profile; 
+}
+*/
 
   return predictions;
 }
