@@ -24,15 +24,20 @@ class StartProfile : public Net<Dtype>::Callback {
  public:
   explicit StartProfile(profile* prof, const shared_ptr<Net<Dtype>>& net)
       : prof_(prof), net_(net) {}
+  virtual ~StartProfile() {}
 
  protected:
   virtual void run(int layer) final {
     if (prof_ == nullptr || net_ == nullptr) {
         return ;
     }
-    auto e = new profile_entry(net_->layer_names()[layer].c_str(),
-                               net_->layers()[layer]->type());
+    //auto e = new profile_entry(net_->layer_names()[layer].c_str(),
+    //                           net_->layers()[layer]->type());
+    auto e = new profile_entry("layer", "bar");
+	std::cout << "added layer = " << layer << " \n";
+	std::cout << "prof = " << prof_ << " \n";
     prof_->add(layer, e);
+	std::cout << "adding layer = " << layer << " \n";
   }
 
  private:
@@ -44,6 +49,7 @@ template <typename Dtype>
 class EndProfile : public Net<Dtype>::Callback {
  public:
   explicit EndProfile(profile* prof) : prof_(prof) {}
+  virtual ~EndProfile() {}
 
  protected:
   virtual void run(int layer) final {

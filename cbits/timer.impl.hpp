@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <iostream>
 #include <map>
-#include <mutex>
 #include <thread>
 #include <type_traits>
 #include <vector>
+#include <mutex>
 
 #include "json.hpp"
 #include "timer.h"
@@ -15,6 +15,9 @@
 using json = nlohmann::json;
 
 using timestamp_t = std::chrono::time_point<std::chrono::system_clock>;
+
+
+static std::mutex mutex;
 
 static timestamp_t now() { return std::chrono::system_clock::now(); }
 
@@ -86,7 +89,7 @@ struct profile {
   }
 
   error_t reset() {
-    std::lock_guard<std::mutex> lock(mut_);
+ std::lock_guard<std::mutex> guard(mutex);
     for (auto e : entries_) {
       delete e.second;
     }
@@ -95,13 +98,13 @@ struct profile {
   }
 
   error_t add(int layer, profile_entry *entry) {
-    std::lock_guard<std::mutex> lock(mut_);
-    entries_.emplace(layer, entry);
+ std::lock_guard<std::mutex> guard(mutex);
+    entries_.insert({layer,  entry});
     return success;
   }
 
   profile_entry *get(int layer) {
-    std::lock_guard<std::mutex> lock(mut_);
+ std::lock_guard<std::mutex> guard(mutex);
     auto p = entries_.find(layer);
     if (p == entries_.end()) {
       return nullptr;
@@ -110,8 +113,7 @@ struct profile {
   }
 
   json to_json() {
-    std::lock_guard<std::mutex> lock(mut_);
-
+ std::lock_guard<std::mutex> guard(mutex);
     const auto start_ns = to_nanoseconds(start_);
     const auto end_ns = to_nanoseconds(end_);
 
@@ -131,14 +133,14 @@ struct profile {
   }
 
   std::string read() {
-    const auto j = this->to_json();
-    return j.dump();
+ //   const auto j = this->to_json();
+ //   return j.dump();
+return "";
   }
 
  private:
   std::string name_{""};
   std::string metadata_{""};
-  std::map<int, profile_entry *> entries_{};
+  std::map<int, profile_entry *> entries_;
   timestamp_t start_{}, end_{};
-  std::mutex mut_;
 };
