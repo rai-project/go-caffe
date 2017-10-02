@@ -10,7 +10,6 @@ import (
 	"unsafe"
 
 	"github.com/Unknwon/com"
-	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 )
 
@@ -81,7 +80,6 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 		padding := make([]float32, (batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
 	}
-	pp.Println(batchSize)
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 	r := C.Predict(p.ctx, ptr)

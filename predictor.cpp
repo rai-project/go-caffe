@@ -31,13 +31,9 @@ class StartProfile : public Net<Dtype>::Callback {
     if (prof_ == nullptr || net_ == nullptr) {
         return ;
     }
-    //auto e = new profile_entry(net_->layer_names()[layer].c_str(),
-    //                           net_->layers()[layer]->type());
-    auto e = new profile_entry("layer", "bar");
-	std::cout << "added layer = " << layer << " \n";
-	std::cout << "prof = " << prof_ << " \n";
+    auto e = new profile_entry(net_->layer_names()[layer].c_str(),
+                               net_->layers()[layer]->type());
     prof_->add(layer, e);
-	std::cout << "adding layer = " << layer << " \n";
   }
 
  private:
