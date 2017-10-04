@@ -25,7 +25,7 @@ type Predictor struct {
 
 func New(opts ...options.Option) (*Predictor, error) {
 	options := options.New(opts...)
-	modelFile := string(options.Symbol())
+	modelFile := string(options.Graph())
 	if !com.IsFile(modelFile) {
 		return nil, errors.Errorf("file %s not found", modelFile)
 	}
@@ -33,13 +33,13 @@ func New(opts ...options.Option) (*Predictor, error) {
 	if !com.IsFile(weightsFile) {
 		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
-	defer func() {
-		if options.UsesGPU() {
-			SetUseGPU()
-		} else {
-			SetUseCPU()
-		}
-	}()
+	//pp.Println("weightsFile  ", weightsFile)
+	//pp.Println("modelFile ", modelFile)
+	if options.UsesGPU() {
+		SetUseGPU()
+	} else {
+		SetUseCPU()
+	}
 	return &Predictor{
 		ctx: C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
 	}, nil
