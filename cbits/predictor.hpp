@@ -9,32 +9,32 @@ extern "C" {
 
 typedef void *PredictorContext;
 
-PredictorContext New(char *model_file, char *trained_file, int batch);
+PredictorContext CaffeNew(char *model_file, char *trained_file, int batch);
 
-const char *Predict(PredictorContext pred, float *imageData);
+const char *CaffePredict(PredictorContext pred, float *imageData);
 
-int PredictorGetChannels(PredictorContext pred);
+int CaffePredictorGetChannels(PredictorContext pred);
 
-int PredictorGetWidth(PredictorContext pred);
+int CaffePredictorGetWidth(PredictorContext pred);
 
-int PredictorGetHeight(PredictorContext pred);
+int CaffePredictorGetHeight(PredictorContext pred);
 
-int PredictorGetBatchSize(PredictorContext pred);
+int CaffePredictorGetBatchSize(PredictorContext pred);
 
-void Delete(PredictorContext pred);
+void CaffeDelete(PredictorContext pred);
 
-void SetMode(int mode);
+void CaffeSetMode(int mode);
 
-void Init();
+void CaffeInit();
 
-void StartProfiling(PredictorContext pred, const char *name,
+void CaffeStartProfiling(PredictorContext pred, const char *name,
                     const char *metadata);
 
-void EndProfiling(PredictorContext pred);
+void CaffeEndProfiling(PredictorContext pred);
 
-void DisableProfiling(PredictorContext pred);
+void CaffeDisableProfiling(PredictorContext pred);
 
-char *ReadProfile(PredictorContext pred);
+char *CaffeReadProfile(PredictorContext pred);
 
 #ifdef __cplusplus
 }

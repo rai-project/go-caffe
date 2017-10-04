@@ -41,7 +41,7 @@ func New(opts ...options.Option) (*Predictor, error) {
 		}
 	}()
 	return &Predictor{
-		ctx: C.New(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
+		ctx: C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
 	}, nil
 }
 
@@ -50,22 +50,22 @@ func (p *Predictor) StartProfiling(name, metadata string) error {
 	cmetadata := C.CString(metadata)
 	defer C.free(unsafe.Pointer(cname))
 	defer C.free(unsafe.Pointer(cmetadata))
-	C.StartProfiling(p.ctx, cname, cmetadata)
+	C.CaffeStartProfiling(p.ctx, cname, cmetadata)
 	return nil
 }
 
 func (p *Predictor) EndProfiling() error {
-	C.EndProfiling(p.ctx)
+	C.CaffeEndProfiling(p.ctx)
 	return nil
 }
 
 func (p *Predictor) DisableProfiling() error {
-	C.DisableProfiling(p.ctx)
+	C.CaffeDisableProfiling(p.ctx)
 	return nil
 }
 
 func (p *Predictor) ReadProfile() (string, error) {
-	cstr := C.ReadProfile(p.ctx)
+	cstr := C.CaffeReadProfile(p.ctx)
 	if cstr == nil {
 		return "", errors.New("failed to read nil profile")
 	}
@@ -79,11 +79,11 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
 
-	batchSize := int64(C.PredictorGetBatchSize(p.ctx))
+	batchSize := int64(C.CaffePredictorGetBatchSize(p.ctx))
 	if batchSize != 1 {
-		width := C.PredictorGetWidth(p.ctx)
-		height := C.PredictorGetHeight(p.ctx)
-		channels := C.PredictorGetChannels(p.ctx)
+		width := C.CaffePredictorGetWidth(p.ctx)
+		height := C.CaffePredictorGetHeight(p.ctx)
+		channels := C.CaffePredictorGetChannels(p.ctx)
 
 		dataLen := int64(len(data))
 		shapeLen := int64(width * height * channels)
@@ -93,7 +93,7 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 	}
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
-	r := C.Predict(p.ctx, ptr)
+	r := C.CaffePredict(p.ctx, ptr)
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
 
@@ -106,17 +106,17 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 }
 
 func (p *Predictor) Close() {
-	C.Delete(p.ctx)
+	C.CaffeDelete(p.ctx)
 }
 
 func SetUseCPU() {
-	C.SetMode(C.int(CPUMode))
+	C.CaffeSetMode(C.int(CPUMode))
 }
 
 func SetUseGPU() {
-	C.SetMode(C.int(GPUMode))
+	C.CaffeSetMode(C.int(GPUMode))
 }
 
 func init() {
-	C.Init()
+	C.CaffeInit()
 }
