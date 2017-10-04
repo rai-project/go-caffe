@@ -11,6 +11,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/pkg/errors"
+	"github.com/rai-project/dlframework/framework/options"
 )
 
 const (
@@ -22,15 +23,25 @@ type Predictor struct {
 	ctx C.PredictorContext
 }
 
-func New(modelFile, trainFile string, batch uint32) (*Predictor, error) {
+func New(opts ...options.Option) (*Predictor, error) {
+	options := options.New(opts...)
+	modelFile := string(options.Symbol())
 	if !com.IsFile(modelFile) {
 		return nil, errors.Errorf("file %s not found", modelFile)
 	}
-	if !com.IsFile(trainFile) {
-		return nil, errors.Errorf("file %s not found", trainFile)
+	weightsFile := string(options.Weights())
+	if !com.IsFile(weightsFile) {
+		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
+	defer func() {
+		if options.UsesGPU() {
+			SetUseGPU()
+		} else {
+			SetUseCPU()
+		}
+	}()
 	return &Predictor{
-		ctx: C.New(C.CString(modelFile), C.CString(trainFile), C.int(batch)),
+		ctx: C.New(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
 	}, nil
 }
 
