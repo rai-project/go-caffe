@@ -234,4 +234,11 @@ void CaffeDelete(PredictorContext pred) {
   delete predictor;
 }
 
-void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }
+// void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }
+void CaffeSetMode(int mode) { 
+  if (mode == 1) {
+  Caffe::set_mode(caffe::Caffe::GPU);
+  } else {
+  Caffe::set_mode(caffe::Caffe::CPU);
+  }
+}
