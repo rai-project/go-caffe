@@ -185,6 +185,9 @@ void CaffeDisableProfiling(PredictorContext pred) {
 
 char* CaffeReadProfile(PredictorContext pred) {
   auto predictor = (Predictor*)pred;
+if (predictor->prof_ == nullptr) {
+  return strdup("");
+}
   const auto s = predictor->prof_->read();
   const auto cstr = s.c_str();
   return strdup(cstr);

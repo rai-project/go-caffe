@@ -133,9 +133,8 @@ struct profile {
   }
 
   std::string read() {
- //   const auto j = this->to_json();
- //   return j.dump();
-return "";
+    const auto j = this->to_json();
+    return j.dump();
   }
 
  private:
