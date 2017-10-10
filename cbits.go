@@ -33,15 +33,13 @@ func New(opts ...options.Option) (*Predictor, error) {
 	if !com.IsFile(weightsFile) {
 		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
-	//pp.Println("weightsFile  ", weightsFile)
-	//pp.Println("modelFile ", modelFile)
+
+	useGPU := 0
 	if options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
+		useGPU = 1
 	}
 	return &Predictor{
-		ctx: C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
+		ctx: C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize()), C.int(useGPU)),
 	}, nil
 }
 

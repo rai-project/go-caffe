@@ -29,7 +29,7 @@ class StartProfile : public Net<Dtype>::Callback {
  protected:
   virtual void run(int layer) final {
     if (prof_ == nullptr || net_ == nullptr) {
-        return ;
+      return;
     }
     auto e = new profile_entry(net_->layer_names()[layer].c_str(),
                                net_->layers()[layer]->type());
@@ -50,11 +50,11 @@ class EndProfile : public Net<Dtype>::Callback {
  protected:
   virtual void run(int layer) final {
     if (prof_ == nullptr) {
-        return ;
+      return;
     }
     auto e = prof_->get(layer);
     if (e == nullptr) {
-       return ;
+      return;
     }
     e->end();
   }
@@ -65,7 +65,8 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string& model_file, const string& trained_file, int batch);
+  Predictor(const string& model_file, const string& trained_file, int batch,
+            int use_gpu);
 
   std::vector<Prediction> Predict(float* imageData);
 
@@ -76,7 +77,12 @@ class Predictor {
 };
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
-                     int batch) {
+                     int batch, int use_gpu) {
+  if (use_gpu) {
+    Caffe::set_mode(Caffe::GPU);
+  } else {
+    Caffe::set_mode(Caffe::CPU);
+  }
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -105,10 +111,10 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
 
   const std::vector<caffe::Blob<float>*> bottom{blob};
 
-  StartProfile<float> * start_profile = nullptr;
-  EndProfile<float> * end_profile = nullptr;
+  StartProfile<float>* start_profile = nullptr;
+  EndProfile<float>* end_profile = nullptr;
   if (prof_ != nullptr) {
-    start_profile =  new StartProfile<float>(prof_, net_);
+    start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
@@ -130,21 +136,22 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
     }
   }
 
-/*
-if (start_profile) {
-  delete start_profile;
-}
-if (end_profile) {
-  delete end_profile; 
-}
-*/
+  /*
+  if (start_profile) {
+    delete start_profile;
+  }
+  if (end_profile) {
+    delete end_profile;
+  }
+  */
 
   return predictions;
 }
 
-PredictorContext CaffeNew(char* model_file, char* trained_file, int batch) {
+PredictorContext CaffeNew(char* model_file, char* trained_file, int batch,
+                          int use_gpu) {
   try {
-    const auto ctx = new Predictor(model_file, trained_file, batch);
+    const auto ctx = new Predictor(model_file, trained_file, batch, use_gpu);
     return (void*)ctx;
   } catch (const std::invalid_argument& ex) {
     LOG(ERROR) << "exception: " << ex.what();
@@ -156,7 +163,7 @@ PredictorContext CaffeNew(char* model_file, char* trained_file, int batch) {
 void CaffeInit() { ::google::InitGoogleLogging("go-caffe"); }
 
 void CaffeStartProfiling(PredictorContext pred, const char* name,
-                    const char* metadata) {
+                         const char* metadata) {
   auto predictor = (Predictor*)pred;
   if (name == nullptr) {
     name = "";
@@ -235,10 +242,10 @@ void CaffeDelete(PredictorContext pred) {
 }
 
 // void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }
-void CaffeSetMode(int mode) { 
+void CaffeSetMode(int mode) {
   if (mode == 1) {
-  Caffe::set_mode(caffe::Caffe::GPU);
+    Caffe::set_mode(caffe::Caffe::GPU);
   } else {
-  Caffe::set_mode(caffe::Caffe::CPU);
+    Caffe::set_mode(caffe::Caffe::CPU);
   }
 }
