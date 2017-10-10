@@ -77,12 +77,7 @@ class Predictor {
 };
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
-                     int batch, int use_gpu) {
-  if (use_gpu) {
-    Caffe::set_mode(Caffe::GPU);
-  } else {
-    Caffe::set_mode(Caffe::CPU);
-  }
+                     int batch) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -148,10 +143,9 @@ std::vector<Prediction> Predictor::Predict(float* imageData) {
   return predictions;
 }
 
-PredictorContext CaffeNew(char* model_file, char* trained_file, int batch,
-                          int use_gpu) {
+PredictorContext CaffeNew(char* model_file, char* trained_file, int batch) {
   try {
-    const auto ctx = new Predictor(model_file, trained_file, batch, use_gpu);
+    const auto ctx = new Predictor(model_file, trained_file, batch);
     return (void*)ctx;
   } catch (const std::invalid_argument& ex) {
     LOG(ERROR) << "exception: " << ex.what();
@@ -241,11 +235,4 @@ void CaffeDelete(PredictorContext pred) {
   delete predictor;
 }
 
-// void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }
-void CaffeSetMode(int mode) {
-  if (mode == 1) {
-    Caffe::set_mode(caffe::Caffe::GPU);
-  } else {
-    Caffe::set_mode(caffe::Caffe::CPU);
-  }
-}
+void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }

@@ -20,7 +20,8 @@ const (
 )
 
 type Predictor struct {
-	ctx C.PredictorContext
+	ctx  C.PredictorContext
+	mode int
 }
 
 func New(opts ...options.Option) (*Predictor, error) {
@@ -34,12 +35,18 @@ func New(opts ...options.Option) (*Predictor, error) {
 		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
 
-	useGPU := 0
+	var mode int
 	if options.UsesGPU() {
-		useGPU = 1
+		mode = 1
+		SetUseGPU()
+	} else {
+		mode = 0
+		SetUseCPU()
 	}
+
 	return &Predictor{
-		ctx: C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize()), C.int(useGPU)),
+		ctx:  C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
+		mode: mode,
 	}, nil
 }
 
@@ -72,6 +79,12 @@ func (p *Predictor) ReadProfile() (string, error) {
 }
 
 func (p *Predictor) Predict(data []float32) (Predictions, error) {
+	if p.mode {
+		SetUseGPU()
+	} else {
+		SetUseCPU()
+	}
+
 	// check input
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")

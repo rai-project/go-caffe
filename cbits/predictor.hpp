@@ -9,8 +9,7 @@ extern "C" {
 
 typedef void *PredictorContext;
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
-                          int use_gpu);
+PredictorContext CaffeNew(char *model_file, char *trained_file, int batch);
 
 const char *CaffePredict(PredictorContext pred, float *imageData);
 
