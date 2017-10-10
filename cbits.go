@@ -79,7 +79,7 @@ func (p *Predictor) ReadProfile() (string, error) {
 }
 
 func (p *Predictor) Predict(data []float32) (Predictions, error) {
-	if p.mode {
+	if p.mode == 1 {
 		SetUseGPU()
 	} else {
 		SetUseCPU()

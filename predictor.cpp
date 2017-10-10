@@ -65,8 +65,7 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string& model_file, const string& trained_file, int batch,
-            int use_gpu);
+  Predictor(const string& model_file, const string& trained_file, int batch);
 
   std::vector<Prediction> Predict(float* imageData);
 
