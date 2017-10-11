@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/rai-project/nvidia-smi"
+
 	"github.com/Unknwon/com"
 	"github.com/pkg/errors"
 	"github.com/rai-project/dlframework/framework/options"
@@ -36,6 +38,9 @@ func New(opts ...options.Option) (*Predictor, error) {
 	}
 
 	if options.UsesGPU() {
+		if !nvidiasmi.HasGPU {
+			return nil, errors.New("no GPU device")
+		}
 		SetUseGPU()
 	} else {
 		SetUseCPU()
