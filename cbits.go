@@ -53,12 +53,6 @@ func New(opts ...options.Option) (*Predictor, error) {
 }
 
 func (p *Predictor) StartProfiling(name, metadata string) error {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	cname := C.CString(name)
 	cmetadata := C.CString(metadata)
 	defer C.free(unsafe.Pointer(cname))
@@ -68,34 +62,16 @@ func (p *Predictor) StartProfiling(name, metadata string) error {
 }
 
 func (p *Predictor) EndProfiling() error {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	C.CaffeEndProfiling(p.ctx)
 	return nil
 }
 
 func (p *Predictor) DisableProfiling() error {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	C.CaffeDisableProfiling(p.ctx)
 	return nil
 }
 
 func (p *Predictor) ReadProfile() (string, error) {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	cstr := C.CaffeReadProfile(p.ctx)
 	if cstr == nil {
 		return "", errors.New("failed to read nil profile")
@@ -105,12 +81,6 @@ func (p *Predictor) ReadProfile() (string, error) {
 }
 
 func (p *Predictor) Predict(data []float32) (Predictions, error) {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	// check input
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")
@@ -143,12 +113,6 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 }
 
 func (p *Predictor) Close() {
-	if p.options.UsesGPU() {
-		SetUseGPU()
-	} else {
-		SetUseCPU()
-	}
-
 	C.CaffeDelete(p.ctx)
 }
 
