@@ -6,7 +6,7 @@ DIST_DIR=$HOME/frameworks/caffe
 mkdir -p $DIST_DIR
 
 cd caffe && \
-	mkdir build && cd build && \
+	mkdir -p build && cd build && \
 	cmake .. \
 		-DCMAKE_INSTALL_PREFIX=$DIST_DIR \
 		-DUSE_ROCKSDB=OFF \
