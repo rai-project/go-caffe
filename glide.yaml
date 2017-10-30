@@ -1,23 +1,33 @@
 package: github.com/rai-project/go-caffe
 import:
 - package: github.com/Unknwon/com
-  version: ^1.0.0
-- package: github.com/gogo/protobuf
-  version: ~0.4.0
-  subpackages:
-  - proto
-- package: github.com/pkg/errors
-  version: ~0.8.0
-- package: github.com/rai-project/config
-- package: github.com/rai-project/logger
-- package: github.com/sirupsen/logrus
-  version: ^1.0.0
-- package: github.com/GeertJohan/go-sourcepath
+  version: ~1.0.0
 - package: github.com/anthonynsimon/bild
   version: ~0.10.0
   subpackages:
-  - parallel
-- package: github.com/mitchellh/go-homedir
+  - imgio
+  - transform
+- package: github.com/gogo/protobuf
+  version: ~0.5.0
+  subpackages:
+  - proto
+- package: github.com/ianlancetaylor/cgosymbolizer
+- package: github.com/k0kubun/pp
+  version: ~2.3.0
+- package: github.com/pkg/errors
+  version: ~0.8.0
+- package: github.com/rai-project/config
+- package: github.com/rai-project/dlframework
+  version: ~0.2.18
+  subpackages:
+  - framework/options
+- package: github.com/rai-project/downloadmanager
+- package: github.com/rai-project/logger
+- package: github.com/rai-project/nvidia-smi
+- package: github.com/sirupsen/logrus
+  version: ~1.0.3
+testImport:
+- package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify
   version: ~1.1.4
   subpackages:

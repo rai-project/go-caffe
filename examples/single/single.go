@@ -12,6 +12,7 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/rai-project/config"
+	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
 )
@@ -62,9 +63,15 @@ func main() {
 		os.Exit(-1)
 	}
 
+	opts := options.New()
+
 	// create predictor
 	caffe.SetUseCPU()
-	predictor, err := caffe.New(graph, weights, 1)
+	predictor, err := caffe.New(
+		options.WithOptions(opts),
+		options.Graph([]byte(graph)),
+		options.Weights([]byte(weights)),
+		options.BatchSize(1))
 	if err != nil {
 		panic(err)
 	}
@@ -86,9 +93,9 @@ func main() {
 	predictor.StartProfiling("test", "")
 	predictions, err := predictor.Predict(res)
 	predictor.EndProfiling()
-	profile, _ := predictor.ReadProfile()
+	// profile, _ := predictor.ReadProfile()
 	// out, _ := json.MarshalIndent(profile, "", "    ")
-	pp.Println(profile)
+	// pp.Println(profile)
 	predictor.DisableProfiling()
 	predictions.Sort()
 
