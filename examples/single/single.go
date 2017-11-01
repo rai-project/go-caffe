@@ -15,6 +15,9 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
+	_ "github.com/rai-project/tracer/jaeger"
+	_ "github.com/rai-project/tracer/noop"
+	_ "github.com/rai-project/tracer/zipkin"
 )
 
 var (
