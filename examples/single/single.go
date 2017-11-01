@@ -57,8 +57,11 @@ func main() {
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
+	defer tracer.Close()
+
 	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
 	defer span.Finish()
+
 	// if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
 	// 	os.Exit(-1)
 	// }
@@ -70,7 +73,7 @@ func main() {
 	// 	os.Exit(-1)
 	// }
 
-	opts := options.New()
+	opts := options.New(options.Context(ctx))
 
 	// create predictor
 	caffe.SetUseGPU()

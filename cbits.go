@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/k0kubun/pp"
 	"github.com/rai-project/nvidia-smi"
 
 	"github.com/Unknwon/com"
@@ -117,10 +118,12 @@ func (p *Predictor) Close() {
 }
 
 func SetUseCPU() {
+	pp.Println("Setting to use CPU")
 	C.CaffeSetMode(C.int(CPUMode))
 }
 
 func SetUseGPU() {
+	pp.Println("Setting to use GPU")
 	C.CaffeSetMode(C.int(GPUMode))
 }
 

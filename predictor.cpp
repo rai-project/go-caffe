@@ -77,6 +77,8 @@ class Predictor {
 
 Predictor::Predictor(const string& model_file, const string& trained_file,
                      int batch) {
+  Caffe::set_mode(Caffe::GPU);
+
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -185,9 +187,9 @@ void CaffeDisableProfiling(PredictorContext pred) {
 
 char* CaffeReadProfile(PredictorContext pred) {
   auto predictor = (Predictor*)pred;
-if (predictor->prof_ == nullptr) {
-  return strdup("");
-}
+  if (predictor->prof_ == nullptr) {
+    return strdup("");
+  }
   const auto s = predictor->prof_->read();
   const auto cstr = s.c_str();
   return strdup(cstr);
@@ -237,4 +239,13 @@ void CaffeDelete(PredictorContext pred) {
   delete predictor;
 }
 
-void CaffeSetMode(int mode) { Caffe::set_mode((caffe::Caffe::Brew)mode); }
+void CaffeSetMode(int mode) {
+  static bool mode_set = false;
+  if (!mode_set) {
+    mode_set = true;
+    // Caffe::set_mode((caffe::Caffe::Brew)mode);
+    Caffe::set_mode(Caffe::Brew::GPU);
+    Caffe::set_device(0);
+    std::cout << Caffe::mode() << "  mode = " << mode << "\n";
+  }
+}
