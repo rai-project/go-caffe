@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"image"
 	"os"
@@ -13,8 +14,9 @@ import (
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/rai-project/config"
 	"github.com/rai-project/dlframework/framework/options"
-	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
+	"github.com/rai-project/tracer"
+	"github.com/rai-project/tracer/ctimer"
 	_ "github.com/rai-project/tracer/jaeger"
 	_ "github.com/rai-project/tracer/noop"
 	_ "github.com/rai-project/tracer/zipkin"
@@ -55,21 +57,23 @@ func main() {
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
-	if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
-		os.Exit(-1)
-	}
+	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
+	defer span.Finish()
+	// if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
+	// 	os.Exit(-1)
+	// }
 
-	if _, err := downloadmanager.DownloadInto(weights_url, dir); err != nil {
-		os.Exit(-1)
-	}
-	if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
-		os.Exit(-1)
-	}
+	// if _, err := downloadmanager.DownloadInto(weights_url, dir); err != nil {
+	// 	os.Exit(-1)
+	// }
+	// if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
+	// 	os.Exit(-1)
+	// }
 
 	opts := options.New()
 
 	// create predictor
-	caffe.SetUseCPU()
+	caffe.SetUseGPU()
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
 		options.Graph([]byte(graph)),
@@ -93,13 +97,27 @@ func main() {
 		panic(err)
 	}
 
+	pp.Println("before predict")
 	predictor.StartProfiling("test", "")
 	predictions, err := predictor.Predict(res)
+	pp.Println("after predict")
+
 	predictor.EndProfiling()
-	// profile, _ := predictor.ReadProfile()
-	// out, _ := json.MarshalIndent(profile, "", "    ")
-	// pp.Println(profile)
+	profBuffer, err := predictor.ReadProfile()
+	if err != nil {
+		pp.Println(err)
+		return
+	}
+
+	t, err := ctimer.New(profBuffer)
+	if err != nil {
+		pp.Println(err)
+		return
+	}
+	t.Publish(ctx)
+
 	predictor.DisableProfiling()
+
 	predictions.Sort()
 
 	var labels []string
