@@ -1,6 +1,6 @@
 FRAMEWORK_VERSION=1.0
 
-#git clone --single-branch --branch $FRAMEWORK_VERSION --recursive https://github.com/BVLC/caffe.git caffe
+git clone --single-branch --branch $FRAMEWORK_VERSION --recursive https://github.com/BVLC/caffe.git caffe
 
 DIST_DIR=$HOME/frameworks/caffe
 mkdir -p $DIST_DIR
