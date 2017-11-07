@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"image"
 	"os"
@@ -14,12 +13,11 @@ import (
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/rai-project/config"
 	"github.com/rai-project/dlframework/framework/options"
+	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
-	"github.com/rai-project/tracer"
+	nvidiasmi "github.com/rai-project/nvidia-smi"
+	_ "github.com/rai-project/tracer/all"
 	"github.com/rai-project/tracer/ctimer"
-	_ "github.com/rai-project/tracer/jaeger"
-	_ "github.com/rai-project/tracer/noop"
-	_ "github.com/rai-project/tracer/zipkin"
 )
 
 var (
@@ -57,28 +55,38 @@ func main() {
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
-	defer tracer.Close()
+	// defer tracer.Close()
 
-	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
-	defer span.Finish()
+	// span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
+	// defer span.Finish()
 
-	// if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
-	// 	os.Exit(-1)
-	// }
+	if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
+		os.Exit(-1)
+	}
 
-	// if _, err := downloadmanager.DownloadInto(weights_url, dir); err != nil {
-	// 	os.Exit(-1)
-	// }
-	// if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
-	// 	os.Exit(-1)
-	// }
+	if _, err := downloadmanager.DownloadInto(weights_url, dir); err != nil {
+		os.Exit(-1)
+	}
+	if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
+		os.Exit(-1)
+	}
 
-	opts := options.New(options.Context(ctx))
+	// opts := options.New(options.Context(ctx))
+	opts := options.New()
+
+	device := options.CPU_DEVICE
+	if nvidiasmi.HasGPU {
+		caffe.SetUseGPU()
+		device = options.CUDA_DEVICE
+	} else {
+		caffe.SetUseCPU()
+	}
+	pp.Println("Using device = ", device)
 
 	// create predictor
-	caffe.SetUseGPU()
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
+		options.Device(device, 0),
 		options.Graph([]byte(graph)),
 		options.Weights([]byte(weights)),
 		options.BatchSize(1))
@@ -100,25 +108,26 @@ func main() {
 		panic(err)
 	}
 
-	pp.Println("before predict")
-	predictor.StartProfiling("test", "")
+	// predictor.StartProfiling("test", "")
 	predictions, err := predictor.Predict(res)
-	pp.Println("after predict")
+	if err != nil {
+		pp.Println(err)
+		os.Exit(-1)
+	}
 
 	predictor.EndProfiling()
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
 		pp.Println(err)
-		return
+		os.Exit(-1)
 	}
 
-	t, err := ctimer.New(profBuffer)
+	_, err = ctimer.New(profBuffer)
 	if err != nil {
 		pp.Println(err)
-		return
+		os.Exit(-1)
 	}
-	t.Publish(ctx)
-
+	// t.Publish(ctx)
 	predictor.DisableProfiling()
 
 	predictions.Sort()

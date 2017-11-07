@@ -14,6 +14,7 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
+	nvidiasmi "github.com/rai-project/nvidia-smi"
 )
 
 var (
@@ -91,10 +92,21 @@ func main() {
 	}
 
 	opts := options.New()
+
+	device := options.CPU_DEVICE
+	if nvidiasmi.HasGPU {
+		caffe.SetUseGPU()
+		device = options.CUDA_DEVICE
+	} else {
+		caffe.SetUseCPU()
+	}
+	pp.Println("Using device = ", device)
+
 	// create predictor
 	caffe.SetUseCPU()
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
+		options.Device(device, 0),
 		options.Graph([]byte(graph)),
 		options.Weights([]byte(weights)),
 		options.BatchSize(uint32(batch)))

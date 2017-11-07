@@ -20,18 +20,15 @@ using json = nlohmann::json;
 using Prediction = std::pair<int, float>;
 
 template <typename Dtype>
-class StartProfile : public Net<Dtype>::Callback
-{
-public:
+class StartProfile : public Net<Dtype>::Callback {
+ public:
   explicit StartProfile(profile *prof, const shared_ptr<Net<Dtype>> &net)
       : prof_(prof), net_(net) {}
   virtual ~StartProfile() {}
 
-protected:
-  virtual void run(int layer) final
-  {
-    if (prof_ == nullptr || net_ == nullptr)
-    {
+ protected:
+  virtual void run(int layer) final {
+    if (prof_ == nullptr || net_ == nullptr) {
       return;
     }
     auto e = new profile_entry(net_->layer_names()[layer].c_str(),
@@ -39,40 +36,35 @@ protected:
     prof_->add(layer, e);
   }
 
-private:
+ private:
   profile *prof_{nullptr};
   const shared_ptr<Net<Dtype>> net_{nullptr};
 };
 
 template <typename Dtype>
-class EndProfile : public Net<Dtype>::Callback
-{
-public:
+class EndProfile : public Net<Dtype>::Callback {
+ public:
   explicit EndProfile(profile *prof) : prof_(prof) {}
   virtual ~EndProfile() {}
 
-protected:
-  virtual void run(int layer) final
-  {
-    if (prof_ == nullptr)
-    {
+ protected:
+  virtual void run(int layer) final {
+    if (prof_ == nullptr) {
       return;
     }
     auto e = prof_->get(layer);
-    if (e == nullptr)
-    {
+    if (e == nullptr) {
       return;
     }
     e->end();
   }
 
-private:
+ private:
   profile *prof_{nullptr};
 };
 
-class Predictor
-{
-public:
+class Predictor {
+ public:
   Predictor(const string &model_file, const string &trained_file, int batch);
 
   std::vector<Prediction> Predict(float *imageData);
@@ -84,10 +76,7 @@ public:
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch)
-{
-  Caffe::set_mode(Caffe::GPU);
-
+                     int batch) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -110,8 +99,7 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 }
 
 /* Return the top N predictions. */
-std::vector<Prediction> Predictor::Predict(float *imageData)
-{
+std::vector<Prediction> Predictor::Predict(float *imageData) {
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
   blob->set_cpu_data(imageData);
 
@@ -119,8 +107,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData)
 
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
-  if (prof_ != nullptr)
-  {
+  if (prof_ != nullptr) {
     start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
@@ -136,10 +123,8 @@ std::vector<Prediction> Predictor::Predict(float *imageData)
 
   std::vector<Prediction> predictions;
   predictions.reserve(outputSize);
-  for (int cnt = 0; cnt < batch_; cnt++)
-  {
-    for (int idx = 0; idx < len; idx++)
-    {
+  for (int cnt = 0; cnt < batch_; cnt++) {
+    for (int idx = 0; idx < len; idx++) {
       predictions.emplace_back(
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
@@ -157,15 +142,11 @@ std::vector<Prediction> Predictor::Predict(float *imageData)
   return predictions;
 }
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch)
-{
-  try
-  {
+PredictorContext CaffeNew(char *model_file, char *trained_file, int batch) {
+  try {
     const auto ctx = new Predictor(model_file, trained_file, batch);
     return (void *)ctx;
-  }
-  catch (const std::invalid_argument &ex)
-  {
+  } catch (const std::invalid_argument &ex) {
     LOG(ERROR) << "exception: " << ex.what();
     errno = EINVAL;
     return nullptr;
@@ -175,45 +156,36 @@ PredictorContext CaffeNew(char *model_file, char *trained_file, int batch)
 void CaffeInit() { ::google::InitGoogleLogging("go-caffe"); }
 
 void CaffeStartProfiling(PredictorContext pred, const char *name,
-                         const char *metadata)
-{
+                         const char *metadata) {
   auto predictor = (Predictor *)pred;
-  if (name == nullptr)
-  {
+  if (name == nullptr) {
     name = "";
   }
-  if (metadata == nullptr)
-  {
+  if (metadata == nullptr) {
     metadata = "";
   }
   predictor->prof_ = new profile(name, metadata);
 }
 
-void CaffeEndProfiling(PredictorContext pred)
-{
+void CaffeEndProfiling(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
-  if (predictor->prof_)
-  {
+  if (predictor->prof_) {
     predictor->prof_->end();
   }
 }
 
-void CaffeDisableProfiling(PredictorContext pred)
-{
+void CaffeDisableProfiling(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
-  if (predictor->prof_)
-  {
+  if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
   }
   predictor->prof_ = nullptr;
 }
 
-char *CaffeReadProfile(PredictorContext pred)
-{
+char *CaffeReadProfile(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
-  if (predictor->prof_ == nullptr)
-  {
+  if (predictor->prof_ == nullptr) {
     return strdup("");
   }
   const auto s = predictor->prof_->read();
@@ -221,14 +193,12 @@ char *CaffeReadProfile(PredictorContext pred)
   return strdup(cstr);
 }
 
-const char *CaffePredict(PredictorContext pred, float *imageData)
-{
+const char *CaffePredict(PredictorContext pred, float *imageData) {
   auto predictor = (Predictor *)pred;
   const auto predictionsTuples = predictor->Predict(imageData);
 
   json predictions = json::array();
-  for (const auto prediction : predictionsTuples)
-  {
+  for (const auto prediction : predictionsTuples) {
     predictions.push_back(
         {{"index", prediction.first}, {"probability", prediction.second}});
   }
@@ -237,35 +207,29 @@ const char *CaffePredict(PredictorContext pred, float *imageData)
   return res;
 }
 
-int CaffePredictorGetChannels(PredictorContext pred)
-{
+int CaffePredictorGetChannels(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   return predictor->channels_;
 }
 
-int CaffePredictorGetWidth(PredictorContext pred)
-{
+int CaffePredictorGetWidth(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   return predictor->width_;
 }
 
-int CaffePredictorGetHeight(PredictorContext pred)
-{
+int CaffePredictorGetHeight(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   return predictor->height_;
 }
 
-int CaffePredictorGetBatchSize(PredictorContext pred)
-{
+int CaffePredictorGetBatchSize(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   return predictor->batch_;
 }
 
-void CaffeDelete(PredictorContext pred)
-{
+void CaffeDelete(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
-  if (predictor->prof_)
-  {
+  if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
     predictor->prof_ = nullptr;
@@ -273,14 +237,12 @@ void CaffeDelete(PredictorContext pred)
   delete predictor;
 }
 
-void CaffeSetMode(int mode)
-{
+void CaffeSetMode(int mode) {
   static bool mode_set = false;
-  if (!mode_set)
-  {
+  if (!mode_set) {
     mode_set = true;
-    // Caffe::set_mode((caffe::Caffe::Brew)mode);
-    Caffe::set_mode(Caffe::Brew::GPU);
+    Caffe::set_mode((caffe::Caffe::Brew)mode);
+    // Caffe::set_mode(Caffe::Brew::GPU);
     Caffe::SetDevice(0);
     std::cout << Caffe::mode() << "  mode = " << mode << "\n";
   }
