@@ -17,7 +17,6 @@ import (
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	_ "github.com/rai-project/tracer/all"
-	"github.com/rai-project/tracer/ctimer"
 )
 
 var (
@@ -115,20 +114,20 @@ func main() {
 		os.Exit(-1)
 	}
 
-	predictor.EndProfiling()
-	profBuffer, err := predictor.ReadProfile()
-	if err != nil {
-		pp.Println(err)
-		os.Exit(-1)
-	}
+	// predictor.EndProfiling()
+	// profBuffer, err := predictor.ReadProfile()
+	// if err != nil {
+	// 	pp.Println(err)
+	// 	os.Exit(-1)
+	// }
 
-	_, err = ctimer.New(profBuffer)
-	if err != nil {
-		pp.Println(err)
-		os.Exit(-1)
-	}
-	// t.Publish(ctx)
-	predictor.DisableProfiling()
+	// _, err = ctimer.New(profBuffer)
+	// if err != nil {
+	// 	pp.Println(err)
+	// 	os.Exit(-1)
+	// }
+	//  t.Publish(ctx)
+	// predictor.DisableProfiling()
 
 	predictions.Sort()
 
