@@ -38,17 +38,24 @@ func New(opts ...options.Option) (*Predictor, error) {
 		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
 
+	mode := CPUMode
 	if options.UsesGPU() {
 		if !nvidiasmi.HasGPU {
 			return nil, errors.New("no GPU device")
 		}
 		SetUseGPU()
+		mode = GPUMode
 	} else {
 		SetUseCPU()
 	}
 
 	return &Predictor{
-		ctx:     C.CaffeNew(C.CString(modelFile), C.CString(weightsFile), C.int(options.BatchSize())),
+		ctx: C.CaffeNew(
+			C.CString(modelFile),
+			C.CString(weightsFile),
+			C.int(options.BatchSize()),
+			C.int(mode),
+		),
 		options: options,
 	}, nil
 }

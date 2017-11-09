@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"image"
 	"os"
@@ -16,7 +17,9 @@ import (
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
+	"github.com/rai-project/tracer"
 	_ "github.com/rai-project/tracer/all"
+	"github.com/rai-project/tracer/ctimer"
 )
 
 var (
@@ -54,10 +57,10 @@ func main() {
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
-	// defer tracer.Close()
+	defer tracer.Close()
 
-	// span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
-	// defer span.Finish()
+	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
+	defer span.Finish()
 
 	if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
 		os.Exit(-1)
@@ -107,27 +110,27 @@ func main() {
 		panic(err)
 	}
 
-	// predictor.StartProfiling("test", "")
+	predictor.StartProfiling("test", "")
 	predictions, err := predictor.Predict(res)
 	if err != nil {
 		pp.Println(err)
 		os.Exit(-1)
 	}
 
-	// predictor.EndProfiling()
-	// profBuffer, err := predictor.ReadProfile()
-	// if err != nil {
-	// 	pp.Println(err)
-	// 	os.Exit(-1)
-	// }
+	predictor.EndProfiling()
+	profBuffer, err := predictor.ReadProfile()
+	if err != nil {
+		pp.Println(err)
+		os.Exit(-1)
+	}
 
-	// _, err = ctimer.New(profBuffer)
-	// if err != nil {
-	// 	pp.Println(err)
-	// 	os.Exit(-1)
-	// }
-	//  t.Publish(ctx)
-	// predictor.DisableProfiling()
+	t, err := ctimer.New(profBuffer)
+	if err != nil {
+		pp.Println(err)
+		os.Exit(-1)
+	}
+	t.Publish(ctx)
+	predictor.DisableProfiling()
 
 	predictions.Sort()
 

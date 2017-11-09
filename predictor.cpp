@@ -65,21 +65,30 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string &model_file, const string &trained_file, int batch);
+  Predictor(const string &model_file, const string &trained_file, int batch, caffe::Caffe::Brew mode);
 
   std::vector<Prediction> Predict(float *imageData);
+
+  void setMode() {
+    Caffe::set_mode(mode_);
+    Caffe::SetDevice(0);
+  }
 
   shared_ptr<Net<float>> net_;
   int width_, height_, channels_;
   int batch_;
+  caffe::Caffe::Brew mode_;
   profile *prof_{nullptr};
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch) {
+                     int batch, caffe::Caffe::Brew mode) {
+
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
+
+  mode_ = mode;
 
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
@@ -100,8 +109,16 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float *imageData) {
+  setMode();
+
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-  blob->set_cpu_data(imageData);
+
+  if (mode_ == Caffe::CPU) {
+    blob->set_cpu_data(imageData);
+  } else {
+    blob->set_gpu_data(imageData);
+    blob->mutable_gpu_data();
+  }
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
 
@@ -142,9 +159,9 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   return predictions;
 }
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch) {
+PredictorContext CaffeNew(char *model_file, char *trained_file, int batch, int mode) {
   try {
-    const auto ctx = new Predictor(model_file, trained_file, batch);
+    const auto ctx = new Predictor(model_file, trained_file, batch, (caffe::Caffe::Brew)mode);
     return (void *)ctx;
   } catch (const std::invalid_argument &ex) {
     LOG(ERROR) << "exception: " << ex.what();
