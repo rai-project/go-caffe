@@ -65,7 +65,8 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string &model_file, const string &trained_file, int batch, caffe::Caffe::Brew mode);
+  Predictor(const string &model_file, const string &trained_file, int batch,
+            caffe::Caffe::Brew mode);
 
   std::vector<Prediction> Predict(float *imageData);
 
@@ -83,7 +84,6 @@ class Predictor {
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
                      int batch, caffe::Caffe::Brew mode) {
-
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -159,9 +159,11 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   return predictions;
 }
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch, int mode) {
+PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
+                          int mode) {
   try {
-    const auto ctx = new Predictor(model_file, trained_file, batch, (caffe::Caffe::Brew)mode);
+    const auto ctx = new Predictor(model_file, trained_file, batch,
+                                   (caffe::Caffe::Brew)mode);
     return (void *)ctx;
   } catch (const std::invalid_argument &ex) {
     LOG(ERROR) << "exception: " << ex.what();
