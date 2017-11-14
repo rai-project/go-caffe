@@ -94,8 +94,8 @@ before_install:
 install:
   - cd ${TRAVIS_BUILD_DIR}
   - glide install --force
-  - rm -fr vendor/github.com/Sirupsen
-  - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
+  - rm -fr vendor/github.com/sirupsen
+  - find vendor -type f -exec sed -i 's/sirupsen/sirupsen/g' {} +
   - go build
 
 script:

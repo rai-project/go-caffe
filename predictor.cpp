@@ -72,7 +72,9 @@ class Predictor {
 
   void setMode() {
     Caffe::set_mode(mode_);
-    Caffe::SetDevice(0);
+    if (mode_ == Caffe::Brew::GPU) {
+      Caffe::SetDevice(0);
+    }
   }
 
   shared_ptr<Net<float>> net_;
@@ -262,7 +264,9 @@ void CaffeSetMode(int mode) {
     mode_set = true;
     Caffe::set_mode((caffe::Caffe::Brew)mode);
     // Caffe::set_mode(Caffe::Brew::GPU);
-    Caffe::SetDevice(0);
+    if (mode == Caffe::Brew::GPU) {
+      Caffe::SetDevice(0);
+    }
     std::cout << Caffe::mode() << "  mode = " << mode << "\n";
   }
 }

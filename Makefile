@@ -24,8 +24,8 @@ glide-install:
 	glide install --force
 
 logrus-fix:
-	rm -fr vendor/github.com/Sirupsen
-	find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
+	rm -fr vendor/github.com/sirupsen
+	find vendor -type f -exec sed -i 's/sirupsen/sirupsen/g' {} +
 
 generate: clean
 	protoc --gogofaster_out=import_path=proto:proto -Iproto -I$(GOPATH)/src proto/caffe.proto
