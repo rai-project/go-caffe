@@ -80,7 +80,7 @@ class Predictor {
   shared_ptr<Net<float>> net_;
   int width_, height_, channels_;
   int batch_;
-  caffe::Caffe::Brew mode_;
+  caffe::Caffe::Brew mode_{Caffe::CPU};
   profile *prof_{nullptr};
 };
 
