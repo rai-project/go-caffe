@@ -63,6 +63,8 @@ class EndProfile : public Net<Dtype>::Callback {
   profile *prof_{nullptr};
 };
 
+#define DEBUG_STMT std::cout << __func__ << "  " << __LINE__ << "\n";
+
 class Predictor {
  public:
   Predictor(const string &model_file, const string &trained_file, int batch,
@@ -111,28 +113,36 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float *imageData) {
+DEBUG_STMT
+
   setMode();
+DEBUG_STMT
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
+DEBUG_STMT
 
   if (mode_ == Caffe::CPU) {
+    DEBUG_STMT
     blob->set_cpu_data(imageData);
   } else {
+    DEBUG_STMT
     blob->set_gpu_data(imageData);
     blob->mutable_gpu_data();
   }
+DEBUG_STMT
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
-
+DEBUG_STMT
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr) {
+    DEBUG_STMT
     start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
   }
-
+DEBUG_STMT
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
 
@@ -148,7 +158,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
   }
-
+DEBUG_STMT
   /*
   if (start_profile) {
     delete start_profile;
@@ -227,18 +237,28 @@ char *CaffeReadProfile(PredictorContext pred) {
 }
 
 const char *CaffePredict(PredictorContext pred, float *imageData) {
+  DEBUG_STMT;
+
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return strdup("");
   }
+  DEBUG_STMT;
+
   const auto predictionsTuples = predictor->Predict(imageData);
+
+  DEBUG_STMT;
 
   json predictions = json::array();
   for (const auto prediction : predictionsTuples) {
     predictions.push_back(
         {{"index", prediction.first}, {"probability", prediction.second}});
   }
+  DEBUG_STMT;
+
   auto res = strdup(predictions.dump().c_str());
+
+  DEBUG_STMT;
 
   return res;
 }
