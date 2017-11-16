@@ -31,8 +31,9 @@ class StartProfile : public Net<Dtype>::Callback {
     if (prof_ == nullptr || net_ == nullptr) {
       return;
     }
-    auto e = new profile_entry(net_->layer_names()[layer].c_str(),
-                               net_->layers()[layer]->type());
+    const auto layer_name = net_->layer_names()[layer];
+    const auto layer_type = net_->layers()[layer]->type();
+    auto e = new profile_entry(layer_name, layer_type);
     prof_->add(layer, e);
   }
 
@@ -113,13 +114,13 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 
 /* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float *imageData) {
-DEBUG_STMT
+  DEBUG_STMT
 
   setMode();
-DEBUG_STMT
+  DEBUG_STMT
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-DEBUG_STMT
+  DEBUG_STMT
 
   if (mode_ == Caffe::CPU) {
     DEBUG_STMT
@@ -129,10 +130,10 @@ DEBUG_STMT
     blob->set_gpu_data(imageData);
     blob->mutable_gpu_data();
   }
-DEBUG_STMT
+  DEBUG_STMT
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
-DEBUG_STMT
+  DEBUG_STMT
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr) {
@@ -142,7 +143,7 @@ DEBUG_STMT
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
   }
-DEBUG_STMT
+  DEBUG_STMT
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
 
@@ -158,7 +159,7 @@ DEBUG_STMT
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
   }
-DEBUG_STMT
+  DEBUG_STMT
   /*
   if (start_profile) {
     delete start_profile;
@@ -217,7 +218,6 @@ void CaffeDisableProfiling(PredictorContext pred) {
     return;
   }
   if (predictor->prof_) {
-    predictor->prof_->reset();
     delete predictor->prof_;
   }
   predictor->prof_ = nullptr;

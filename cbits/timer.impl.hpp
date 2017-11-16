@@ -3,11 +3,10 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
-#include <map>
+#include <mutex>
 #include <thread>
 #include <type_traits>
 #include <vector>
-#include <mutex>
 
 #include "json.hpp"
 #include "timer.h"
@@ -15,9 +14,6 @@
 using json = nlohmann::json;
 
 using timestamp_t = std::chrono::time_point<std::chrono::system_clock>;
-
-
-static std::mutex mutex;
 
 static timestamp_t now() { return std::chrono::system_clock::now(); }
 
@@ -74,6 +70,7 @@ struct profile_entry {
 struct profile {
   profile(std::string name = "", std::string metadata = "")
       : name_(name), metadata_(metadata) {
+    entries_.reserve(1024);
     start();
   }
   ~profile() { this->reset(); }
@@ -89,37 +86,42 @@ struct profile {
   }
 
   error_t reset() {
- std::lock_guard<std::mutex> guard(mutex);
+    std::lock_guard<std::mutex> lock(mut_);
     for (auto e : entries_) {
-      delete e.second;
+      if (e != nullptr) {
+        delete e;
+      }
     }
     entries_.clear();
     return success;
   }
 
-  error_t add(int layer, profile_entry *entry) {
- std::lock_guard<std::mutex> guard(mutex);
-    entries_.insert({layer,  entry});
+  error_t add(int ii, profile_entry *entry) {
+    std::lock_guard<std::mutex> lock(mut_);
+    if (ii >= entries_.size()) {
+      entries_.reserve(2 * ii);
+    }
+    entries_[ii] = entry;
     return success;
   }
 
-  profile_entry *get(int layer) {
- std::lock_guard<std::mutex> guard(mutex);
-    auto p = entries_.find(layer);
-    if (p == entries_.end()) {
+  profile_entry *get(int ii) {
+    std::lock_guard<std::mutex> lock(mut_);
+    if (ii >= entries_.size()) {
       return nullptr;
     }
-    return p->second;
+    return entries_[ii];
   }
 
   json to_json() {
- std::lock_guard<std::mutex> guard(mutex);
+    std::lock_guard<std::mutex> lock(mut_);
+
     const auto start_ns = to_nanoseconds(start_);
     const auto end_ns = to_nanoseconds(end_);
 
     json elements = json::array();
     for (const auto e : entries_) {
-      elements.emplace_back(e.second->to_json());
+      elements.emplace_back(e->to_json());
     }
     return json{
         {"name", name_}, {"metadata", metadata_}, {"start", start_ns},
@@ -140,6 +142,7 @@ struct profile {
  private:
   std::string name_{""};
   std::string metadata_{""};
-  std::map<int, profile_entry *> entries_;
+  std::vector<profile_entry *> entries_{};
   timestamp_t start_{}, end_{};
+  std::mutex mut_;
 };
