@@ -179,6 +179,9 @@ void CaffeInit() { ::google::InitGoogleLogging("go-caffe"); }
 void CaffeStartProfiling(PredictorContext pred, const char *name,
                          const char *metadata) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
   if (name == nullptr) {
     name = "";
   }
@@ -190,6 +193,9 @@ void CaffeStartProfiling(PredictorContext pred, const char *name,
 
 void CaffeEndProfiling(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
   if (predictor->prof_) {
     predictor->prof_->end();
   }
@@ -197,6 +203,9 @@ void CaffeEndProfiling(PredictorContext pred) {
 
 void CaffeDisableProfiling(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
   if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
@@ -206,6 +215,9 @@ void CaffeDisableProfiling(PredictorContext pred) {
 
 char *CaffeReadProfile(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return strdup("");
+  }
   if (predictor->prof_ == nullptr) {
     return strdup("");
   }
@@ -216,6 +228,9 @@ char *CaffeReadProfile(PredictorContext pred) {
 
 const char *CaffePredict(PredictorContext pred, float *imageData) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return strdup("");
+  }
   const auto predictionsTuples = predictor->Predict(imageData);
 
   json predictions = json::array();
@@ -230,26 +245,41 @@ const char *CaffePredict(PredictorContext pred, float *imageData) {
 
 int CaffePredictorGetChannels(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return 0;
+  }
   return predictor->channels_;
 }
 
 int CaffePredictorGetWidth(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return 0;
+  }
   return predictor->width_;
 }
 
 int CaffePredictorGetHeight(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return 0;
+  }
   return predictor->height_;
 }
 
 int CaffePredictorGetBatchSize(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return 0;
+  }
   return predictor->batch_;
 }
 
 void CaffeDelete(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
   if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
