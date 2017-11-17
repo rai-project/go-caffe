@@ -34,7 +34,6 @@ class StartProfile : public Net<Dtype>::Callback {
     const auto layer_name = net_->layer_names()[layer];
     const auto layer_type = net_->layers()[layer]->type();
     auto e = new profile_entry(layer_name, layer_type);
-std::cout << "start layer = " << layer << "\n";
     prof_->add(layer, e);
   }
 
@@ -51,7 +50,6 @@ class EndProfile : public Net<Dtype>::Callback {
 
  protected:
   virtual void run(int layer) final {
-std::cout << "end layer = " << layer << "\n";
     if (prof_ == nullptr) {
       return;
     }
@@ -66,7 +64,11 @@ std::cout << "end layer = " << layer << "\n";
   profile *prof_{nullptr};
 };
 
+#if 0
 #define DEBUG_STMT std::cout << __func__ << "  " << __LINE__ << "\n";
+#else
+#define DEBUG_STMT 
+#endif
 
 class Predictor {
  public:
@@ -204,7 +206,11 @@ void CaffeStartProfiling(PredictorContext pred, const char *name,
   if (metadata == nullptr) {
     metadata = "";
   }
-  predictor->prof_ = new profile(name, metadata);
+  if (predictor->prof_ == nullptr) {
+      predictor->prof_ = new profile(name, metadata);
+  } else {
+      predictor->prof_->reset();
+  }
 }
 
 void CaffeEndProfiling(PredictorContext pred) {
@@ -223,9 +229,8 @@ void CaffeDisableProfiling(PredictorContext pred) {
     return;
   }
   if (predictor->prof_) {
-    delete predictor->prof_;
+    predictor->prof_->reset();
   }
-  predictor->prof_ = nullptr;
 }
 
 char *CaffeReadProfile(PredictorContext pred) {

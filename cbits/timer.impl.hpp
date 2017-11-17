@@ -101,7 +101,8 @@ struct profile {
     if (ii >= entries_.size()) {
       entries_.reserve(2 * ii);
     }
-    entries_[ii] = entry;
+auto begin = entries_.begin();
+    entries_.insert(begin + ii, entry);
     return success;
   }
 
