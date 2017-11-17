@@ -34,6 +34,7 @@ class StartProfile : public Net<Dtype>::Callback {
     const auto layer_name = net_->layer_names()[layer];
     const auto layer_type = net_->layers()[layer]->type();
     auto e = new profile_entry(layer_name, layer_type);
+std::cout << "start layer = " << layer << "\n";
     prof_->add(layer, e);
   }
 
@@ -50,6 +51,7 @@ class EndProfile : public Net<Dtype>::Callback {
 
  protected:
   virtual void run(int layer) final {
+std::cout << "end layer = " << layer << "\n";
     if (prof_ == nullptr) {
       return;
     }
@@ -85,6 +87,7 @@ class Predictor {
   int batch_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
   profile *prof_{nullptr};
+  bool prof_registered_{false};
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
@@ -136,14 +139,16 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   DEBUG_STMT
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
-  if (prof_ != nullptr) {
+  if (prof_ != nullptr && prof_registered_ == false) {
     DEBUG_STMT
     start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
+  prof_registered_ = true;
   }
   DEBUG_STMT
+net_->set_debug_info(true);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
 
