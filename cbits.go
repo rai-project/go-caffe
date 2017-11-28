@@ -6,9 +6,12 @@ package caffe
 import "C"
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"unsafe"
+
+	"github.com/rai-project/tracer"
+
+	jsserializer "github.com/rai-project/serializer/json"
 
 	"github.com/k0kubun/pp"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -23,6 +26,10 @@ import (
 const (
 	CPUMode = 0
 	GPUMode = 1
+)
+
+var (
+	json = jsserializer.New()
 )
 
 type Predictor struct {
@@ -120,7 +127,11 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 	)
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
+
+	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
 	r := C.CaffePredict(p.ctx, ptr)
+	predictSpan.Finish()
+
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
 
