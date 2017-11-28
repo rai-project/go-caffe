@@ -5,14 +5,17 @@ package caffe
 // #include "cbits/predictor.hpp"
 import "C"
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"unsafe"
 
 	"github.com/k0kubun/pp"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rai-project/nvidia-smi"
 
 	"github.com/Unknwon/com"
+	olog "github.com/opentracing/opentracing-go/log"
 	"github.com/pkg/errors"
 	"github.com/rai-project/dlframework/framework/options"
 )
@@ -88,11 +91,16 @@ func (p *Predictor) ReadProfile() (string, error) {
 	return C.GoString(cstr), nil
 }
 
-func (p *Predictor) Predict(data []float32) (Predictions, error) {
+func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, error) {
 	// check input
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
+
+	span := opentracing.SpanFromContext(ctx)
+	span.LogFields(
+		olog.String("event", "before caffe padding"),
+	)
 
 	batchSize := int64(C.CaffePredictorGetBatchSize(p.ctx))
 	if batchSize != 1 {
@@ -107,16 +115,29 @@ func (p *Predictor) Predict(data []float32) (Predictions, error) {
 		data = append(data, padding...)
 	}
 
+	span.LogFields(
+		olog.String("event", "after caffe padding"),
+	)
+
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 	r := C.CaffePredict(p.ctx, ptr)
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
+
+	span.LogFields(
+		olog.String("event", "before caffe unmarshal"),
+	)
 
 	predictions := []Prediction{}
 	err := json.Unmarshal([]byte(js), &predictions)
 	if err != nil {
 		return nil, err
 	}
+
+	span.LogFields(
+		olog.String("event", "after caffe unmarshal"),
+	)
+
 	return predictions, nil
 }
 
