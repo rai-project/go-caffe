@@ -130,7 +130,6 @@ func SetUseCPU() {
 }
 
 func SetUseGPU() {
-	pp.Println("Setting to use GPU")
 	C.CaffeSetMode(C.int(GPUMode))
 }
 
