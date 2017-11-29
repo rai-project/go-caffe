@@ -62,7 +62,9 @@
 		"bitset": "cpp",
 		"utility": "cpp",
 		"ios": "cpp",
-		"iosfwd": "cpp"
+		"iosfwd": "cpp",
+		"__string": "cpp",
+		"string_view": "cpp"
 	},
 	"editor.insertSpaces": true
 }

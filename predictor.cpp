@@ -67,7 +67,7 @@ class EndProfile : public Net<Dtype>::Callback {
 #if 0
 #define DEBUG_STMT std::cout << __func__ << "  " << __LINE__ << "\n";
 #else
-#define DEBUG_STMT 
+#define DEBUG_STMT
 #endif
 
 class Predictor {
@@ -124,9 +124,16 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   setMode();
   DEBUG_STMT
 
-  auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-  DEBUG_STMT
+  auto mallocEntry = new profile_entry("create blob", "malloc");
+  prof_->add(1024, mallocEntry);
 
+  auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
+
+  mallocEntry->end();
+
+  auto setDataEntry = new profile_entry("set data", "setData");
+  prof_->add(1025, setDataEntry);
+  DEBUG_STMT
   if (mode_ == Caffe::CPU) {
     DEBUG_STMT
     blob->set_cpu_data(imageData);
@@ -136,6 +143,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
     blob->mutable_gpu_data();
   }
   DEBUG_STMT
+  setDataEntry->end();
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
   DEBUG_STMT
@@ -147,13 +155,19 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
-  prof_registered_ = true;
+    prof_registered_ = true;
   }
   DEBUG_STMT
-net_->set_debug_info(true);
+  // net_->set_debug_info(true);
+
+  auto netForwardEntry = new profile_entry("net forward", "netForward");
+  prof_->add(1026, netForwardEntry);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
+  netForwardEntry->end();
 
+  auto copyBackEntry = new profile_entry("copy back", "copyBack");
+  prof_->add(1027, copyBackEntry);
   const auto len = output_layer->channels();
   const auto outputSize = len * batch_;
   const float *outputData = output_layer->cpu_data();
@@ -167,6 +181,8 @@ net_->set_debug_info(true);
     }
   }
   DEBUG_STMT
+  copyBackEntry->end();
+
   /*
   if (start_profile) {
     delete start_profile;
@@ -207,9 +223,9 @@ void CaffeStartProfiling(PredictorContext pred, const char *name,
     metadata = "";
   }
   if (predictor->prof_ == nullptr) {
-      predictor->prof_ = new profile(name, metadata);
+    predictor->prof_ = new profile(name, metadata);
   } else {
-      predictor->prof_->reset();
+    predictor->prof_->reset();
   }
 }
 
