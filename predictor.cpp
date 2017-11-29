@@ -125,14 +125,14 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   DEBUG_STMT
 
   auto mallocEntry = new profile_entry("create blob", "malloc");
-  prof_->add(1024, mallocEntry);
+  prof_->add(24, mallocEntry);
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
   mallocEntry->end();
 
   auto setDataEntry = new profile_entry("set data", "setData");
-  prof_->add(1025, setDataEntry);
+  prof_->add(025, setDataEntry);
   DEBUG_STMT
   if (mode_ == Caffe::CPU) {
     DEBUG_STMT

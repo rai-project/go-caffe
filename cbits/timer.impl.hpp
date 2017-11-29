@@ -102,6 +102,11 @@ struct profile {
       entries_.reserve(2 * ii);
     }
 auto begin = entries_.begin();
+if (ii > entries_.size() + 1) {
+for (int jj = entries_.size(); jj < ii; jj++) {
+entries_.insert(begin + jj, nullptr);
+}
+}
     entries_.insert(begin + ii, entry);
     return success;
   }
@@ -122,6 +127,9 @@ auto begin = entries_.begin();
 
     json elements = json::array();
     for (const auto e : entries_) {
+      if (e == nullptr) {
+continue; 
+      }
       elements.emplace_back(e->to_json());
     }
     return json{
