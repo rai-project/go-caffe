@@ -44,14 +44,14 @@ SOFTWARE.
 #include <initializer_list>  // initializer_list
 #include <iomanip>           // hex
 #include <iosfwd>            // istream, ostream
-#include <iterator>          // advance, begin, back_inserter, bidirectional_iterator_tag, distance, end, inserter, iterator, iterator_traits, next, random_access_iterator_tag, reverse_iterator
-#include <limits>            // numeric_limits
-#include <locale>            // locale
-#include <map>               // map
-#include <memory>       // addressof, allocator, allocator_traits, unique_ptr
-#include <numeric>      // accumulate
-#include <sstream>      // stringstream
-#include <string>       // getline, stoi, string, to_string
+#include <iterator>  // advance, begin, back_inserter, bidirectional_iterator_tag, distance, end, inserter, iterator, iterator_traits, next, random_access_iterator_tag, reverse_iterator
+#include <limits>    // numeric_limits
+#include <locale>    // locale
+#include <map>       // map
+#include <memory>    // addressof, allocator, allocator_traits, unique_ptr
+#include <numeric>   // accumulate
+#include <sstream>   // stringstream
+#include <string>    // getline, stoi, string, to_string
 #include <type_traits>  // add_pointer, conditional, decay, enable_if, false_type, integral_constant, is_arithmetic, is_base_of, is_const, is_constructible, is_convertible, is_default_constructible, is_enum, is_floating_point, is_integral, is_nothrow_move_assignable, is_nothrow_move_constructible, is_pointer, is_reference, is_same, is_scalar, is_signed, remove_const, remove_cv, remove_pointer, remove_reference, true_type, underlying_type
 #include <utility>      // declval, forward, make_pair, move, pair, swap
 #include <vector>       // vector
@@ -907,10 +907,9 @@ struct has_from_json {
 template <typename BasicJsonType, typename T>
 struct has_non_default_from_json {
  private:
-  template <typename U,
-            typename = enable_if_t<
-                std::is_same<T, decltype(uncvref_t<U>::from_json(
-                                    std::declval<BasicJsonType>()))>::value>>
+  template <typename U, typename = enable_if_t<std::is_same<
+                            T, decltype(uncvref_t<U>::from_json(
+                                   std::declval<BasicJsonType>()))>::value>>
   static int detect(U&&);
   static void detect(...);
 
@@ -924,9 +923,8 @@ struct has_non_default_from_json {
 template <typename BasicJsonType, typename T>
 struct has_to_json {
  private:
-  template <typename U,
-            typename = decltype(uncvref_t<U>::to_json(
-                std::declval<BasicJsonType&>(), std::declval<T>()))>
+  template <typename U, typename = decltype(uncvref_t<U>::to_json(
+                            std::declval<BasicJsonType&>(), std::declval<T>()))>
   static int detect(U&&);
   static void detect(...);
 
@@ -1564,9 +1562,8 @@ class input_adapter {
     assert(std::accumulate(
                first, last, std::pair<bool, int>(true, 0),
                [&first](std::pair<bool, int> res, decltype(*first) val) {
-                 res.first &=
-                     (val ==
-                      *(std::next(std::addressof(*first), res.second++)));
+                 res.first &= (val == *(std::next(std::addressof(*first),
+                                                  res.second++)));
                  return res;
                })
                .first);
@@ -3060,10 +3057,9 @@ class parser {
         // throw in case of infinity or NAN
         if (JSON_UNLIKELY(not std::isfinite(result.m_value.number_float))) {
           if (allow_exceptions) {
-            JSON_THROW(out_of_range::create(406,
-                                            "number overflow parsing '" +
-                                                m_lexer.get_token_string() +
-                                                "'"));
+            JSON_THROW(out_of_range::create(
+                406, "number overflow parsing '" + m_lexer.get_token_string() +
+                         "'"));
           } else {
             expect(token_type::uninitialized);
           }
@@ -6386,7 +6382,7 @@ namespace {
 constexpr const auto& to_json = detail::static_const<detail::to_json_fn>::value;
 constexpr const auto& from_json =
     detail::static_const<detail::from_json_fn>::value;
-}
+}  // namespace
 
 /*!
 @brief default JSONSerializer template argument
@@ -6998,11 +6994,10 @@ class basic_json {
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
     result["compiler"] = {{"family", "icc"}, {"version", __INTEL_COMPILER}};
 #elif defined(__GNUC__) || defined(__GNUG__)
-    result["compiler"] = {
-        {"family", "gcc"},
-        {"version",
-         std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." +
-             std::to_string(__GNUC_PATCHLEVEL__)}};
+    result["compiler"] = {{"family", "gcc"},
+                          {"version", std::to_string(__GNUC__) + "." +
+                                          std::to_string(__GNUC_MINOR__) + "." +
+                                          std::to_string(__GNUC_PATCHLEVEL__)}};
 #elif defined(__HP_cc) || defined(__HP_aCC)
     result["compiler"] = "hp"
 #elif defined(__IBMCPP__)
@@ -8172,9 +8167,8 @@ class basic_json {
 
       default: {
         JSON_THROW(invalid_iterator::create(
-            206,
-            "cannot construct with iterators from " +
-                std::string(first.m_object->type_name())));
+            206, "cannot construct with iterators from " +
+                     std::string(first.m_object->type_name())));
       }
     }
 
@@ -8848,9 +8842,8 @@ class basic_json {
     }
 
     JSON_THROW(type_error::create(
-        303,
-        "incompatible ReferenceType for get_ref, actual type is " +
-            std::string(obj.type_name())));
+        303, "incompatible ReferenceType for get_ref, actual type is " +
+                 std::string(obj.type_name())));
   }
 
  public:
@@ -9202,10 +9195,9 @@ class basic_json {
                                detail::json_ref<basic_json>>::value and
               not std::is_same<ValueType, typename string_t::value_type>::value
 #ifndef _MSC_VER  // fix for issue #167 operator<< ambiguity under VS2015
-              and
-              not std::is_same<
-                  ValueType,
-                  std::initializer_list<typename string_t::value_type>>::value
+              and not std::is_same<ValueType,
+                                   std::initializer_list<
+                                       typename string_t::value_type>>::value
 #endif
 #if (defined(__cplusplus) && __cplusplus >= 201703L) ||             \
     (defined(_MSC_VER) && _MSC_VER > 1900 && defined(_HAS_CXX17) && \
@@ -13322,9 +13314,9 @@ NLOHMANN_BASIC_JSON_TPL& json_pointer::get_checked(
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           JSON_THROW(detail::out_of_range::create(
-              402,
-              "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
-                  ") is out of range"));
+              402, "array index '-' (" +
+                       std::to_string(ptr->m_value.array->size()) +
+                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
@@ -13372,9 +13364,9 @@ const NLOHMANN_BASIC_JSON_TPL& json_pointer::get_unchecked(
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" cannot be used for const access
           JSON_THROW(detail::out_of_range::create(
-              402,
-              "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
-                  ") is out of range"));
+              402, "array index '-' (" +
+                       std::to_string(ptr->m_value.array->size()) +
+                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
@@ -13423,9 +13415,9 @@ const NLOHMANN_BASIC_JSON_TPL& json_pointer::get_checked(
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           JSON_THROW(detail::out_of_range::create(
-              402,
-              "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
-                  ") is out of range"));
+              402, "array index '-' (" +
+                       std::to_string(ptr->m_value.array->size()) +
+                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)

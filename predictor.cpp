@@ -124,15 +124,15 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   setMode();
   DEBUG_STMT
 
-  auto mallocEntry = new profile_entry("create blob", "malloc");
-  prof_->add(24, mallocEntry);
+  // auto mallocEntry = new profile_entry("create blob", "malloc");
+  // prof_->add(24, mallocEntry);
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
-  mallocEntry->end();
+  // mallocEntry->end();
 
-  auto setDataEntry = new profile_entry("set data", "setData");
-  prof_->add(025, setDataEntry);
+  // auto setDataEntry = new profile_entry("set data", "setData");
+  // prof_->add(025, setDataEntry);
   DEBUG_STMT
   if (mode_ == Caffe::CPU) {
     DEBUG_STMT
@@ -143,7 +143,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
     blob->mutable_gpu_data();
   }
   DEBUG_STMT
-  setDataEntry->end();
+  // setDataEntry->end();
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
   DEBUG_STMT
@@ -160,14 +160,14 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   DEBUG_STMT
   // net_->set_debug_info(true);
 
-  auto netForwardEntry = new profile_entry("net forward", "netForward");
-  prof_->add(1026, netForwardEntry);
+  // auto netForwardEntry = new profile_entry("net forward", "netForward");
+  // prof_->add(1026, netForwardEntry);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
-  netForwardEntry->end();
+  // netForwardEntry->end();
 
-  auto copyBackEntry = new profile_entry("copy back", "copyBack");
-  prof_->add(1027, copyBackEntry);
+  // auto copyBackEntry = new profile_entry("copy back", "copyBack");
+  // prof_->add(1027, copyBackEntry);
   const auto len = output_layer->channels();
   const auto outputSize = len * batch_;
   const float *outputData = output_layer->cpu_data();
@@ -181,7 +181,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
     }
   }
   DEBUG_STMT
-  copyBackEntry->end();
+  // copyBackEntry->end();
 
   /*
   if (start_profile) {
