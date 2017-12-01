@@ -105,9 +105,11 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 	}
 
 	span := opentracing.SpanFromContext(ctx)
-	span.LogFields(
-		olog.String("event", "before caffe padding"),
-	)
+	if span != nil {
+		span.LogFields(
+			olog.String("event", "before caffe padding"),
+		)
+	}
 
 	batchSize := int64(C.CaffePredictorGetBatchSize(p.ctx))
 	if batchSize != 1 {
@@ -121,23 +123,29 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 		padding := make([]float32, (batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
 	}
-
-	span.LogFields(
-		olog.String("event", "after caffe padding"),
-	)
+	if span != nil {
+		span.LogFields(
+			olog.String("event", "after caffe padding"),
+		)
+	}
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 
 	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
 	r := C.CaffePredict(p.ctx, ptr)
-	predictSpan.Finish()
+
+	if predictSpan != nil {
+		predictSpan.Finish()
+	}
 
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
 
-	span.LogFields(
-		olog.String("event", "before caffe unmarshal"),
-	)
+	if span != nil {
+		span.LogFields(
+			olog.String("event", "before caffe unmarshal"),
+		)
+	}
 
 	predictions := []Prediction{}
 	err := json.Unmarshal([]byte(js), &predictions)
@@ -145,9 +153,11 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 		return nil, err
 	}
 
-	span.LogFields(
-		olog.String("event", "after caffe unmarshal"),
-	)
+	if span != nil {
+		span.LogFields(
+			olog.String("event", "after caffe unmarshal"),
+		)
+	}
 
 	return predictions, nil
 }

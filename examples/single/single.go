@@ -113,7 +113,7 @@ func main() {
 	}
 
 	predictor.StartProfiling("test", "")
-	predictions, err := predictor.Predict(res)
+	predictions, err := predictor.Predict(ctx, res)
 	if err != nil {
 		pp.Println(err)
 		os.Exit(-1)

@@ -1,7 +1,13 @@
 package main
 
+// #include <cuda.h>
+// #include <cuda_runtime.h>
+// #include <cuda_profiler_api.h>
+// #include <cudaProfiler.h>
+import "C"
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"image"
 	"os"
@@ -18,7 +24,7 @@ import (
 )
 
 var (
-	batch        = 10
+	batch        = 128
 	graph_url    = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/deploy.prototxt"
 	weights_url  = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -48,6 +54,7 @@ func cvtImageTo1DArray(src image.Image, mean float32) ([]float32, error) {
 }
 
 func main() {
+	defer C.cuProfilerStop()
 	dir, _ := filepath.Abs("../tmp")
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
@@ -103,7 +110,6 @@ func main() {
 	pp.Println("Using device = ", device)
 
 	// create predictor
-	caffe.SetUseCPU()
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
 		options.Device(device, 0),
@@ -115,7 +121,7 @@ func main() {
 	}
 	defer predictor.Close()
 
-	predictions, err := predictor.Predict(input)
+	predictions, err := predictor.Predict(context.Background(), input)
 
 	var labels []string
 	f, err := os.Open(features)
