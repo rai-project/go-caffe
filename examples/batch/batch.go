@@ -55,6 +55,7 @@ func cvtImageTo1DArray(src image.Image, mean float32) ([]float32, error) {
 
 func main() {
 	defer C.cuProfilerStop()
+
 	dir, _ := filepath.Abs("../tmp")
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
