@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	batch        = 128
+	batch        = 64
 	graph_url    = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/deploy.prototxt"
 	weights_url  = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
