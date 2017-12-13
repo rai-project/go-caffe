@@ -14,11 +14,9 @@ import (
 	jsserializer "github.com/rai-project/serializer/json"
 
 	"github.com/k0kubun/pp"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/rai-project/nvidia-smi"
 
 	"github.com/Unknwon/com"
-	olog "github.com/opentracing/opentracing-go/log"
 	"github.com/pkg/errors"
 	"github.com/rai-project/dlframework/framework/options"
 )
@@ -104,13 +102,6 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
 
-	span := opentracing.SpanFromContext(ctx)
-	if span != nil {
-		span.LogFields(
-			olog.String("event", "before caffe padding"),
-		)
-	}
-
 	batchSize := int64(C.CaffePredictorGetBatchSize(p.ctx))
 	if batchSize != 1 {
 		width := C.CaffePredictorGetWidth(p.ctx)
@@ -122,11 +113,6 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 		inputCount := dataLen / shapeLen
 		padding := make([]float32, (batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
-	}
-	if span != nil {
-		span.LogFields(
-			olog.String("event", "after caffe padding"),
-		)
 	}
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
@@ -141,22 +127,10 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 	defer C.free(unsafe.Pointer(r))
 	js := C.GoString(r)
 
-	if span != nil {
-		span.LogFields(
-			olog.String("event", "before caffe unmarshal"),
-		)
-	}
-
 	predictions := []Prediction{}
 	err := json.Unmarshal([]byte(js), &predictions)
 	if err != nil {
 		return nil, err
-	}
-
-	if span != nil {
-		span.LogFields(
-			olog.String("event", "after caffe unmarshal"),
-		)
 	}
 
 	return predictions, nil
