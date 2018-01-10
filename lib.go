@@ -7,8 +7,8 @@ package caffe
 // #cgo darwin LDFLAGS: -L/opt/caffe/lib  -L/usr/local/opt/openblas/lib
 // #cgo ppc64le,powerai CXXFLAGS: -I/opt/DL/caffe/include -I/usr/local/cuda/include
 // #cgo ppc64le,powerai LDFLAGS: -L/opt/DL/caffe/lib
-// #cgo ppc64le,!powerai CXXFLAGS: -I/home/carml/frameworks/caffe/include -I/usr/local/cuda/include
-// #cgo ppc64le,!powerai LDFLAGS: -L/home/carml/frameworks/caffe/lib
-// #cgo linux CXXFLAGS: -I/opt/frameworks/caffe/include -I/usr/local/cuda/include
-// #cgo linux LDFLAGS: -L/opt/frameworks/caffe/lib
+// #cgo ppc64le,!powerai CXXFLAGS: -I/opt/caffe/include -I/home/carml/frameworks/caffe/include -I/usr/local/cuda/include
+// #cgo ppc64le,!powerai LDFLAGS: -L/opt/caffe/lib -L/home/carml/frameworks/caffe/lib
+// #cgo linux CXXFLAGS: -I/opt/caffe/include -I/opt/frameworks/caffe/include -I/usr/local/cuda/include
+// #cgo linux LDFLAGS: -L/opt/caffe/lib -L/opt/frameworks/caffe/lib
 import "C"
