@@ -25,7 +25,7 @@ import:
 - package: github.com/rai-project/logger
 - package: github.com/rai-project/nvidia-smi
 - package: github.com/sirupsen/logrus
-  version: ~1.0.3
+  version: ^1.0.0
 - package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify
   subpackages:
