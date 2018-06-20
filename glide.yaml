@@ -8,7 +8,7 @@ import:
   - imgio
   - transform
 - package: github.com/gogo/protobuf
-  version: ~0.5.0
+  version: ^1.0.0
   subpackages:
   - proto
 - package: github.com/ianlancetaylor/cgosymbolizer
