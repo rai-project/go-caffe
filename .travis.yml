@@ -122,6 +122,8 @@ before_install:
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
   - cmake -DCPU_ONLY=ON -DBLAS=Open -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
   - cat Makefile.config.example
+  - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/g' Makefile.config.example
+  - cat Makefile.config.example
   - make
   - make install
   - |
