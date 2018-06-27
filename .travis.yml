@@ -91,7 +91,7 @@ matrix:
 
 before_install:
   - eval "${MATRIX_EVAL}"
-  - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.8.3 bash)"
+  - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.10.x bash)"
   - go env
   - export GOPATH=$HOME/gopath
   - export PATH=$HOME/gopath/bin:$PATH
