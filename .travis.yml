@@ -119,11 +119,13 @@ before_install:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew tap homebrew/science && brew update && brew install boost snappy leveldb protobuf gflags glog szip lmdb hdf5 homebrew/science/opencv ; fi; echo "done brewing..."
   - cd ${HOME}
   - git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe
+  - cp ${HOME}/caffe/Makefile.config.example ${HOME}/caffe/Makefile.config 
+  - cat ${HOME}/caffe/Makefile.config
+  - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/g' ${HOME}/caffe/Makefile.config
+  - sed -i 's/BLAS := atlas/BLAS := open/g' ${HOME}/caffe/Makefile.config
+  - cat ${HOME}/caffe/Makefile.config
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
   - cmake -DCPU_ONLY=ON -DBLAS=Open -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
-  - cat Makefile.config.example
-  - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/g' Makefile.config.example
-  - cat Makefile.config.example
   - make
   - make install
   - |
