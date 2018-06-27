@@ -122,6 +122,7 @@ before_install:
   - cp ${HOME}/caffe/Makefile.config.example ${HOME}/caffe/Makefile.config 
   - sed -i 's/# CPU_ONLY := 1/CPU_ONLY := 1/g' ${HOME}/caffe/Makefile.config
   - sed -i 's/BLAS := atlas/BLAS := open/g' ${HOME}/caffe/Makefile.config
+  - echo "CUDA_DIR := /usr/local/cuda-9.2" >> ${HOME}/caffe/Makefile.config
   - sed -i 's/add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION})/add_definitions(-DCAFFE_VERSION=${CAFFE_TARGET_VERSION}) \nadd_definitions( -DCPU_ONLY=1 )/g' ${HOME}/caffe/CMakeLists.txt
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
   - cmake -DCPU_ONLY=ON -DBLAS=Open -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
