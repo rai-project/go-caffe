@@ -135,6 +135,7 @@ install:
   - dep ensure
   - rm -fr vendor/github.com/Sirupsen
   - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
+  - sudo find / -name cublas_v2.h
   - go build
 
 script:
