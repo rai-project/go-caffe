@@ -15,14 +15,7 @@ env:
   - LD_LIBRARY_PATH=/usr/local/cuda-9.2/targets/x86_64-linux/lib/stubs/:+:${LD_LIBRARY_PATH}}
   - PATH=/usr/local/cuda-9.2/bin${PATH:+:${PATH}}
   - CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/cuda-9.2/lib64/stubs"
-sources: &sources
-  - sourceline: ppa:ubuntu-toolchain-r/test
-  - sourceline: ppa:masterminds/glide
-  - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64
-      /
-    key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-  - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
-      /
+  
 addons: &addons
   - glide
   - cmake
@@ -62,8 +55,13 @@ matrix:
       addons: &gcc6
         apt:
           sources:
-            - ubuntu-toolchain-r-test
-            - *sources
+            - sourceline: ppa:ubuntu-toolchain-r/test
+            - sourceline: ppa:masterminds/glide
+            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64
+                /
+              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
+                /
           packages:
             - g++-6
             - *addons
@@ -75,8 +73,13 @@ matrix:
         apt:
           sources:
             - llvm-toolchain-precise-5.0
-            - ubuntu-toolchain-r-test
-            - *sources
+            - sourceline: ppa:ubuntu-toolchain-r/test
+            - sourceline: ppa:masterminds/glide
+            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64
+                /
+              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
+                /
           packages:
             - clang-5.0
             - *addons
