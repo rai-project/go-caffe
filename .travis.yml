@@ -48,6 +48,7 @@ addons: &addons
   - python-numpy
   - python-pip
   - python-setuptools
+  - libopenblas-dev
 matrix:
   allow_failures:
     - os: osx
@@ -119,7 +120,7 @@ before_install:
   - cd ${HOME}
   - git clone --depth 1 https://github.com/BVLC/caffe.git ${HOME}/caffe
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
-  - cmake -DCPU_ONLY=ON -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
+  - cmake -DCPU_ONLY=ON -DBLAS=Open -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
   - make
   - make install
   - |
