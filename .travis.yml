@@ -145,6 +145,7 @@ install:
   - rm -fr vendor/github.com/Sirupsen
   - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
   - sudo find / -name host_defines.h
+  - ls -l /usr/local/cuda-9.2/targets/x86_64-linux/include/crt
   - go build
 
 script:
