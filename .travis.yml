@@ -1,5 +1,5 @@
 language: cpp
-sudo: false
+sudo: true
 
 
   
@@ -98,6 +98,7 @@ matrix:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
+  - sudo ln -s /usr/local/cuda-9.2 /usr/local/cuda
   - eval "${MATRIX_EVAL}"
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.10.x bash)"
   - go env
@@ -123,8 +124,6 @@ before_install:
   - cp ${HOME}/caffe/Makefile.config.example ${HOME}/caffe/Makefile.config 
   - echo 'CPU_ONLY := 1' >> ${HOME}/caffe/Makefile.config
   - echo 'BLAS := open' >> ${HOME}/caffe/Makefile.config
-  - echo "CUDA_DIR := /usr/local/cuda-9.2" >> ${HOME}/caffe/Makefile.config
-  - echo "CUDA_DIR := /usr/local/cuda-9.2" >> ${HOME}/caffe/Makefile.config
   - echo 'add_definitions( -DCPU_ONLY=1 )' >> ${HOME}/caffe/CMakeLists.txt
   - mkdir ${HOME}/caffe_build && cd ${HOME}/caffe_build
   - cmake -DCPU_ONLY=ON -DBLAS=Open -DBUILD_python=OFF -DBUILD_docs=OFF ${HOME}/caffe
