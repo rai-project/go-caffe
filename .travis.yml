@@ -7,28 +7,28 @@ env:
   global:
   - CXX=g++-6
   - CC=gcc-6
-  - CUDACXX=/usr/local/cuda-9.2/bin/nvcc
+  - CUDACXX=/usr/local/cuda-9.1/bin/nvcc
   - LD_LIBRARY_PATH=/usr/local/nvidia/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-  - LD_LIBRARY_PATH=/usr/local/cuda-9.2/nvvm/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-  - LD_LIBRARY_PATH=/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-  - LD_LIBRARY_PATH=/usr/local/cuda-9.2/lib64/stubs${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-  - LD_LIBRARY_PATH=/usr/local/cuda-9.2/targets/x86_64-linux/lib/stubs/:+:${LD_LIBRARY_PATH}}
-  - PATH=/usr/local/cuda-9.2/bin${PATH:+:${PATH}}
-  - CGO_CFLAGS="${CGO_CFLAGS} -I /usr/local/cuda-9.2/include -I/usr/local/cuda-9.2/nvvm/include -I /usr/local/cuda-9.2/extras/CUPTI/include -I /usr/local/cuda-9.2/targets/x86_64-linux/include -I /usr/local/cuda-9.2/targets/x86_64-linux/include/crt"
-  - CGO_CXXFLAGS="${CGO_CXXFLAGS} -I /usr/local/cuda-9.2/include -I/usr/local/cuda-9.2/nvvm/include -I /usr/local/cuda-9.2/extras/CUPTI/include -I /usr/local/cuda-9.2/targets/x86_64-linux/include -I /usr/local/cuda-9.2/targets/x86_64-linux/include/crt"
-  - CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/cuda-9.2/lib64/stubs"
-  - CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/nvidia/lib64 -L /usr/local/cuda-9.2/nvvm/lib64 -L /usr/local/cuda-9.2/lib64 -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/targets/x86_64-linux/lib/stubs/ -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/extras/CUPTI/lib64"
+  - LD_LIBRARY_PATH=/usr/local/cuda-9.1/nvvm/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+  - LD_LIBRARY_PATH=/usr/local/cuda-9.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+  - LD_LIBRARY_PATH=/usr/local/cuda-9.1/lib64/stubs${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+  - LD_LIBRARY_PATH=/usr/local/cuda-9.1/targets/x86_64-linux/lib/stubs/:+:${LD_LIBRARY_PATH}}
+  - PATH=/usr/local/cuda-9.1/bin${PATH:+:${PATH}}
+  - CGO_CFLAGS="${CGO_CFLAGS} -I /usr/local/cuda-9.1/include -I/usr/local/cuda-9.1/nvvm/include -I /usr/local/cuda-9.1/extras/CUPTI/include -I /usr/local/cuda-9.1/targets/x86_64-linux/include -I /usr/local/cuda-9.1/targets/x86_64-linux/include/crt"
+  - CGO_CXXFLAGS="${CGO_CXXFLAGS} -I /usr/local/cuda-9.1/include -I/usr/local/cuda-9.1/nvvm/include -I /usr/local/cuda-9.1/extras/CUPTI/include -I /usr/local/cuda-9.1/targets/x86_64-linux/include -I /usr/local/cuda-9.1/targets/x86_64-linux/include/crt"
+  - CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/cuda-9.1/lib64/stubs"
+  - CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/nvidia/lib64 -L /usr/local/cuda-9.1/nvvm/lib64 -L /usr/local/cuda-9.1/lib64 -L /usr/local/cuda-9.1/lib64/stubs -L /usr/local/cuda-9.1/targets/x86_64-linux/lib/stubs/ -L /usr/local/cuda-9.1/lib64/stubs -L /usr/local/cuda-9.1/extras/CUPTI/lib64"
   
 addons: &addons
   - glide
   - cmake
   - libnccl2
-  - cuda-cudart-dev-9-2
-  - cuda-libraries-9-2
-  - cuda-libraries-dev-9-2
-  - cuda-cublas-dev-9-2
-  - cuda-misc-headers-9-2
-  - cuda-nvml-dev-9-2
+  - cuda-cudart-dev-9-1
+  - cuda-libraries-9-1
+  - cuda-libraries-dev-9-1
+  - cuda-cublas-dev-9-1
+  - cuda-misc-headers-9-1
+  - cuda-nvml-dev-9-1
   - libcudnn7
   - libcudnn7-dev
   - build-essential
@@ -98,8 +98,7 @@ matrix:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
-  - sudo ln -s /usr/local/cuda-9.2 /usr/local/cuda
-  - sudo ln -s /usr/local/cuda-9.2/targets/x86_64-linux/include/host_defines.h /usr/local/cuda-9.2/targets/x86_64-linux/include/crt/host_defines.h
+  - sudo ln -s /usr/local/cuda-9.1 /usr/local/cuda
   - eval "${MATRIX_EVAL}"
   - eval "$(curl -sL https://raw.githubusercontent.com/travis-ci/gimme/master/gimme | GIMME_GO_VERSION=1.10.x bash)"
   - go env
@@ -146,8 +145,8 @@ install:
   - rm -fr vendor/github.com/Sirupsen
   - find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} +
   - sudo find / -name host_defines.h
-  - ls -l /usr/local/cuda-9.2/targets/x86_64-linux/include
-  - cat /usr/local/cuda-9.2/targets/x86_64-linux/include/host_defines.h
+  - ls -l /usr/local/cuda-9.1/targets/x86_64-linux/include
+  - cat /usr/local/cuda-9.1/targets/x86_64-linux/include/host_defines.h
   - go build
 
 script:
