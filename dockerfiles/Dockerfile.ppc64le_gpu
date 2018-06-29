@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ########## LIBRARY INSTALLATION ###################
 ENV CAFFE_ROOT=/opt/caffe
-RUN git clone  --single-branch -b ${FRAMEWORK_VERSION} --depth 1 --recursive https://github.com/BVLC/caffe.git && cd caffe && \
+RUN git clone --depth=1 --recursive --branch=master https://github.com/BVLC/caffe.git && cd caffe && \
     mkdir build && cd build && \
     git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
     cmake .. \
@@ -59,7 +59,7 @@ ENV PKG github.com/rai-project/go-caffe
 WORKDIR $GOPATH/src/$PKG
 
 RUN git clone --depth=1 --branch=master https://${PKG}.git . && \
-    glide install && \
+    dep ensure && \
     rm -fr vendor/github.com/Sirupsen && \
     find vendor -type f -exec sed -i 's/Sirupsen/sirupsen/g' {} + && \
     go build -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"&& \
