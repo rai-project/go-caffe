@@ -9,6 +9,6 @@ package caffe
 // #cgo ppc64le,powerai LDFLAGS: -L/opt/DL/caffe/lib
 // #cgo ppc64le,!powerai CXXFLAGS: -I/opt/caffe/include -I/home/carml/frameworks/caffe/include -I/usr/local/cuda/include
 // #cgo ppc64le,!powerai LDFLAGS: -L/opt/caffe/lib -L/home/carml/frameworks/caffe/lib
-// #cgo linux CXXFLAGS: -I/opt/caffe/include -I/opt/frameworks/caffe/include -I/usr/local/cuda/include
-// #cgo linux LDFLAGS: -L/opt/caffe/lib -L/opt/frameworks/caffe/lib
+// #cgo linux CXXFLAGS: -I/home/as29/my_caffe/caffe/build/install/include -I/usr/local/cuda/include
+// #cgo linux LDFLAGS: -L/home/as29/my_caffe/caffe/build/install/lib
 import "C"
