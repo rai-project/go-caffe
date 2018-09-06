@@ -33,12 +33,14 @@ class StartProfile : public Net<Dtype>::Callback {
     }
     const auto layer_name = net_->layer_names()[layer];
     const auto layer_type = net_->layers()[layer]->type();
-    auto e = new profile_entry(layer_name, layer_type);
+    auto e = new profile_entry(layer_sequence_index_, layer_name, layer_type);
     prof_->add(layer, e);
+    order_++;
   }
 
  private:
   profile *prof_{nullptr};
+  int order_{1};
   const shared_ptr<Net<Dtype>> net_{nullptr};
 };
 

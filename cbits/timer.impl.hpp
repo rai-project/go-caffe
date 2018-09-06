@@ -30,8 +30,11 @@ static uint64_t to_nanoseconds(timestamp_t t) {
 }
 
 struct profile_entry {
-  profile_entry(std::string name = "", std::string metadata = "")
-      : name_(name), metadata_(metadata) {
+  profile_entry(int layer_sequence_index, std::string name = "",
+                std::string metadata = "")
+      : layer_sequence_index_(layer_sequence_index),
+        name_(name),
+        metadata_(metadata) {
     start();
   }
   ~profile_entry() {}
@@ -51,8 +54,12 @@ struct profile_entry {
     const auto end_ns = to_nanoseconds(end_);
     uint64_t id = std::hash<std::thread::id>()(std::this_thread::get_id());
     return json{
-        {"name", name_}, {"metadata", metadata_}, {"start", start_ns},
-        {"end", end_ns}, {"thread_id", id},
+        {"name", name_},
+        {"metadata", metadata_},
+        {"start", start_ns},
+        {"end", end_ns},
+        {"layer_sequence_index", layer_sequence_index_},
+        {"thread_id", id},
     };
   }
 
@@ -64,12 +71,13 @@ struct profile_entry {
  private:
   std::string name_{""};
   std::string metadata_{""};
+  int layer_sequence_index_{1};
   timestamp_t start_{}, end_{};
 };
 
 struct profile {
   profile(std::string name = "", std::string metadata = "")
-      : name_(name), metadata_(metadata) {
+      : name_(name), metadata_(metadata), layer_sequence_index_(1) {
     entries_.reserve(1024);
     start();
   }
@@ -92,6 +100,7 @@ struct profile {
         delete e;
       }
     }
+    layer_sequence_index_ = 1;
     entries_.clear();
     return success;
   }
