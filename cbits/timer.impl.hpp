@@ -13,6 +13,8 @@
 
 using json = nlohmann::json;
 
+using shapes_t = std::vector<std::vector<int>>;
+
 using timestamp_t = std::chrono::time_point<std::chrono::system_clock>;
 
 static timestamp_t now() { return std::chrono::system_clock::now(); }
@@ -30,11 +32,12 @@ static uint64_t to_nanoseconds(timestamp_t t) {
 }
 
 struct profile_entry {
-  profile_entry(int layer_sequence_index, std::string name = "",
-                std::string metadata = "")
+  profile_entry(int layer_sequence_index, std::string name,
+                std::string metadata, shapes_t shapes)
       : layer_sequence_index_(layer_sequence_index),
         name_(name),
-        metadata_(metadata) {
+        metadata_(metadata),
+        shapes_(shapes) {
     start();
   }
   ~profile_entry() {}
@@ -59,6 +62,7 @@ struct profile_entry {
         {"start", start_ns},
         {"end", end_ns},
         {"layer_sequence_index", layer_sequence_index_},
+        {"shapes", shapes_},
         {"thread_id", id},
     };
   }
@@ -69,15 +73,16 @@ struct profile_entry {
   }
 
  private:
+  int layer_sequence_index_{0};
   std::string name_{""};
   std::string metadata_{""};
-  int layer_sequence_index_{1};
+  shapes_t shapes_{};
   timestamp_t start_{}, end_{};
 };
 
 struct profile {
   profile(std::string name = "", std::string metadata = "")
-      : name_(name), metadata_(metadata), layer_sequence_index_(1) {
+      : name_(name), metadata_(metadata) {
     entries_.reserve(1024);
     start();
   }
@@ -100,7 +105,6 @@ struct profile {
         delete e;
       }
     }
-    layer_sequence_index_ = 1;
     entries_.clear();
     return success;
   }

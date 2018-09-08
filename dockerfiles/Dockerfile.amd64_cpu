@@ -40,6 +40,7 @@ RUN git clone --depth=1 --recursive --branch=master https://github.com/BVLC/caff
     && cmake .. \
       -DCPU_ONLY=ON \
       -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
+      -DCMAKE_CXX_STANDARD=11 \
       -DUSE_ROCKSDB=OFF \
       -DBUILD_python=OFF \
       -DUSE_OPENCV=OFF \

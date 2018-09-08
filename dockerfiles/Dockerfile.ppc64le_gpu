@@ -40,6 +40,7 @@ RUN git clone --depth=1 --recursive --branch=master https://github.com/BVLC/caff
     git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
     cmake .. \
       -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
+      -DCMAKE_CXX_STANDARD=11 \
       -DUSE_ROCKSDB=OFF \
       -DBUILD_python=OFF \
       -DUSE_OPENCV=OFF \

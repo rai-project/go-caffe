@@ -1,3 +1,9 @@
 {
-    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/"
+    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
+    "files.associations": {
+        "*.cu": "c",
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "memory": "cpp"
+    }
 }

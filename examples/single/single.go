@@ -134,6 +134,8 @@ func main() {
 	t.Publish(ctx)
 	predictor.DisableProfiling()
 
+	pp.Println(t)
+
 	predictions.Sort()
 
 	var labels []string

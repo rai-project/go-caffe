@@ -33,14 +33,20 @@ class StartProfile : public Net<Dtype>::Callback {
     }
     const auto layer_name = net_->layer_names()[layer];
     const auto layer_type = net_->layers()[layer]->type();
-    auto e = new profile_entry(layer_sequence_index_, layer_name, layer_type);
+    const auto blobs = net_->layers()[layer]->blobs();
+    shapes_t shapes(blobs.size());
+    for (const auto blob : blobs) {
+      shapes.emplace_back(blob->shape());
+    }
+    auto e = new profile_entry(current_layer_sequence_index_, layer_name,
+                               layer_type, shapes);
     prof_->add(layer, e);
-    order_++;
+    current_layer_sequence_index_++;
   }
 
  private:
   profile *prof_{nullptr};
-  int order_{1};
+  int current_layer_sequence_index_{1};
   const shared_ptr<Net<Dtype>> net_{nullptr};
 };
 
