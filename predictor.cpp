@@ -34,7 +34,7 @@ class StartProfile : public Net<Dtype>::Callback {
     const auto layer_name = net_->layer_names()[layer];
     const auto layer_type = net_->layers()[layer]->type();
     const auto blobs = net_->layers()[layer]->blobs();
-    shapes_t shapes(blobs.size());
+    shapes_t shapes{};
     for (const auto blob : blobs) {
       shapes.emplace_back(blob->shape());
     }
