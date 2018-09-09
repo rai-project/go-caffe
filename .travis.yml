@@ -1,9 +1,11 @@
 language: cpp
 sudo: true
 cache:
-  apt: false
+  apt: true
 dist: trusty
-
+addons:
+  apt:
+    update: true
 env:
   global:
   - CXX=g++-6
