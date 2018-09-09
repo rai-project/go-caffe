@@ -1,5 +1,6 @@
 dist: trusty
 sudo: required
+language: go
 cache:
   apt: true
 env:
@@ -47,7 +48,6 @@ addons: &addons
   - python-pip
   - python-setuptools
   - libopenblas-dev
-language: cpp
 matrix:
   allow_failures:
     - os: osx
