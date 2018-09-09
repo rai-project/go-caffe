@@ -54,7 +54,9 @@ matrix:
   include:
     - addons:
         apt:
-          packages: *addons
+          packages:
+            - g++-6
+            - <: *addons
           sources:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
             - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /
@@ -66,7 +68,9 @@ matrix:
       os: linux
     - addons:
         apt:
-          packages: *addons
+          packages:
+            - clang-3.9
+            - <: *addons
           sources:
             - llvm-toolchain-precise-3.9
             - sourceline: "ppa:ubuntu-toolchain-r/test"
