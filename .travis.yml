@@ -1,7 +1,8 @@
 language: cpp
 sudo: true
-
-
+cache:
+  apt: true
+dist: trusty
 
 env:
   global:
