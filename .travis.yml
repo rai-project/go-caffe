@@ -22,13 +22,12 @@ addons: &addons
   - cmake
   - libnccl2
   - cuda-cudart-dev-9-2
-  - cuda-libraries-9-2
   - cuda-libraries-dev-9-2
+  - cuda-command-line-tools-9-2
   - cuda-cublas-dev-9-2
-  - cuda-misc-headers-9-2
-  - cuda-nvml-dev-9-2
   - libcudnn7
   - libcudnn7-dev
+  - cuda-nvml-dev-9-2
   - build-essential
   - git
   - wget
@@ -55,9 +54,7 @@ matrix:
   include:
     - addons:
         apt:
-          packages:
-            - g++-6
-            - *addons
+          packages: *addons
           sources:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
             - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /
@@ -69,9 +66,7 @@ matrix:
       os: linux
     - addons:
         apt:
-          packages:
-            - clang-3.9
-            - *addons
+          packages: *addons
           sources:
             - llvm-toolchain-precise-3.9
             - sourceline: "ppa:ubuntu-toolchain-r/test"
