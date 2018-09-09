@@ -1,7 +1,7 @@
 language: cpp
 sudo: true
 cache:
-  apt: true
+  apt: false
 dist: trusty
 
 env:
@@ -64,7 +64,6 @@ matrix:
               key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
             - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
                 /
-              key_url: https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/7fa2af80.pub
           packages:
             - g++-6
             - *addons
@@ -83,8 +82,7 @@ matrix:
               key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
             - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
                 /
-              key_url: https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/7fa2af80.pub
-          packages:
+           packages:
             - clang-3.9
             - *addons
       env:
