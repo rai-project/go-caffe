@@ -60,10 +60,9 @@ matrix:
             - *addons
           sources:
             - sourceline: "ppa:ubuntu-toolchain-r/test"
-            - key_url: "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub"
-              sourceline: "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /"
-            - sourceline: "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /"
-              key_url: "https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/7fa2af80.pub"
+            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /
+              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /
       compiler: gcc6
       env:
         - 'MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"'
@@ -77,10 +76,9 @@ matrix:
             - llvm-toolchain-precise-3.9
             - sourceline: "ppa:ubuntu-toolchain-r/test"
             - sourceline: "ppa:masterminds/glide"
-            - key_url: "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/7fa2af80.pub"
-              sourceline: "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64 /"
-            - sourceline: "deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1404/x86_64 /"
-              key_url: "https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/7fa2af80.pub"
+            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /
+              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /
       compiler: clang
       env:
         - 'MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"'
