@@ -23,11 +23,9 @@ env:
 addons: &addons
   - cmake
   - libnccl2
-  - cuda-cudart-dev-9-2
-  - cuda-libraries-9-2
-  - cuda-libraries-dev-9-2
-  - cuda-cublas-dev-9-2
-  - cuda-misc-headers-9-2
+  - cuda-9-2
+  - cuda-command-line-tools-9-2
+  - cuda-samples-9-2
   - cuda-nvml-dev-9-2
   - libcudnn7
   - libcudnn7-dev
@@ -66,6 +64,7 @@ matrix:
               key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
             - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64
                 /
+              key_url: https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/7fa2af80.pub
           packages:
             - g++-6
             - *addons
@@ -79,9 +78,9 @@ matrix:
             - llvm-toolchain-precise-3.9
             - sourceline: ppa:ubuntu-toolchain-r/test
             - sourceline: ppa:masterminds/glide
-            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64 /
-              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1404/x86_64/7fa2af80.pub
-            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1404/x86_64 /
+            - sourceline: deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64 /
+              key_url: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+            - sourceline: deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64 /
           packages:
             - clang-3.9
             - *addons
