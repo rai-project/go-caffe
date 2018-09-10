@@ -37,16 +37,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CAFFE_DIST_DIR=/opt/caffe
 RUN git clone --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
   mkdir build && cd build && \
-  git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
   cmake .. \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
-  -DUSE_ROCKSDB=OFF \
+  -DBLAS=open \
   -DBUILD_python=OFF \
   -DUSE_OPENCV=OFF \
-  -DBLAS=open \
-  -DUSE_CUDNN=1 \
-  -DUSE_NCCL=1 \
+  -DUSE_NCCL=OFF \
+  -DCPU_ONLY=OFF \
+  -DUSE_CUDNN=ON \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \

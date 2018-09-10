@@ -38,14 +38,13 @@ ENV CAFFE_DIST_DIR=/opt/caffe
 RUN git clone --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
   mkdir build && cd build \
   && cmake .. \
-  -DCPU_ONLY=on \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
-  -DUSE_ROCKSDB=OFF \
+  -DBLAS=open \
   -DBUILD_python=OFF \
   -DUSE_OPENCV=OFF \
   -DUSE_NCCL=OFF \
-  -DBLAS=open \
+  -DCPU_ONLY=ON \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \

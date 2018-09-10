@@ -37,16 +37,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV CAFFE_DIST_DIR=/opt/caffe
 RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
   mkdir build && cd build && \
-  git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
   cmake .. \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
+  -DBLAS=open \
   -DBUILD_python=OFF \
   -DUSE_OPENCV=OFF \
-  -DBLAS=open \
-  -DUSE_CUDNN=ON \
-  -DUSE_NCCL=ON \
+  -DUSE_NCCL=OFF \
   -DCPU_ONLY=OFF \
+  -DUSE_CUDNN=ON \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \
@@ -56,7 +55,6 @@ RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION 
 RUN echo "$CAFFE_DIST_DIR/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
 
 ########## GO BINDING INSTALLATION ###################
-
 ENV PKG github.com/rai-project/go-caffe
 WORKDIR $GOPATH/src/$PKG
 
