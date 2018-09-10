@@ -34,12 +34,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   rm -rf /var/lib/apt/lists/*
 
 ########## LIBRARY INSTALLATION ###################
-ENV CAFFE_ROOT=/opt/caffe
-RUN git clone --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
+ENV CAFFE_DIST_DIR=/opt/caffe
+RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
   mkdir build && cd build && \
   git clone https://github.com/NVIDIA/nccl.git && cd nccl && make -j install && cd .. && rm -rf nccl && \
   cmake .. \
-  -DCMAKE_INSTALL_PREFIX=$CAFFE_ROOT \
+  -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
   -DBUILD_python=OFF \
   -DUSE_OPENCV=OFF \
@@ -53,7 +53,7 @@ RUN git clone --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.c
   && cd .. \
   && rm -rf build
 
-RUN echo "$CAFFE_ROOT/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
+RUN echo "$CAFFE_DIST_DIR/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
 
 ########## GO BINDING INSTALLATION ###################
 
