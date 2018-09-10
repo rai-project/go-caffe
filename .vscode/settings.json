@@ -2,8 +2,20 @@
     "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
     "files.associations": {
         "*.cu": "c",
+        "Dockerfile.*": "dockerfile",
+        ".aliases": "bat",
+        ".env": "bat",
         "algorithm": "cpp",
         "bitset": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "__config": "cpp",
+        "__nullptr": "cpp",
+        "cstddef": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "new": "cpp",
+        "stdexcept": "cpp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp"
     }
 }

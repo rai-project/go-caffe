@@ -83,7 +83,6 @@ struct profile_entry {
 struct profile {
   profile(std::string name = "", std::string metadata = "")
       : name_(name), metadata_(metadata) {
-    entries_.reserve(1024);
     start();
   }
   ~profile() { this->reset(); }

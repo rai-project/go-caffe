@@ -118,8 +118,8 @@ func main() {
 		pp.Println(err)
 		os.Exit(-1)
 	}
-
 	predictor.EndProfiling()
+
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
 		pp.Println(err)
