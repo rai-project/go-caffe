@@ -59,6 +59,7 @@ struct profile_entry {
     return json{
         {"name", name_},
         {"metadata", metadata_},
+        {"layer_type", metadata_},
         {"start", start_ns},
         {"end", end_ns},
         {"layer_sequence_index", layer_sequence_index_},
