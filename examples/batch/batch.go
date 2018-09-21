@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/GeertJohan/go-sourcepath"
-
 	"github.com/k0kubun/pp"
 
 	"github.com/anthonynsimon/bild/imgio"
@@ -25,9 +23,9 @@ import (
 )
 
 var (
-	batch        = 64
+	batch        = 1
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
-	weights_url  = " http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
+	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
 )
 
@@ -60,22 +58,21 @@ func main() {
 	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
-  defer tracer.Close()
+	defer tracer.Close()
 
-  span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
+	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
 	defer span.Finish()
 
 	if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
-		os.Exit(-1)
+		panic(err)
 	}
 
 	if _, err := downloadmanager.DownloadInto(weights_url, dir); err != nil {
-		os.Exit(-1)
+		panic(err)
 	}
 	if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
-		os.Exit(-1)
+		panic(err)
 	}
-
 
 	var input []float32
 	cnt := 0
@@ -91,7 +88,7 @@ func main() {
 			return err
 		}
 		resized := transform.Resize(img, 227, 227, transform.Linear)
-		res, err := cvtImageTo1DArray(resized, {123, 117, 104})
+		res, err := cvtImageTo1DArray(resized, []float32{104, 117, 123})
 		if err != nil {
 			panic(err)
 		}
@@ -99,7 +96,7 @@ func main() {
 		cnt++
 
 		return nil
-  })
+	})
 
 	if err != nil {
 		panic(err)
@@ -113,7 +110,7 @@ func main() {
 		device = options.CUDA_DEVICE
 	} else {
 		caffe.SetUseCPU()
-  }
+	}
 
 	// pp.Println("Using device = ", device)
 
@@ -126,35 +123,33 @@ func main() {
 		options.BatchSize(uint32(batch)))
 	if err != nil {
 		panic(err)
-  }
+	}
 	defer predictor.Close()
 
-  predictor.StartProfiling("predict", "")
+	predictor.StartProfiling("predict", "")
 	predictions, err := predictor.Predict(ctx, input)
 	if err != nil {
-		pp.Println(err)
-		os.Exit(-1)
+		panic(err)
 	}
 	predictor.EndProfiling()
 
-  profBuffer, err := predictor.ReadProfile()
+	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
-		pp.Println(err)
-		os.Exit(-1)
+		panic(err)
 	}
 
 	t, err := ctimer.New(profBuffer)
 	if err != nil {
-		pp.Println(err)
-		os.Exit(-1)
+		panic(err)
 	}
+
 	t.Publish(ctx)
 	predictor.DisableProfiling()
 
 	var labels []string
 	f, err := os.Open(features)
 	if err != nil {
-		os.Exit(-1)
+		panic(err)
 	}
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
