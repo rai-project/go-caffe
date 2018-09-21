@@ -351,6 +351,6 @@ void CaffeSetMode(int mode) {
     if (mode == Caffe::Brew::GPU) {
       Caffe::SetDevice(0);
     }
-    std::cout << Caffe::mode() << "  mode = " << mode << "\n";
+    //std::cout << Caffe::mode() << "  mode = " << mode << "\n";
   }
 }

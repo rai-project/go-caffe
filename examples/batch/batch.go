@@ -16,6 +16,7 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
+	cupti "github.com/rai-project/go-cupti"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
 	_ "github.com/rai-project/tracer/all"
@@ -23,7 +24,7 @@ import (
 )
 
 var (
-	batchSize    = 1
+	batchSize    = 64
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -58,11 +59,9 @@ func main() {
 	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
+	ctx := context.Background()
+
 	defer tracer.Close()
-
-	span, ctx := tracer.StartSpanFromContext(context.Background(), tracer.FULL_TRACE, "caffe_single")
-	defer span.Finish()
-
 	if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
 		panic(err)
 	}
@@ -79,11 +78,11 @@ func main() {
 
 	img, err := imgio.Open(imagePath)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	var input []float32
-	for ii := 0; i < batchSize; ii++ {
+	for ii := 0; ii < batchSize; ii++ {
 		resized := transform.Resize(img, 227, 227, transform.Linear)
 		res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
 		if err != nil {
@@ -98,9 +97,13 @@ func main() {
 	if nvidiasmi.HasGPU {
 		caffe.SetUseGPU()
 		device = options.CUDA_DEVICE
+
 	} else {
 		caffe.SetUseCPU()
 	}
+
+	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
+	defer span.Finish()
 
 	// create predictor
 	predictor, err := caffe.New(
@@ -114,6 +117,15 @@ func main() {
 	}
 	defer predictor.Close()
 
+	if nvidiasmi.HasGPU {
+		cu, err := cupti.New(cupti.Context(ctx))
+		if err == nil {
+			defer func() {
+				cu.Wait()
+				cu.Close()
+			}()
+		}
+	}
 	predictor.StartProfiling("predict", "")
 	predictions, err := predictor.Predict(ctx, input)
 	if err != nil {
@@ -147,7 +159,7 @@ func main() {
 	}
 
 	len := len(predictions) / batchSize
-	for i := 0; i < cnt; i++ {
+	for i := 0; i < 1; i++ {
 		res := predictions[i*len : (i+1)*len]
 		res.Sort()
 		pp.Println(res[0].Probability)
