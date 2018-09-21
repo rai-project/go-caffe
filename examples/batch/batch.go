@@ -88,7 +88,7 @@ func main() {
 			return err
 		}
 		resized := transform.Resize(img, 227, 227, transform.Linear)
-		res, err := cvtImageTo1DArray(resized, []float32{104, 117, 123})
+		res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
 		if err != nil {
 			panic(err)
 		}
