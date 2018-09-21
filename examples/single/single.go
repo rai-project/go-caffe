@@ -24,14 +24,15 @@ import (
 	"github.com/rai-project/tracer/ctimer"
 )
 
+// https://github.com/rai-project/caffe/blob/master/builtin_models/BVLC-AlexNet.yml
 var (
-	graph_url    = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/deploy.prototxt"
-	weights_url  = "https://github.com/DeepScale/SqueezeNet/raw/master/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel"
+	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
+	weights_url  = " http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
 )
 
 // convert go Image to 1-dim array
-func cvtImageTo1DArray(src image.Image, mean float32) ([]float32, error) {
+func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 	if src == nil {
 		return nil, fmt.Errorf("src image nil")
 	}
@@ -44,9 +45,9 @@ func cvtImageTo1DArray(src image.Image, mean float32) ([]float32, error) {
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			r, g, b, _ := src.At(x+b.Min.X, y+b.Min.Y).RGBA()
-			res[y*w+x] = float32(b>>8) - mean
-			res[w*h+y*w+x] = float32(g>>8) - mean
-			res[2*w*h+y*w+x] = float32(r>>8) - mean
+			res[y*w+x] = float32(b>>8) - mean[0]
+			res[w*h+y*w+x] = float32(g>>8) - mean[1]
+			res[2*w*h+y*w+x] = float32(r>>8) - mean[2]
 		}
 	}
 
@@ -56,7 +57,7 @@ func cvtImageTo1DArray(src image.Image, mean float32) ([]float32, error) {
 func main() {
 	dir, _ := filepath.Abs("../tmp")
 	graph := filepath.Join(dir, "deploy.prototxt")
-	weights := filepath.Join(dir, "squeezenet_v1.0.caffemodel")
+	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
 
 	defer tracer.Close()
@@ -75,7 +76,6 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// opts := options.New(options.Context(ctx))
 	opts := options.New()
 
 	device := options.CPU_DEVICE
@@ -107,12 +107,12 @@ func main() {
 
 	// preprocess
 	resized := transform.Resize(img, 227, 227, transform.Linear)
-	res, err := cvtImageTo1DArray(resized, 128)
+	res, err := cvtImageTo1DArray(resized, {123, 117, 104})
 	if err != nil {
 		panic(err)
 	}
 
-	predictor.StartProfiling("test", "")
+	predictor.StartProfiling("predict", "")
 	predictions, err := predictor.Predict(ctx, res)
 	if err != nil {
 		pp.Println(err)
@@ -134,7 +134,7 @@ func main() {
 	t.Publish(ctx)
 	predictor.DisableProfiling()
 
-	pp.Println(t)
+	// pp.Println(t)
 
 	predictions.Sort()
 
