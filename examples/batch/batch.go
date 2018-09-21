@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/k0kubun/pp"
-
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
+	"github.com/k0kubun/pp"
+
 	"github.com/rai-project/config"
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	batch        = 1
+	batchSize    = 1
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -74,32 +74,22 @@ func main() {
 		panic(err)
 	}
 
-	var input []float32
-	cnt := 0
-
 	imgDir, _ := filepath.Abs("../_fixtures")
-	err := filepath.Walk(imgDir, func(path string, info os.FileInfo, err error) error {
-		if path == imgDir || filepath.Ext(path) != ".jpg" || cnt >= batch {
-			return nil
-		}
+	imagePath := filepath.Join(imgDir, "platypus.jpg")
 
-		img, err := imgio.Open(path)
-		if err != nil {
-			return err
-		}
+	img, err := imgio.Open(imagePath)
+	if err != nil {
+		return err
+	}
+
+	var input []float32
+	for ii := 0; i < batchSize; ii++ {
 		resized := transform.Resize(img, 227, 227, transform.Linear)
 		res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
 		if err != nil {
 			panic(err)
 		}
 		input = append(input, res...)
-		cnt++
-
-		return nil
-	})
-
-	if err != nil {
-		panic(err)
 	}
 
 	opts := options.New()
@@ -112,15 +102,13 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
-	// pp.Println("Using device = ", device)
-
 	// create predictor
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
 		options.Device(device, 0),
 		options.Graph([]byte(graph)),
 		options.Weights([]byte(weights)),
-		options.BatchSize(uint32(batch)))
+		options.BatchSize(uint32(batchSize)))
 	if err != nil {
 		panic(err)
 	}
@@ -158,7 +146,7 @@ func main() {
 		labels = append(labels, line)
 	}
 
-	len := len(predictions) / batch
+	len := len(predictions) / batchSize
 	for i := 0; i < cnt; i++ {
 		res := predictions[i*len : (i+1)*len]
 		res.Sort()
