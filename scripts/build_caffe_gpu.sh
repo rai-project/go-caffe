@@ -10,6 +10,7 @@ cd $CAFFE_SRC_DIR && mkdir -p build && cd build && \
 	cmake .. \
     -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
     -DCMAKE_CXX_STANDARD=11 \
+    -DCMAKE_CXX_FLAGS=-std=c++11 \
     -DBLAS=open \
     -DBUILD_python=OFF \
     -DUSE_OPENCV=OFF \
