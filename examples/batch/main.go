@@ -14,6 +14,7 @@ import (
 	"image"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
@@ -31,7 +32,7 @@ import (
 )
 
 var (
-	batchSize    = 64
+	batchSize    = 256
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -117,6 +118,8 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
+	defer C.cudaDeviceReset()
+
 	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
 	defer span.Finish()
 
@@ -144,15 +147,18 @@ func main() {
 		}
 	*/
 	predictions, err := predictor.Predict(ctx, input)
-
+	time.Sleep(50 * time.Millisecond)
 	C.cudaProfilerStart()
-	predictor.StartProfiling("predict", "")
+	//predictor.StartProfiling("predict", "")
 	predictions, err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
-	predictor.EndProfiling()
+	//predictor.EndProfiling()
 	C.cudaProfilerStop()
+	C.cuCtxSynchronize()
+
+	return
 
 	/*
 		profBuffer, err := predictor.ReadProfile()

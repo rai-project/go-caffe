@@ -166,7 +166,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
     prof_registered_ = true;
   }
   DEBUG_STMT
-  // net_->set_debug_info(true);
+  net_->set_debug_info(true);
 
   // auto netForwardEntry = new profile_entry("net forward", "netForward");
   // prof_->add(1026, netForwardEntry);
