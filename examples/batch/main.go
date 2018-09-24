@@ -14,7 +14,6 @@ import (
 	"image"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
@@ -26,6 +25,7 @@ import (
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
+
 	//_ "github.com/rai-project/tracer/all"
 
 	_ "github.com/rai-project/tracer/jaeger"
@@ -146,11 +146,17 @@ func main() {
 			}
 		}
 	*/
-	predictions, err := predictor.Predict(ctx, input)
-	time.Sleep(50 * time.Millisecond)
+	if false {
+		predictions, err := predictor.Predict(ctx, input)
+		if err != nil {
+			panic(err)
+		}
+		_ = predictions
+	}
+	//time.Sleep(50 * time.Millisecond)
 	C.cudaProfilerStart()
 	//predictor.StartProfiling("predict", "")
-	predictions, err = predictor.Predict(ctx, input)
+	predictions, err := predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
