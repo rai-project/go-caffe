@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	batchSize    = 256
+	batchSize    = 64
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
