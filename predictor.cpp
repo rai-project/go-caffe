@@ -108,8 +108,8 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 
   mode_ = mode;
 
-  CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
-  CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
+  // CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
+  // CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
 
   const auto input_layer = net_->input_blobs()[0];
 

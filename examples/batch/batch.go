@@ -80,18 +80,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
+	pp.Println("here...")
+	resized := transform.Resize(img, 227, 227, transform.Linear)
+	res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
+	if err != nil {
+		panic(err)
+	}
 	var input []float32
 	for ii := 0; ii < batchSize; ii++ {
-		resized := transform.Resize(img, 227, 227, transform.Linear)
-		res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
-		if err != nil {
-			panic(err)
-		}
 		input = append(input, res...)
 	}
 
 	opts := options.New()
+	pp.Println("here...")
 
 	device := options.CPU_DEVICE
 	if nvidiasmi.HasGPU {
@@ -102,9 +103,12 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
+	pp.Println("here...")
+
 	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
 	defer span.Finish()
-
+	pp.Println(graph)
+	pp.Println(weights)
 	// create predictor
 	predictor, err := caffe.New(
 		options.WithOptions(opts),
@@ -117,6 +121,7 @@ func main() {
 	}
 	defer predictor.Close()
 
+	pp.Println("here...")
 	if nvidiasmi.HasGPU {
 		cu, err := cupti.New(cupti.Context(ctx))
 		if err == nil {
