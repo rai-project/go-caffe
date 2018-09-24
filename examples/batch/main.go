@@ -146,12 +146,12 @@ func main() {
 	predictions, err := predictor.Predict(ctx, input)
 
 	C.cudaProfilerStart()
-	// predictor.StartProfiling("predict", "")
+	predictor.StartProfiling("predict", "")
 	predictions, err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
-	// predictor.EndProfiling()
+	predictor.EndProfiling()
 	C.cudaProfilerStop()
 
 	/*
