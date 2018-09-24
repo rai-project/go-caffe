@@ -1,5 +1,12 @@
 package main
 
+// #cgo linux CFLAGS: -I/usr/local/cuda/include
+// #cgo linux LDFLAGS: -lcuda -lcudart -L/usr/local/cuda/lib64
+// #include <cuda.h>
+// #include <cuda_runtime.h>
+// #include <cuda_profiler_api.h>
+import "C"
+
 import (
 	"bufio"
 	"context"
@@ -16,11 +23,11 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
-	cupti "github.com/rai-project/go-cupti"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
-	_ "github.com/rai-project/tracer/all"
+	//_ "github.com/rai-project/tracer/all"
 	"github.com/rai-project/tracer/ctimer"
+	_ "github.com/rai-project/tracer/jaeger"
 )
 
 var (
@@ -81,7 +88,7 @@ func main() {
 		}
 	}
 
-	imgDir, _ := filepath.Abs("./_fixtures")
+	imgDir, _ := filepath.Abs("../_fixtures")
 	imagePath := filepath.Join(imgDir, "platypus.jpg")
 
 	img, err := imgio.Open(imagePath)
@@ -110,7 +117,7 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
-	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_example")
+	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
 	defer span.Finish()
 
 	// create predictor
@@ -125,21 +132,26 @@ func main() {
 	}
 	defer predictor.Close()
 
-	if nvidiasmi.HasGPU {
-		cu, err := cupti.New(cupti.Context(ctx))
-		if err == nil {
-			defer func() {
-				cu.Wait()
-				cu.Close()
-			}()
+	/*
+		if nvidiasmi.HasGPU {
+			cu, err := cupti.New(cupti.Context(ctx))
+			if err == nil {
+				defer func() {
+					cu.Wait()
+					cu.Close()
+				}()
+			}
 		}
-	}
+	*/
+
+	C.cudaProfilerStart()
 	predictor.StartProfiling("predict", "")
 	predictions, err := predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
 	predictor.EndProfiling()
+	C.cudaProfilerStop()
 
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
