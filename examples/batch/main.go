@@ -26,7 +26,7 @@ import (
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
 	//_ "github.com/rai-project/tracer/all"
-	"github.com/rai-project/tracer/ctimer"
+
 	_ "github.com/rai-project/tracer/jaeger"
 )
 
@@ -143,28 +143,31 @@ func main() {
 			}
 		}
 	*/
+	predictions, err := predictor.Predict(ctx, input)
 
 	C.cudaProfilerStart()
-	predictor.StartProfiling("predict", "")
-	predictions, err := predictor.Predict(ctx, input)
+	// predictor.StartProfiling("predict", "")
+	predictions, err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
-	predictor.EndProfiling()
+	// predictor.EndProfiling()
 	C.cudaProfilerStop()
 
-	profBuffer, err := predictor.ReadProfile()
-	if err != nil {
-		panic(err)
-	}
+	/*
+		profBuffer, err := predictor.ReadProfile()
+		if err != nil {
+			panic(err)
+		}
 
-	t, err := ctimer.New(profBuffer)
-	if err != nil {
-		panic(err)
-	}
+		t, err := ctimer.New(profBuffer)
+		if err != nil {
+			panic(err)
+		}
 
-	t.Publish(ctx)
-	predictor.DisableProfiling()
+		t.Publish(ctx)
+		predictor.DisableProfiling()
+	*/
 
 	var labels []string
 	f, err := os.Open(features)
