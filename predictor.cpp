@@ -172,6 +172,21 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
   // prof_->add(1026, netForwardEntry);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
+  for (int ii =0 ;ii<10;ii++) {
+  const auto rr = net_->Forward(bottom);
+  const auto output_layer = rr[0];
+  }
+  const auto iters = 100;
+  double es = 0.0;
+  for (int ii =0 ;ii<iters;ii++) {
+    const auto start = now();
+  const auto rr = net_->Forward(bottom);
+  const auto output_layer = rr[0];
+    const auto end = now();
+    es += elapsed_time(start, end);
+
+  }
+  std::cout <<  es / iters << "\n";
   // netForwardEntry->end();
 
   // auto copyBackEntry = new profile_entry("copy back", "copyBack");
