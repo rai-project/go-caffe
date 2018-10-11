@@ -6,5 +6,4 @@ tmp
 _obj
 cifar-test-leveldb
 
-single
-*nvprof
+*.nvprof
