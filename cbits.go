@@ -117,7 +117,8 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 
-	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
+	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
+
 	r := C.CaffePredict(p.ctx, ptr)
 
 	if predictSpan != nil {
@@ -125,12 +126,18 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 	}
 
 	defer C.free(unsafe.Pointer(r))
-	js := C.GoString(r)
 
+	unmarshallSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "unmarshal output")
+
+	js := C.GoString(r)
 	predictions := []Prediction{}
 	err := json.Unmarshal([]byte(js), &predictions)
 	if err != nil {
 		return nil, err
+	}
+
+	if unmarshallSpan != nil {
+		unmarshallSpan.Finish()
 	}
 
 	return predictions, nil
