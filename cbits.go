@@ -96,7 +96,7 @@ func (p *Predictor) ReadProfile() (string, error) {
 	return C.GoString(cstr), nil
 }
 
-func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, error) {
+func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, error) {
 	// check input
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")
@@ -132,10 +132,6 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 	err := json.Unmarshal([]byte(js), &predictions)
 	if err != nil {
 		return nil, err
-	}
-
-	if unmarshallSpan != nil {
-		unmarshallSpan.Finish()
 	}
 
 	return predictions, nil

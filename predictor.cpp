@@ -73,9 +73,9 @@ class EndProfile : public Net<Dtype>::Callback {
 };
 
 #if 0
-#define std ::cout << __func__ << "  " << __LINE__ << "\n";
+#define DEBUG_STMT std ::cout << __func__ << "  " << __LINE__ << "\n";
 #else
-#define
+#define DEBUG_STMT
 #endif
 
 class Predictor {
@@ -127,21 +127,16 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 
 std::vector<Prediction> Predictor::Predict(float *imageData) {
   setMode();
+    shapes_t shapes{{1, 2, 2, 4}};
 
-  // auto mallocEntry = new profile_entry("create blob", "malloc");
-  // prof_->add(0, mallocEntry);
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-  // mallocEntry->end();
 
-  // auto setDataEntry = new profile_entry("set data", "setData");
-  // prof_->add(1, setDataEntry);
   if (mode_ == Caffe::CPU) {
     blob->set_cpu_data(imageData);
   } else {
     blob->set_gpu_data(imageData);
     blob->mutable_gpu_data();
   }
-  // setDataEntry->end();
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
   StartProfile<float> *start_profile = nullptr;
@@ -156,14 +151,8 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
 
   // net_->set_debug_info(true);
 
-  // auto netForwardEntry = new profile_entry("net forward", "netForward");
-  // prof_->add(2, netForwardEntry);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
-  // netForwardEntry->end();
-
-  // auto copyBackEntry = new profile_entry("copy back", "copyBack");
-  // prof_->add(9999, copyBackEntry);
   const auto len = output_layer->channels();
   const auto outputSize = len * batch_;
   const float *outputData = output_layer->cpu_data();
@@ -176,17 +165,7 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
   }
-  // copyBackEntry->end();
-
-  /*
-  if (start_profile) {
-    delete start_profile;
-  }
-  if (end_profile) {
-    delete end_profile;
-  }
-  */
-
+  
   return predictions;
 }
 
