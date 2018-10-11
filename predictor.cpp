@@ -73,9 +73,9 @@ class EndProfile : public Net<Dtype>::Callback {
 };
 
 #if 0
-#define DEBUG_STMT std::cout << __func__ << "  " << __LINE__ << "\n";
+#define std ::cout << __func__ << "  " << __LINE__ << "\n";
 #else
-#define DEBUG_STMT
+#define
 #endif
 
 class Predictor {
@@ -125,57 +125,45 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->Reshape();
 }
 
-/* Return the top N predictions. */
 std::vector<Prediction> Predictor::Predict(float *imageData) {
-  DEBUG_STMT
-
   setMode();
-  DEBUG_STMT
 
   // auto mallocEntry = new profile_entry("create blob", "malloc");
-  // prof_->add(24, mallocEntry);
-
+  // prof_->add(0, mallocEntry);
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-
   // mallocEntry->end();
 
   // auto setDataEntry = new profile_entry("set data", "setData");
-  // prof_->add(025, setDataEntry);
-  DEBUG_STMT
+  // prof_->add(1, setDataEntry);
   if (mode_ == Caffe::CPU) {
-    DEBUG_STMT
     blob->set_cpu_data(imageData);
   } else {
-    DEBUG_STMT
     blob->set_gpu_data(imageData);
     blob->mutable_gpu_data();
   }
-  DEBUG_STMT
   // setDataEntry->end();
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
-  DEBUG_STMT
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr && prof_registered_ == false) {
-    DEBUG_STMT
     start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
     prof_registered_ = true;
   }
-  DEBUG_STMT
+
   // net_->set_debug_info(true);
 
   // auto netForwardEntry = new profile_entry("net forward", "netForward");
-  // prof_->add(1026, netForwardEntry);
+  // prof_->add(2, netForwardEntry);
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
   // netForwardEntry->end();
 
   // auto copyBackEntry = new profile_entry("copy back", "copyBack");
-  // prof_->add(1027, copyBackEntry);
+  // prof_->add(9999, copyBackEntry);
   const auto len = output_layer->channels();
   const auto outputSize = len * batch_;
   const float *outputData = output_layer->cpu_data();
@@ -188,7 +176,6 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
           std::make_pair(idx, outputData[cnt * len + idx]));
     }
   }
-  DEBUG_STMT
   // copyBackEntry->end();
 
   /*
@@ -271,28 +258,20 @@ char *CaffeReadProfile(PredictorContext pred) {
 }
 
 const char *CaffePredict(PredictorContext pred, float *imageData) {
-  DEBUG_STMT;
-
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return strdup("");
   }
-  DEBUG_STMT;
 
   const auto predictionsTuples = predictor->Predict(imageData);
-
-  DEBUG_STMT;
 
   json predictions = json::array();
   for (const auto prediction : predictionsTuples) {
     predictions.push_back(
         {{"index", prediction.first}, {"probability", prediction.second}});
   }
-  DEBUG_STMT;
 
   auto res = strdup(predictions.dump().c_str());
-
-  DEBUG_STMT;
 
   return res;
 }
@@ -347,10 +326,8 @@ void CaffeSetMode(int mode) {
   if (!mode_set) {
     mode_set = true;
     Caffe::set_mode((caffe::Caffe::Brew)mode);
-    // Caffe::set_mode(Caffe::Brew::GPU);
     if (mode == Caffe::Brew::GPU) {
       Caffe::SetDevice(0);
     }
-    //std::cout << Caffe::mode() << "  mode = " << mode << "\n";
   }
 }

@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
-#endif // __cplusplus
+#endif  // __cplusplus
 
 typedef int error_t;
 
@@ -15,4 +15,4 @@ const int error_not_implemented = 3;
 struct profile_entry;
 struct profile;
 
-#endif // __TIMER_H__
+#endif  // __TIMER_H__
