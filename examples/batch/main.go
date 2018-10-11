@@ -25,6 +25,7 @@ import (
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
+
 	//_ "github.com/rai-project/tracer/all"
 
 	_ "github.com/rai-project/tracer/jaeger"
@@ -32,6 +33,7 @@ import (
 
 var (
 	batchSize    = 64
+	model        = "bvlc_alexnet"
 	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
@@ -62,6 +64,7 @@ func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 
 func main() {
 	dir, _ := filepath.Abs("../tmp")
+	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
