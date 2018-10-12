@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <iosfwd>
-#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -16,9 +15,6 @@
 using namespace caffe;
 using std::string;
 using json = nlohmann::json;
-
-static std::atomic<int64_t> predictorId = 0;
-static std::map<int64_t, const float *> predictionResultsMap{};
 
 /* Pair (label, confidence) representing a prediction. */
 using Prediction = std::pair<int, float>;
@@ -104,7 +100,7 @@ class Predictor {
   profile *prof_{nullptr};
   bool prof_registered_{false};
 
-  int id_{0};
+  const float *result_{nullptr};
 };
 
 Predictor::Predictor(int64_t predictorId, const string &model_file,
@@ -165,6 +161,8 @@ const float *Predictor::Predict(float *imageData) {
   pred_len_ = output_layer->channels();
   const float *outputData = output_layer->cpu_data();
 
+  prediction->result_ = outputData;
+
   return outputData;
 }
 
@@ -186,7 +184,6 @@ void CaffeDelete(PredictorContext pred) {
   if (predictor == nullptr) {
     return;
   }
-  predictionResultsMap.erase(predictor->id_);
   if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
@@ -201,11 +198,7 @@ float *CaffeGetPredictions(PredictorContext pred) {
     return nullptr;
   }
 
-  auto e = predictionResultsMap.find(predictor->id_);
-  if (e == predictionResultsMap.end()) {
-    return nullptr;
-  }
-  return e->second;
+  return e->result_;
 }
 
 void CaffeSetMode(int mode) {
@@ -273,15 +266,13 @@ char *CaffeReadProfile(PredictorContext pred) {
   return strdup(cstr);
 }
 
-const float *CaffePredict(PredictorContext pred, float *imageData) {
+void CaffePredict(PredictorContext pred, float *imageData) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
-    return nullptr;
+    return;
   }
-  auto data = predictor->Predict(imageData);
-  const auto id = predictor->id_;
-  predictionResultsMap[id] = data;
-  return id;
+  predictor->Predict(imageData);
+  return;
 }
 
 int CaffePredictorGetWidth(PredictorContext pred) {

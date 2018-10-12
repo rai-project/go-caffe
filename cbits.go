@@ -96,7 +96,7 @@ func (p *Predictor) ReadProfile() (string, error) {
 	return C.GoString(cstr), nil
 }
 
-func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, error) {
+func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
@@ -124,7 +124,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 		predictSpan.Finish()
 	}
 
-	return ret, nil
+	return nil
 }
 
 func (p *Predictor) PostPredict(ctx context.Context) Predictions {

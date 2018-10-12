@@ -12,7 +12,7 @@ typedef void *PredictorContext;
 PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
                           int mode);
 
-int64_t CaffePredict(PredictorContext pred, float *imageData);
+void CaffePredict(PredictorContext pred, float *imageData);
 
 float *CaffeGetPredictions(PredictorContext pred);
 
