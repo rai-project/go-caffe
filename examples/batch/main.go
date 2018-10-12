@@ -128,7 +128,6 @@ func main() {
 	ctx := context.Background()
 
 	output, err := predictor.Predict(ctx, input)
-	predictions, err := predictor.Postprocess(output)
 	if err != nil {
 		panic(err)
 	}
@@ -150,18 +149,20 @@ func main() {
 	}
 
 	predictor.StartProfiling("predict", "")
-	predictions, err = predictor.Predict(ctx, input)
+	output, err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
 	predictor.EndProfiling()
+	predictor.DisableProfiling()
 
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
 		panic(err)
 	}
 
-	predictor.DisableProfiling()
+	predictions := predictor.Postprocess(output)
+
 	predictor.Close()
 	span.Finish()
 

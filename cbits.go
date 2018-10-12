@@ -101,16 +101,16 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
 
-	batchSize := p.batchSize
+	batchSize := p.options.BatchSize()
 	width := C.CaffePredictorGetWidth(p.ctx)
 	height := C.CaffePredictorGetHeight(p.ctx)
 	channels := C.CaffePredictorGetChannels(p.ctx)
-	shapeLen := int64(width * height * channels)
-	dataLen := int64(len(data))
+	shapeLen := int(width * height * channels)
+	dataLen := len(data)
 
 	inputCount := dataLen / shapeLen
-	if p.batchSize > inputCount {
-		padding := make([]float32, (p.batchSize-inputCount)*shapeLen)
+	if batchSize > inputCount {
+		padding := make([]float32, (batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
 	}
 
@@ -118,7 +118,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 
 	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
 
-	ret := C.CaffePredict(p.ctx, ptr)
+	res := C.CaffePredict(p.ctx, ptr)
 
 	if predictSpan != nil {
 		predictSpan.Finish()
@@ -126,21 +126,30 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 
 	// defer C.free(unsafe.Pointer(res))
 
-	return unsafe.Pointer(ret), nil
+	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
+	length := batchSize * predLen
+	slice := (*[1 << 30]C.float)(unsafe.Pointer(res))[:length:length]
+
+	ret := make([]float32, length)
+	for ii, e := range slice {
+		ret[ii] = float32(e)
+	}
+
+	return ret, nil
 }
 
-func (p *Predictor) Postprocess(output []float32) (Predictions, error) {
-	predictions := []Prediction{}
-	batchSize := p.batchSize
-	predLen := C.CaffePredictorGetPredLen(p.ctx)
+func (p *Predictor) Postprocess(output []float32) Predictions {
+	var predictions Predictions
+	batchSize := p.options.BatchSize()
+	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
 
 	for ii := 0; ii < batchSize; ii++ {
 		for jj := 0; jj < predLen; jj++ {
-			predictions := predictions.append(predictions, Prediction{Index: jj, Probability: ii*predLen + idx})
+			predictions = append(predictions, Prediction{Index: jj, Probability: output[ii*predLen+jj]})
 		}
 	}
 
-	return predictions, nil
+	return predictions
 }
 
 func (p *Predictor) Close() {
