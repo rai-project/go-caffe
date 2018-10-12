@@ -127,7 +127,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	return nil
 }
 
-func (p *Predictor) PostPredict(ctx context.Context) Predictions {
+func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "post_predict")
 	defer span.Finish()
 

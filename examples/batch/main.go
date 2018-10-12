@@ -148,7 +148,7 @@ func main() {
 
 	predictor.StartProfiling("predict", "")
 
-	output, err = predictor.Predict(ctx, input)
+	err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
@@ -161,7 +161,7 @@ func main() {
 		cu.Close()
 	}
 
-	predictions := predictor.PostPredict(ctx, output)
+	predictions := predictor.ReadPredictedFeatures(ctx)
 
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {

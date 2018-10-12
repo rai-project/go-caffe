@@ -139,7 +139,7 @@ func main() {
 
 	C.cudaProfilerStart()
 
-	output, err = predictor.Predict(ctx, input)
+	err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
@@ -147,7 +147,7 @@ func main() {
 	C.cudaDeviceSynchronize()
 	C.cudaProfilerStop()
 
-	predictions := predictor.PostPredict(ctx, output)
+	predictions := predictor.ReadPredictedFeatures(ctx)
 
 	if true {
 		var labels []string
