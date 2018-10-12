@@ -61,15 +61,13 @@ func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 }
 
 func main() {
+	defer tracer.Close()
+
 	dir, _ := filepath.Abs("../tmp")
 	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
 	features := filepath.Join(dir, "synset.txt")
-
-	ctx := context.Background()
-
-	defer tracer.Close()
 
 	if _, err := os.Stat(graph); os.IsNotExist(err) {
 		if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
@@ -118,6 +116,8 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
+	ctx := context.Background()
+
 	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
 	defer span.Finish()
 
@@ -132,34 +132,43 @@ func main() {
 	}
 	defer predictor.Close()
 
-	predictions, err := predictor.Predict(ctx, input)
-
-	C.cudaProfilerStart()
-	predictions, err = predictor.Predict(ctx, input)
+	output, err := predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
+
+	C.cudaProfilerStart()
+
+	output, err = predictor.Predict(ctx, input)
+	if err != nil {
+		panic(err)
+	}
+
 	C.cudaDeviceSynchronize()
 	C.cudaProfilerStop()
 
-	var labels []string
-	f, err := os.Open(features)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		labels = append(labels, line)
-	}
+	predictions := predictor.PostPredict(ctx, output)
 
-	len := len(predictions) / batchSize
-	for i := 0; i < 1; i++ {
-		res := predictions[i*len : (i+1)*len]
-		res.Sort()
-		pp.Println(res[0].Probability)
-		pp.Println(labels[res[0].Index])
+	if true {
+		var labels []string
+		f, err := os.Open(features)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			line := scanner.Text()
+			labels = append(labels, line)
+		}
+
+		len := len(predictions) / batchSize
+		for i := 0; i < 1; i++ {
+			res := predictions[i*len : (i+1)*len]
+			res.Sort()
+			pp.Println(res[0].Probability)
+			pp.Println(labels[res[0].Index])
+		}
 	}
 }
 

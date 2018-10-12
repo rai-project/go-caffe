@@ -5,7 +5,7 @@
 ```
 cd batch
 go build
-nvprof --profile-from-start off ./batch
+nvprof --profile-from-start off ./batch_nvprof
 ```
 
 ## With jaeger

@@ -62,6 +62,8 @@ func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 }
 
 func main() {
+	defer tracer.Close()
+
 	dir, _ := filepath.Abs("../tmp")
 	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
@@ -124,6 +126,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer predictor.Close()
 
 	ctx := context.Background()
 
@@ -132,39 +135,38 @@ func main() {
 		panic(err)
 	}
 
-	defer tracer.Close()
-
 	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
+	defer span.Finish()
 
-	if true {
-		if nvidiasmi.HasGPU {
-			cu, err := cupti.New(cupti.Context(ctx))
-			if err == nil {
-				defer func() {
-					cu.Wait()
-					cu.Close()
-				}()
-			}
+	var cu *cupti.CUPTI
+	if nvidiasmi.HasGPU {
+		cu, err = cupti.New(cupti.Context(ctx))
+		if err != nil {
+			panic(err)
 		}
 	}
 
 	predictor.StartProfiling("predict", "")
+
 	output, err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
+
 	predictor.EndProfiling()
 	predictor.DisableProfiling()
+
+	if nvidiasmi.HasGPU {
+		cu.Wait()
+		cu.Close()
+	}
+
+	predictions := predictor.PostPredict(ctx, output)
 
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
 		panic(err)
 	}
-
-	predictions := predictor.Postprocess(output)
-
-	predictor.Close()
-	span.Finish()
 
 	t, err := ctimer.New(profBuffer)
 	if err != nil {

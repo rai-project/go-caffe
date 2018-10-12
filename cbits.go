@@ -138,7 +138,10 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 	return ret, nil
 }
 
-func (p *Predictor) Postprocess(output []float32) Predictions {
+func (p *Predictor) PostPredict(ctx context.Context, output []float32) Predictions {
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "post_predict")
+	defer span.Finish()
+
 	var predictions Predictions
 	batchSize := p.options.BatchSize()
 	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
