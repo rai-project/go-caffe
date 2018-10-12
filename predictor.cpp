@@ -12,6 +12,12 @@
 #include "timer.h"
 #include "timer.impl.hpp"
 
+#if 0
+#define DEBUG_STMT std ::cout << __func__ << "  " << __LINE__ << "\n";
+#else
+#define DEBUG_STMT
+#endif
+
 using namespace caffe;
 using std::string;
 using json = nlohmann::json;
@@ -72,16 +78,10 @@ class EndProfile : public Net<Dtype>::Callback {
   profile *prof_{nullptr};
 };
 
-#if 0
-#define DEBUG_STMT std ::cout << __func__ << "  " << __LINE__ << "\n";
-#else
-#define DEBUG_STMT
-#endif
-
 class Predictor {
  public:
-  Predictor(const string &model_file,
-            const string &trained_file, int batch, caffe::Caffe::Brew mode);
+  Predictor(const string &model_file, const string &trained_file, int batch,
+            caffe::Caffe::Brew mode);
 
   const float *Predict(float *imageData);
 
@@ -103,9 +103,8 @@ class Predictor {
   const float *result_{nullptr};
 };
 
-Predictor::Predictor(const string &model_file,
-                     const string &trained_file, int batch,
-                     caffe::Caffe::Brew mode) {
+Predictor::Predictor(const string &model_file, const string &trained_file,
+                     int batch, caffe::Caffe::Brew mode) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);

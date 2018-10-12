@@ -118,7 +118,7 @@ func main() {
 
 	ctx := context.Background()
 
-	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
+	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch_nvprof")
 	defer span.Finish()
 
 	predictor, err := caffe.New(

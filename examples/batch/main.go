@@ -154,25 +154,25 @@ func main() {
 	}
 
 	predictor.EndProfiling()
-	predictor.DisableProfiling()
 
 	if nvidiasmi.HasGPU {
 		cu.Wait()
 		cu.Close()
 	}
 
-	predictions := predictor.ReadPredictedFeatures(ctx)
-
 	profBuffer, err := predictor.ReadProfile()
 	if err != nil {
 		panic(err)
 	}
+	predictor.DisableProfiling()
 
 	t, err := ctimer.New(profBuffer)
 	if err != nil {
 		panic(err)
 	}
 	t.Publish(ctx)
+
+	predictions := predictor.ReadPredictedFeatures(ctx)
 
 	if true {
 		var labels []string

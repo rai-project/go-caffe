@@ -36,6 +36,9 @@ type Predictor struct {
 }
 
 func New(opts ...options.Option) (*Predictor, error) {
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "new")
+	defer span.Finish()
+
 	options := options.New(opts...)
 	modelFile := string(options.Graph())
 	if !com.IsFile(modelFile) {
@@ -116,19 +119,16 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 
-	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
+	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "c_predict")
+	defer predictSpan.Finish()
 
 	C.CaffePredict(p.ctx, ptr)
-
-	if predictSpan != nil {
-		predictSpan.Finish()
-	}
 
 	return nil
 }
 
 func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "read_features")
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "read_predicted_features")
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
