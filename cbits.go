@@ -124,31 +124,25 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, err
 		predictSpan.Finish()
 	}
 
-	// defer C.free(unsafe.Pointer(res))
-
-	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
-	length := batchSize * predLen
-	slice := (*[1 << 30]C.float)(unsafe.Pointer(res))[:length:length]
-
-	ret := make([]float32, length)
-	for ii, e := range slice {
-		ret[ii] = float32(e)
-	}
-
 	return ret, nil
 }
 
-func (p *Predictor) PostPredict(ctx context.Context, output []float32) Predictions {
+func (p *Predictor) PostPredict(ctx context.Context) Predictions {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "post_predict")
 	defer span.Finish()
 
-	var predictions Predictions
 	batchSize := p.options.BatchSize()
 	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
+	length := batchSize * predLen
 
-	for ii := 0; ii < batchSize; ii++ {
-		for jj := 0; jj < predLen; jj++ {
-			predictions = append(predictions, Prediction{Index: jj, Probability: output[ii*predLen+jj]})
+	cPredictions := C.CaffeGetPredictions(p.ctx)
+	slice := (*[1 << 30]C.float)(unsafe.Pointer(cPredictions))[:length:length]
+
+	predictions := make([]Prediction, length)
+	for ii := 0; ii < length; ii++ {
+		predictions[ii] = Prediction{
+			Index:       ii / batchSize,
+			Probability: float32(slice[ii]),
 		}
 	}
 

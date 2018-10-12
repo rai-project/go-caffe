@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iosfwd>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -15,6 +16,9 @@
 using namespace caffe;
 using std::string;
 using json = nlohmann::json;
+
+static std::atomic<int64_t> predictorId = 0;
+static std::map<int64_t, const float *> predictionResultsMap{};
 
 /* Pair (label, confidence) representing a prediction. */
 using Prediction = std::pair<int, float>;
@@ -80,8 +84,8 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string &model_file, const string &trained_file, int batch,
-            caffe::Caffe::Brew mode);
+  Predictor(int64_t predictorId, const string &model_file,
+            const string &trained_file, int batch, caffe::Caffe::Brew mode);
 
   const float *Predict(float *imageData);
 
@@ -99,10 +103,15 @@ class Predictor {
   caffe::Caffe::Brew mode_{Caffe::CPU};
   profile *prof_{nullptr};
   bool prof_registered_{false};
+
+  int id_{0};
 };
 
-Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch, caffe::Caffe::Brew mode) {
+Predictor::Predictor(int64_t predictorId, const string &model_file,
+                     const string &trained_file, int batch,
+                     caffe::Caffe::Brew mode) {
+  id_ = predictorId;
+
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -177,12 +186,26 @@ void CaffeDelete(PredictorContext pred) {
   if (predictor == nullptr) {
     return;
   }
+  predictionResultsMap.erase(predictor->id_);
   if (predictor->prof_) {
     predictor->prof_->reset();
     delete predictor->prof_;
     predictor->prof_ = nullptr;
   }
   delete predictor;
+}
+
+float *CaffeGetPredictions(PredictorContext pred) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return nullptr;
+  }
+
+  auto e = predictionResultsMap.find(predictor->id_);
+  if (e == predictionResultsMap.end()) {
+    return nullptr;
+  }
+  return e->second;
 }
 
 void CaffeSetMode(int mode) {
@@ -255,7 +278,10 @@ const float *CaffePredict(PredictorContext pred, float *imageData) {
   if (predictor == nullptr) {
     return nullptr;
   }
-  return predictor->Predict(imageData);
+  auto data = predictor->Predict(imageData);
+  const auto id = predictor->id_;
+  predictionResultsMap[id] = data;
+  return id;
 }
 
 int CaffePredictorGetWidth(PredictorContext pred) {
