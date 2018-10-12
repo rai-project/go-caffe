@@ -14,7 +14,7 @@ PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
 
 void CaffePredict(PredictorContext pred, float *imageData);
 
-float *CaffeGetPredictions(PredictorContext pred);
+const float *CaffeGetPredictions(PredictorContext pred);
 
 int CaffePredictorGetChannels(PredictorContext pred);
 

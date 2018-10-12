@@ -8,3 +8,6 @@ cifar-test-leveldb
 
 *.nvprof
 .vscode
+
+batch
+single

@@ -130,7 +130,7 @@ func main() {
 
 	ctx := context.Background()
 
-	output, err := predictor.Predict(ctx, input)
+	err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}

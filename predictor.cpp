@@ -80,7 +80,7 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(int64_t predictorId, const string &model_file,
+  Predictor(const string &model_file,
             const string &trained_file, int batch, caffe::Caffe::Brew mode);
 
   const float *Predict(float *imageData);
@@ -103,11 +103,9 @@ class Predictor {
   const float *result_{nullptr};
 };
 
-Predictor::Predictor(int64_t predictorId, const string &model_file,
+Predictor::Predictor(const string &model_file,
                      const string &trained_file, int batch,
                      caffe::Caffe::Brew mode) {
-  id_ = predictorId;
-
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -133,6 +131,8 @@ Predictor::Predictor(int64_t predictorId, const string &model_file,
 
 const float *Predictor::Predict(float *imageData) {
   setMode();
+
+  result_ = nullptr;
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
@@ -161,7 +161,7 @@ const float *Predictor::Predict(float *imageData) {
   pred_len_ = output_layer->channels();
   const float *outputData = output_layer->cpu_data();
 
-  prediction->result_ = outputData;
+  result_ = outputData;
 
   return outputData;
 }
@@ -192,13 +192,13 @@ void CaffeDelete(PredictorContext pred) {
   delete predictor;
 }
 
-float *CaffeGetPredictions(PredictorContext pred) {
+const float *CaffeGetPredictions(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
   }
 
-  return e->result_;
+  return predictor->result_;
 }
 
 void CaffeSetMode(int mode) {

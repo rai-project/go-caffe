@@ -98,7 +98,7 @@ func (p *Predictor) ReadProfile() (string, error) {
 
 func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	if data == nil || len(data) < 1 {
-		return nil, fmt.Errorf("intput data nil or empty")
+		return fmt.Errorf("intput data nil or empty")
 	}
 
 	batchSize := p.options.BatchSize()
@@ -118,7 +118,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 
 	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
 
-	res := C.CaffePredict(p.ctx, ptr)
+	C.CaffePredict(p.ctx, ptr)
 
 	if predictSpan != nil {
 		predictSpan.Finish()
@@ -128,7 +128,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 }
 
 func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "post_predict")
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "read_features")
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
