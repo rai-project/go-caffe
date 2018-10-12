@@ -96,22 +96,21 @@ func (p *Predictor) ReadProfile() (string, error) {
 	return C.GoString(cstr), nil
 }
 
-func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, error) {
-	// check input
+func (p *Predictor) Predict(ctx context.Context, data []float32) ([]float32, error) {
 	if data == nil || len(data) < 1 {
 		return nil, fmt.Errorf("intput data nil or empty")
 	}
 
-	batchSize := int64(C.CaffePredictorGetBatchSize(p.ctx))
-	if batchSize != 1 {
-		width := C.CaffePredictorGetWidth(p.ctx)
-		height := C.CaffePredictorGetHeight(p.ctx)
-		channels := C.CaffePredictorGetChannels(p.ctx)
+	batchSize := p.batchSize
+	width := C.CaffePredictorGetWidth(p.ctx)
+	height := C.CaffePredictorGetHeight(p.ctx)
+	channels := C.CaffePredictorGetChannels(p.ctx)
+	shapeLen := int64(width * height * channels)
+	dataLen := int64(len(data))
 
-		dataLen := int64(len(data))
-		shapeLen := int64(width * height * channels)
-		inputCount := dataLen / shapeLen
-		padding := make([]float32, (batchSize-inputCount)*shapeLen)
+	inputCount := dataLen / shapeLen
+	if p.batchSize > inputCount {
+		padding := make([]float32, (p.batchSize-inputCount)*shapeLen)
 		data = append(data, padding...)
 	}
 
@@ -119,19 +118,26 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) (Predictions, e
 
 	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.STEP_TRACE, "c_predict")
 
-	r := C.CaffePredict(p.ctx, ptr)
+	ret := C.CaffePredict(p.ctx, ptr)
 
 	if predictSpan != nil {
 		predictSpan.Finish()
 	}
 
-	defer C.free(unsafe.Pointer(r))
+	// defer C.free(unsafe.Pointer(res))
 
-	js := C.GoString(r)
+	return unsafe.Pointer(ret), nil
+}
+
+func (p *Predictor) Postprocess(output []float32) (Predictions, error) {
 	predictions := []Prediction{}
-	err := json.Unmarshal([]byte(js), &predictions)
-	if err != nil {
-		return nil, err
+	batchSize := p.batchSize
+	predLen := C.CaffePredictorGetPredLen(p.ctx)
+
+	for ii := 0; ii < batchSize; ii++ {
+		for jj := 0; jj < predLen; jj++ {
+			predictions := predictions.append(predictions, Prediction{Index: jj, Probability: ii*predLen + idx})
+		}
 	}
 
 	return predictions, nil

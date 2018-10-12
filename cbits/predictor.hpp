@@ -12,7 +12,7 @@ typedef void *PredictorContext;
 PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
                           int mode);
 
-const char *CaffePredict(PredictorContext pred, float *imageData);
+const float *CaffePredict(PredictorContext pred, float *imageData);
 
 int CaffePredictorGetChannels(PredictorContext pred);
 
@@ -21,6 +21,8 @@ int CaffePredictorGetWidth(PredictorContext pred);
 int CaffePredictorGetHeight(PredictorContext pred);
 
 int CaffePredictorGetBatchSize(PredictorContext pred);
+
+int CaffePredictorGetPredLen(PredictorContext pred);
 
 void CaffeDelete(PredictorContext pred);
 

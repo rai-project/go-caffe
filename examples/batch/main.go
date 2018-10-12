@@ -120,14 +120,15 @@ func main() {
 		options.Device(device, 0),
 		options.Graph([]byte(graph)),
 		options.Weights([]byte(weights)),
-		options.BatchSize(uint32(batchSize)))
+		options.BatchSize(batchSize))
 	if err != nil {
 		panic(err)
 	}
 
 	ctx := context.Background()
 
-	predictions, err := predictor.Predict(ctx, input)
+	output, err := predictor.Predict(ctx, input)
+	predictions, err := predictor.Postprocess(output)
 	if err != nil {
 		panic(err)
 	}

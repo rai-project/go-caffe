@@ -83,7 +83,7 @@ class Predictor {
   Predictor(const string &model_file, const string &trained_file, int batch,
             caffe::Caffe::Brew mode);
 
-  std::vector<Prediction> Predict(float *imageData);
+  const float *Predict(float *imageData);
 
   void setMode() {
     Caffe::set_mode(mode_);
@@ -95,6 +95,7 @@ class Predictor {
   shared_ptr<Net<float>> net_;
   int width_, height_, channels_;
   int batch_;
+  int pred_len_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
   profile *prof_{nullptr};
   bool prof_registered_{false};
@@ -125,9 +126,8 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->Reshape();
 }
 
-std::vector<Prediction> Predictor::Predict(float *imageData) {
+const float *Predictor::Predict(float *imageData) {
   setMode();
-    shapes_t shapes{{1, 2, 2, 4}};
 
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
@@ -153,20 +153,10 @@ std::vector<Prediction> Predictor::Predict(float *imageData) {
 
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
-  const auto len = output_layer->channels();
-  const auto outputSize = len * batch_;
+  pred_len_ = output_layer->channels();
   const float *outputData = output_layer->cpu_data();
 
-  std::vector<Prediction> predictions;
-  predictions.reserve(outputSize);
-  for (int cnt = 0; cnt < batch_; cnt++) {
-    for (int idx = 0; idx < len; idx++) {
-      predictions.emplace_back(
-          std::make_pair(idx, outputData[cnt * len + idx]));
-    }
-  }
-  
-  return predictions;
+  return outputData;
 }
 
 PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
@@ -179,6 +169,30 @@ PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
     LOG(ERROR) << "exception: " << ex.what();
     errno = EINVAL;
     return nullptr;
+  }
+}
+
+void CaffeDelete(PredictorContext pred) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
+  if (predictor->prof_) {
+    predictor->prof_->reset();
+    delete predictor->prof_;
+    predictor->prof_ = nullptr;
+  }
+  delete predictor;
+}
+
+void CaffeSetMode(int mode) {
+  static bool mode_set = false;
+  if (!mode_set) {
+    mode_set = true;
+    Caffe::set_mode((caffe::Caffe::Brew)mode);
+    if (mode == Caffe::Brew::GPU) {
+      Caffe::SetDevice(0);
+    }
   }
 }
 
@@ -236,31 +250,12 @@ char *CaffeReadProfile(PredictorContext pred) {
   return strdup(cstr);
 }
 
-const char *CaffePredict(PredictorContext pred, float *imageData) {
+const float *CaffePredict(PredictorContext pred, float *imageData) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
-    return strdup("");
+    return nullptr;
   }
-
-  const auto predictionsTuples = predictor->Predict(imageData);
-
-  json predictions = json::array();
-  for (const auto prediction : predictionsTuples) {
-    predictions.push_back(
-        {{"index", prediction.first}, {"probability", prediction.second}});
-  }
-
-  auto res = strdup(predictions.dump().c_str());
-
-  return res;
-}
-
-int CaffePredictorGetChannels(PredictorContext pred) {
-  auto predictor = (Predictor *)pred;
-  if (predictor == nullptr) {
-    return 0;
-  }
-  return predictor->channels_;
+  return predictor->Predict(imageData);
 }
 
 int CaffePredictorGetWidth(PredictorContext pred) {
@@ -279,34 +274,18 @@ int CaffePredictorGetHeight(PredictorContext pred) {
   return predictor->height_;
 }
 
-int CaffePredictorGetBatchSize(PredictorContext pred) {
+int CaffePredictorGetChannels(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
   }
-  return predictor->batch_;
+  return predictor->channels_;
 }
 
-void CaffeDelete(PredictorContext pred) {
+int CaffePredictorGetPredLen(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
-    return;
+    return 0;
   }
-  if (predictor->prof_) {
-    predictor->prof_->reset();
-    delete predictor->prof_;
-    predictor->prof_ = nullptr;
-  }
-  delete predictor;
-}
-
-void CaffeSetMode(int mode) {
-  static bool mode_set = false;
-  if (!mode_set) {
-    mode_set = true;
-    Caffe::set_mode((caffe::Caffe::Brew)mode);
-    if (mode == Caffe::Brew::GPU) {
-      Caffe::SetDevice(0);
-    }
-  }
+  return predictor->pred_len_;
 }
