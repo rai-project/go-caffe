@@ -133,7 +133,7 @@ func main() {
 	}
 	defer predictor.Close()
 
-	output, err := predictor.Predict(ctx, input)
+	err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}

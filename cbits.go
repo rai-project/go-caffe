@@ -36,7 +36,7 @@ type Predictor struct {
 }
 
 func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "new")
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "new")
 	defer span.Finish()
 
 	options := options.New(opts...)
@@ -119,7 +119,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 
-	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "c_predict")
+	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
 	defer predictSpan.Finish()
 
 	C.CaffePredict(p.ctx, ptr)
@@ -128,11 +128,12 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 }
 
 func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "read_predicted_features")
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "read_predicted_features")
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
 	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
+	pp.Println(predLen)
 	length := batchSize * predLen
 
 	cPredictions := C.CaffeGetPredictions(p.ctx)
@@ -141,7 +142,7 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 	predictions := make([]Prediction, length)
 	for ii := 0; ii < length; ii++ {
 		predictions[ii] = Prediction{
-			Index:       ii / batchSize,
+			Index:       ii % predLen,
 			Probability: float32(slice[ii]),
 		}
 	}
