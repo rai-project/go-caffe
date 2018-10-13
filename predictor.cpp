@@ -98,8 +98,7 @@ class Predictor {
   int pred_len_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
   profile *prof_{nullptr};
-  bool prof_registered_{false};
-
+  bool profile_enabled_{false};
   const float *result_{nullptr};
 };
 
@@ -145,12 +144,12 @@ void Predictor::Predict(float *imageData) {
   const std::vector<caffe::Blob<float> *> bottom{blob};
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
-  if (prof_ != nullptr && prof_registered_ == false) {
+  if (prof_ != nullptr && profile_enabled_ == false) {
     start_profile = new StartProfile<float>(prof_, net_);
     end_profile = new EndProfile<float>(prof_);
     net_->add_before_forward(start_profile);
     net_->add_after_forward(end_profile);
-    prof_registered_ = true;
+    profile_enabled_ = true;
   }
 
   // net_->set_debug_info(true);
@@ -210,10 +209,6 @@ void DeleteCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
-  }
-  if (predictor->result_) {
-    delete predictor->result_;
-    // predictor->result_ = nullptr;
   }
   if (predictor->prof_) {
     predictor->prof_->reset();
