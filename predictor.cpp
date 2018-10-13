@@ -83,7 +83,7 @@ class Predictor {
   Predictor(const string &model_file, const string &trained_file, int batch,
             caffe::Caffe::Brew mode);
 
-  const float *Predict(float *imageData);
+  void Predict(float *imageData);
 
   void setMode() {
     Caffe::set_mode(mode_);

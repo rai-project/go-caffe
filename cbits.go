@@ -113,7 +113,6 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 	length := batchSize * predLen
 
 	cPredictions := C.GetPredictionsCaffe(p.ctx)
-	defer C.free(unsafe.Pointer(cPredictions))
 
 	slice := (*[1 << 30]C.float)(unsafe.Pointer(cPredictions))[:length:length]
 
