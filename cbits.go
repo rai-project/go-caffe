@@ -65,32 +65,16 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	}, nil
 }
 
-func (p *Predictor) StartProfiling(name, metadata string) error {
-	cname := C.CString(name)
-	cmetadata := C.CString(metadata)
-	defer C.free(unsafe.Pointer(cname))
-	defer C.free(unsafe.Pointer(cmetadata))
-	C.StartProfilingCaffe(p.ctx, cname, cmetadata)
-	return nil
+func SetUseCPU() {
+	C.SetModeCaffe(C.int(CPUMode))
 }
 
-func (p *Predictor) EndProfiling() error {
-	C.EndProfilingCaffe(p.ctx)
-	return nil
+func SetUseGPU() {
+	C.SetModeCaffe(C.int(GPUMode))
 }
 
-func (p *Predictor) DisableProfiling() error {
-	C.DisableProfilingCaffe(p.ctx)
-	return nil
-}
-
-func (p *Predictor) ReadProfile() (string, error) {
-	cstr := C.ReadProfileCaffe(p.ctx)
-	if cstr == nil {
-		return "", errors.New("failed to read nil profile")
-	}
-	defer C.free(unsafe.Pointer(cstr))
-	return C.GoString(cstr), nil
+func init() {
+	C.InitCaffe()
 }
 
 func (p *Predictor) Predict(ctx context.Context, data []float32) error {
@@ -150,15 +134,30 @@ func (p *Predictor) Close() {
 	C.DeleteCaffe(p.ctx)
 }
 
-func SetUseCPU() {
-	pp.Println("Setting to use CPU")
-	C.SetModeCaffe(C.int(CPUMode))
+func (p *Predictor) StartProfiling(name, metadata string) error {
+	cname := C.CString(name)
+	cmetadata := C.CString(metadata)
+	defer C.free(unsafe.Pointer(cname))
+	defer C.free(unsafe.Pointer(cmetadata))
+	C.StartProfilingCaffe(p.ctx, cname, cmetadata)
+	return nil
 }
 
-func SetUseGPU() {
-	C.SetModeCaffe(C.int(GPUMode))
+func (p *Predictor) EndProfiling() error {
+	C.EndProfilingCaffe(p.ctx)
+	return nil
 }
 
-func init() {
-	C.InitCaffe()
+func (p *Predictor) DisableProfiling() error {
+	C.DisableProfilingCaffe(p.ctx)
+	return nil
+}
+
+func (p *Predictor) ReadProfile() (string, error) {
+	cstr := C.ReadProfileCaffe(p.ctx)
+	if cstr == nil {
+		return "", errors.New("failed to read nil profile")
+	}
+	defer C.free(unsafe.Pointer(cstr))
+	return C.GoString(cstr), nil
 }
