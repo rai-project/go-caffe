@@ -165,7 +165,7 @@ const float *Predictor::Predict(float *imageData) {
   return outputData;
 }
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
+PredictorContext NewCaffe(char *model_file, char *trained_file, int batch,
                           int mode) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch,
@@ -178,7 +178,38 @@ PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
   }
 }
 
-void CaffeDelete(PredictorContext pred) {
+void SetModeCaffe(int mode) {
+  static bool mode_set = false;
+  if (!mode_set) {
+    mode_set = true;
+    Caffe::set_mode((caffe::Caffe::Brew)mode);
+    if (mode == Caffe::Brew::GPU) {
+      Caffe::SetDevice(0);
+    }
+  }
+}
+
+void InitCaffe() { ::google::InitGoogleLogging("go-caffe"); }
+
+void PredictCaffe(PredictorContext pred, float *imageData) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
+  predictor->Predict(imageData);
+  return;
+}
+
+const float *GetPredictionsCaffe(PredictorContext pred) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return nullptr;
+  }
+
+  return predictor->result_;
+}
+
+void DeleteCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -191,29 +222,7 @@ void CaffeDelete(PredictorContext pred) {
   delete predictor;
 }
 
-const float *CaffeGetPredictions(PredictorContext pred) {
-  auto predictor = (Predictor *)pred;
-  if (predictor == nullptr) {
-    return nullptr;
-  }
-
-  return predictor->result_;
-}
-
-void CaffeSetMode(int mode) {
-  static bool mode_set = false;
-  if (!mode_set) {
-    mode_set = true;
-    Caffe::set_mode((caffe::Caffe::Brew)mode);
-    if (mode == Caffe::Brew::GPU) {
-      Caffe::SetDevice(0);
-    }
-  }
-}
-
-void CaffeInit() { ::google::InitGoogleLogging("go-caffe"); }
-
-void CaffeStartProfiling(PredictorContext pred, const char *name,
+void StartProfilingCaffe(PredictorContext pred, const char *name,
                          const char *metadata) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
@@ -232,7 +241,7 @@ void CaffeStartProfiling(PredictorContext pred, const char *name,
   }
 }
 
-void CaffeEndProfiling(PredictorContext pred) {
+void EndProfilingCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -242,7 +251,7 @@ void CaffeEndProfiling(PredictorContext pred) {
   }
 }
 
-void CaffeDisableProfiling(PredictorContext pred) {
+void DisableProfilingCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -252,7 +261,7 @@ void CaffeDisableProfiling(PredictorContext pred) {
   }
 }
 
-char *CaffeReadProfile(PredictorContext pred) {
+char *ReadProfileCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return strdup("");
@@ -265,16 +274,7 @@ char *CaffeReadProfile(PredictorContext pred) {
   return strdup(cstr);
 }
 
-void CaffePredict(PredictorContext pred, float *imageData) {
-  auto predictor = (Predictor *)pred;
-  if (predictor == nullptr) {
-    return;
-  }
-  predictor->Predict(imageData);
-  return;
-}
-
-int CaffePredictorGetWidth(PredictorContext pred) {
+int PredictorGetWidthCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -282,7 +282,7 @@ int CaffePredictorGetWidth(PredictorContext pred) {
   return predictor->width_;
 }
 
-int CaffePredictorGetHeight(PredictorContext pred) {
+int PredictorGetHeightCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -290,7 +290,7 @@ int CaffePredictorGetHeight(PredictorContext pred) {
   return predictor->height_;
 }
 
-int CaffePredictorGetChannels(PredictorContext pred) {
+int PredictorGetChannelsCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -298,7 +298,7 @@ int CaffePredictorGetChannels(PredictorContext pred) {
   return predictor->channels_;
 }
 
-int CaffePredictorGetPredLen(PredictorContext pred) {
+int PredictorGetPredLenCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;

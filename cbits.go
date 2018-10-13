@@ -11,8 +11,6 @@ import (
 
 	"github.com/rai-project/tracer"
 
-	jsserializer "github.com/rai-project/serializer/json"
-
 	"github.com/k0kubun/pp"
 	"github.com/rai-project/nvidia-smi"
 
@@ -24,10 +22,6 @@ import (
 const (
 	CPUMode = 0
 	GPUMode = 1
-)
-
-var (
-	json = jsserializer.New()
 )
 
 type Predictor struct {
@@ -61,7 +55,7 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	}
 
 	return &Predictor{
-		ctx: C.CaffeNew(
+		ctx: C.NewCaffe(
 			C.CString(modelFile),
 			C.CString(weightsFile),
 			C.int(options.BatchSize()),
@@ -76,22 +70,22 @@ func (p *Predictor) StartProfiling(name, metadata string) error {
 	cmetadata := C.CString(metadata)
 	defer C.free(unsafe.Pointer(cname))
 	defer C.free(unsafe.Pointer(cmetadata))
-	C.CaffeStartProfiling(p.ctx, cname, cmetadata)
+	C.StartProfilingCaffe(p.ctx, cname, cmetadata)
 	return nil
 }
 
 func (p *Predictor) EndProfiling() error {
-	C.CaffeEndProfiling(p.ctx)
+	C.EndProfilingCaffe(p.ctx)
 	return nil
 }
 
 func (p *Predictor) DisableProfiling() error {
-	C.CaffeDisableProfiling(p.ctx)
+	C.DisableProfilingCaffe(p.ctx)
 	return nil
 }
 
 func (p *Predictor) ReadProfile() (string, error) {
-	cstr := C.CaffeReadProfile(p.ctx)
+	cstr := C.ReadProfileCaffe(p.ctx)
 	if cstr == nil {
 		return "", errors.New("failed to read nil profile")
 	}
@@ -105,9 +99,9 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	}
 
 	batchSize := p.options.BatchSize()
-	width := C.CaffePredictorGetWidth(p.ctx)
-	height := C.CaffePredictorGetHeight(p.ctx)
-	channels := C.CaffePredictorGetChannels(p.ctx)
+	width := C.PredictorGetWidthCaffe(p.ctx)
+	height := C.PredictorGetHeightCaffe(p.ctx)
+	channels := C.PredictorGetChannelsCaffe(p.ctx)
 	shapeLen := int(width * height * channels)
 	dataLen := len(data)
 
@@ -122,7 +116,7 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
 	defer predictSpan.Finish()
 
-	C.CaffePredict(p.ctx, ptr)
+	C.PredictCaffe(p.ctx, ptr)
 
 	return nil
 }
@@ -132,11 +126,13 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
-	predLen := int(C.CaffePredictorGetPredLen(p.ctx))
+	predLen := int(C.PredictorGetPredLenCaffe(p.ctx))
 	pp.Println(predLen)
 	length := batchSize * predLen
 
-	cPredictions := C.CaffeGetPredictions(p.ctx)
+	cPredictions := C.GetPredictionsCaffe(p.ctx)
+	defer C.free(unsafe.Pointer(cPredictions))
+
 	slice := (*[1 << 30]C.float)(unsafe.Pointer(cPredictions))[:length:length]
 
 	predictions := make([]Prediction, length)
@@ -151,18 +147,18 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 }
 
 func (p *Predictor) Close() {
-	C.CaffeDelete(p.ctx)
+	C.DeleteCaffe(p.ctx)
 }
 
 func SetUseCPU() {
 	pp.Println("Setting to use CPU")
-	C.CaffeSetMode(C.int(CPUMode))
+	C.SetModeCaffe(C.int(CPUMode))
 }
 
 func SetUseGPU() {
-	C.CaffeSetMode(C.int(GPUMode))
+	C.SetModeCaffe(C.int(GPUMode))
 }
 
 func init() {
-	C.CaffeInit()
+	C.InitCaffe()
 }

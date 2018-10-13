@@ -9,37 +9,35 @@ extern "C" {
 
 typedef void *PredictorContext;
 
-PredictorContext CaffeNew(char *model_file, char *trained_file, int batch,
+PredictorContext NewCaffe(char *model_file, char *trained_file, int batch,
                           int mode);
 
-void CaffePredict(PredictorContext pred, float *imageData);
+void SetModeCaffe(int mode);
 
-const float *CaffeGetPredictions(PredictorContext pred);
+void InitCaffe();
 
-int CaffePredictorGetChannels(PredictorContext pred);
+void PredictCaffe(PredictorContext pred, float *imageData);
 
-int CaffePredictorGetWidth(PredictorContext pred);
+const float *GetPredictionsCaffe(PredictorContext pred);
 
-int CaffePredictorGetHeight(PredictorContext pred);
+void DeleteCaffe(PredictorContext pred);
 
-int CaffePredictorGetBatchSize(PredictorContext pred);
-
-int CaffePredictorGetPredLen(PredictorContext pred);
-
-void CaffeDelete(PredictorContext pred);
-
-void CaffeSetMode(int mode);
-
-void CaffeInit();
-
-void CaffeStartProfiling(PredictorContext pred, const char *name,
+void StartProfilingCaffe(PredictorContext pred, const char *name,
                          const char *metadata);
 
-void CaffeEndProfiling(PredictorContext pred);
+void EndProfilingCaffe(PredictorContext pred);
 
-void CaffeDisableProfiling(PredictorContext pred);
+void DisableProfilingCaffe(PredictorContext pred);
 
-char *CaffeReadProfile(PredictorContext pred);
+char *ReadProfileCaffe(PredictorContext pred);
+
+int PredictorGetWidthCaffe(PredictorContext pred);
+
+int PredictorGetHeightCaffe(PredictorContext pred);
+
+int PredictorGetChannelsCaffe(PredictorContext pred);
+
+int PredictorGetPredLenCaffe(PredictorContext pred);
 
 #ifdef __cplusplus
 }
