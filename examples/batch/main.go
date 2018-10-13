@@ -117,7 +117,13 @@ func main() {
 		caffe.SetUseCPU()
 	}
 
+	ctx := context.Background()
+
+	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
+	defer span.Finish()
+
 	predictor, err := caffe.New(
+		ctx,
 		options.WithOptions(opts),
 		options.Device(device, 0),
 		options.Graph([]byte(graph)),
@@ -128,15 +134,10 @@ func main() {
 	}
 	defer predictor.Close()
 
-	ctx := context.Background()
-
 	err = predictor.Predict(ctx, input)
 	if err != nil {
 		panic(err)
 	}
-
-	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch")
-	defer span.Finish()
 
 	var cu *cupti.CUPTI
 	if nvidiasmi.HasGPU {

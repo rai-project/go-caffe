@@ -35,7 +35,7 @@ type Predictor struct {
 	options *options.Options
 }
 
-func New(opts ...options.Option) (*Predictor, error) {
+func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.PIPELINE_TRACE, "new")
 	defer span.Finish()
 

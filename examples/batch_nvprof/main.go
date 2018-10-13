@@ -122,6 +122,7 @@ func main() {
 	defer span.Finish()
 
 	predictor, err := caffe.New(
+		ctx,
 		options.WithOptions(opts),
 		options.Device(device, 0),
 		options.Graph([]byte(graph)),
