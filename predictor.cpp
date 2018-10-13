@@ -270,7 +270,7 @@ char *ReadProfileCaffe(PredictorContext pred) {
   return strdup(cstr);
 }
 
-int PredictorGetWidthCaffe(PredictorContext pred) {
+int GetWidthCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -278,7 +278,7 @@ int PredictorGetWidthCaffe(PredictorContext pred) {
   return predictor->width_;
 }
 
-int PredictorGetHeightCaffe(PredictorContext pred) {
+int GetHeightCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -286,7 +286,7 @@ int PredictorGetHeightCaffe(PredictorContext pred) {
   return predictor->height_;
 }
 
-int PredictorGetChannelsCaffe(PredictorContext pred) {
+int GetChannelsCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -294,7 +294,7 @@ int PredictorGetChannelsCaffe(PredictorContext pred) {
   return predictor->channels_;
 }
 
-int PredictorGetPredLenCaffe(PredictorContext pred) {
+int GetPredLenCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;

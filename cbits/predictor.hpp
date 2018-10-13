@@ -31,13 +31,13 @@ void DisableProfilingCaffe(PredictorContext pred);
 
 char *ReadProfileCaffe(PredictorContext pred);
 
-int PredictorGetWidthCaffe(PredictorContext pred);
+int GetWidthCaffe(PredictorContext pred);
 
-int PredictorGetHeightCaffe(PredictorContext pred);
+int GetHeightCaffe(PredictorContext pred);
 
-int PredictorGetChannelsCaffe(PredictorContext pred);
+int GetChannelsCaffe(PredictorContext pred);
 
-int PredictorGetPredLenCaffe(PredictorContext pred);
+int GetPredLenCaffe(PredictorContext pred);
 
 #ifdef __cplusplus
 }

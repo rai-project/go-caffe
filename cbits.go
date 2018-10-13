@@ -82,9 +82,9 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	}
 
 	batchSize := p.options.BatchSize()
-	width := C.PredictorGetWidthCaffe(p.ctx)
-	height := C.PredictorGetHeightCaffe(p.ctx)
-	channels := C.PredictorGetChannelsCaffe(p.ctx)
+	width := C.GetWidthCaffe(p.ctx)
+	height := C.GetHeightCaffe(p.ctx)
+	channels := C.GetChannelsCaffe(p.ctx)
 	shapeLen := int(width * height * channels)
 	dataLen := len(data)
 
@@ -109,7 +109,7 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
-	predLen := int(C.PredictorGetPredLenCaffe(p.ctx))
+	predLen := int(C.GetPredLenCaffe(p.ctx))
 	length := batchSize * predLen
 
 	cPredictions := C.GetPredictionsCaffe(p.ctx)
