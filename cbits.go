@@ -11,7 +11,6 @@ import (
 
 	"github.com/rai-project/tracer"
 
-	"github.com/k0kubun/pp"
 	"github.com/rai-project/nvidia-smi"
 
 	"github.com/Unknwon/com"
@@ -111,7 +110,6 @@ func (p *Predictor) ReadPredictedFeatures(ctx context.Context) Predictions {
 
 	batchSize := p.options.BatchSize()
 	predLen := int(C.PredictorGetPredLenCaffe(p.ctx))
-	pp.Println(predLen)
 	length := batchSize * predLen
 
 	cPredictions := C.GetPredictionsCaffe(p.ctx)
