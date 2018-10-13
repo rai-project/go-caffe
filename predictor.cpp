@@ -128,7 +128,7 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->Reshape();
 }
 
-const float *Predictor::Predict(float *imageData) {
+void Predictor::Predict(float *imageData) {
   setMode();
 
   result_ = nullptr;
@@ -157,12 +157,9 @@ const float *Predictor::Predict(float *imageData) {
 
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
+
   pred_len_ = output_layer->channels();
-  const float *outputData = output_layer->cpu_data();
-
-  result_ = outputData;
-
-  return outputData;
+  result_ = output_layer->cpu_data();
 }
 
 PredictorContext NewCaffe(char *model_file, char *trained_file, int batch,
@@ -213,6 +210,10 @@ void DeleteCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
+  }
+  if (predictor->result_) {
+    delete predictor->result_;
+    // predictor->result_ = nullptr;
   }
   if (predictor->prof_) {
     predictor->prof_->reset();
