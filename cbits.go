@@ -42,6 +42,12 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 		return nil, errors.Errorf("file %s not found", weightsFile)
 	}
 
+	modelFileString := C.CString(modelFile)
+	defer C.free(unsafe.Pointer(modelFileString))
+
+	weightsFileString := C.CString(weightsFile)
+	defer C.free(unsafe.Pointer(weightsFileString))
+
 	mode := CPUMode
 	if options.UsesGPU() {
 		if !nvidiasmi.HasGPU {
@@ -55,8 +61,8 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 
 	return &Predictor{
 		ctx: C.NewCaffe(
-			C.CString(modelFile),
-			C.CString(weightsFile),
+			modelFileString,
+			weightsFileString,
 			C.int(options.BatchSize()),
 			C.int(mode),
 		),

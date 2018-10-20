@@ -95,11 +95,11 @@ class Predictor {
   shared_ptr<Net<float>> net_;
   int width_, height_, channels_;
   int batch_;
-  int pred_len_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
+  int pred_len_;
+  const float *result_{nullptr};
   profile *prof_{nullptr};
   bool profile_enabled_{false};
-  const float *result_{nullptr};
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
@@ -153,7 +153,6 @@ void Predictor::Predict(float *imageData) {
   }
 
   // net_->set_debug_info(true);
-
   const auto rr = net_->Forward(bottom);
   const auto output_layer = rr[0];
 
@@ -201,7 +200,6 @@ const float *GetPredictionsCaffe(PredictorContext pred) {
   if (predictor == nullptr) {
     return nullptr;
   }
-
   return predictor->result_;
 }
 
