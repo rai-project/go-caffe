@@ -9,7 +9,7 @@ extern "C" {
 
 typedef void *PredictorContext;
 
-PredictorContext NewCaffe(char *model_file, char *trained_file, int batch,
+PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
                           int mode);
 
 void SetModeCaffe(int mode);

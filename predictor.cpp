@@ -80,8 +80,8 @@ class EndProfile : public Net<Dtype>::Callback {
 
 class Predictor {
  public:
-  Predictor(const string &model_file, const string &trained_file, int batch,
-            caffe::Caffe::Brew mode);
+  Predictor(const string &model_file, const string &trained_file,
+            int batch_size, caffe::Caffe::Brew mode);
 
   void Predict(float *imageData);
 
@@ -103,7 +103,7 @@ class Predictor {
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch, caffe::Caffe::Brew mode) {
+                     int batch_size, caffe::Caffe::Brew mode) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
@@ -118,7 +118,7 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   width_ = input_layer->width();
   height_ = input_layer->height();
   channels_ = input_layer->channels();
-  batch_ = batch;
+  batch_ = batch_size;
 
   CHECK(channels_ == 3 || channels_ == 1)
       << "Input layer should have 1 or 3 channels.";
@@ -160,10 +160,10 @@ void Predictor::Predict(float *imageData) {
   result_ = output_layer->cpu_data();
 }
 
-PredictorContext NewCaffe(char *model_file, char *trained_file, int batch,
+PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
                           int mode) {
   try {
-    const auto ctx = new Predictor(model_file, trained_file, batch,
+    const auto ctx = new Predictor(model_file, trained_file, batch_size,
                                    (caffe::Caffe::Brew)mode);
     return (void *)ctx;
   } catch (const std::invalid_argument &ex) {
