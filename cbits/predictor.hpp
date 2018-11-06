@@ -16,7 +16,7 @@ void SetModeCaffe(int mode);
 
 void InitCaffe();
 
-void PredictCaffe(PredictorContext pred, float *imageData);
+void PredictCaffe(PredictorContext pred, float *inputData);
 
 const float *GetPredictionsCaffe(PredictorContext pred);
 

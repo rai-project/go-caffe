@@ -83,7 +83,7 @@ class Predictor {
   Predictor(const string &model_file, const string &trained_file,
             int batch_size, caffe::Caffe::Brew mode);
 
-  void Predict(float *imageData);
+  void Predict(float *inputData);
 
   void setMode() {
     Caffe::set_mode(mode_);
@@ -127,7 +127,7 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->Reshape();
 }
 
-void Predictor::Predict(float *imageData) {
+void Predictor::Predict(float *inputData) {
   setMode();
 
   result_ = nullptr;
@@ -135,9 +135,9 @@ void Predictor::Predict(float *imageData) {
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
   if (mode_ == Caffe::CPU) {
-    blob->set_cpu_data(imageData);
+    blob->set_cpu_data(inputData);
   } else {
-    blob->set_gpu_data(imageData);
+    blob->set_gpu_data(inputData);
     blob->mutable_gpu_data();
   }
 
@@ -186,12 +186,12 @@ void SetModeCaffe(int mode) {
 
 void InitCaffe() { ::google::InitGoogleLogging("go-caffe"); }
 
-void PredictCaffe(PredictorContext pred, float *imageData) {
+void PredictCaffe(PredictorContext pred, float *inputData) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
   }
-  predictor->Predict(imageData);
+  predictor->Predict(inputData);
   return;
 }
 
