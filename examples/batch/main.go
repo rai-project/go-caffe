@@ -171,7 +171,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	t.Publish(ctx)
+	t.Publish(ctx, tracer.FRAMEWORK_TRACE)
 
 	predictions := predictor.ReadPredictedFeatures(ctx)
 
