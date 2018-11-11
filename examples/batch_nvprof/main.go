@@ -148,33 +148,38 @@ func main() {
 	C.cudaDeviceSynchronize()
 	C.cudaProfilerStop()
 
-	predictions, err := predictor.ReadPredictions(ctx)
+  output, err := predictor.ReadPredictionOutput(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	if true {
-		var labels []string
-		f, err := os.Open(features)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			line := scanner.Text()
-			labels = append(labels, line)
-		}
-
-		len := len(predictions) / batchSize
-		for i := 0; i < 1; i++ {
-			res := predictions[i*len : (i+1)*len]
-			res.Sort()
-			pp.Println(res[0].Probability)
-			pp.Println(labels[res[0].Index])
-		}
+	var labels []string
+	f, err := os.Open(synset)
+	if err != nil {
+		panic(err)
 	}
-}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		labels = append(labels, line)
+	}
+
+	features := make([]dlframework.Features, batchSize)
+	featuresLen := len(output) / batchSize
+
+	for ii := 0; ii < batchSize; ii++ {
+		rprobs := make([]*dlframework.Feature, featuresLen)
+		for jj := 0; jj < featuresLen; jj++ {
+			rprobs[jj] = feature.New(
+				feature.ClassificationIndex(int32(jj)),
+				feature.ClassificationName(labels[jj]),
+				feature.Probability(output[ii*featuresLen+jj]),
+			)
+		}
+		sort.Sort(dlframework.Features(rprobs))
+		features[ii] = rprobs
+	}
 
 func init() {
 	config.Init(

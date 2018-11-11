@@ -103,15 +103,14 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
 
 	predictSpan, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "predict")
-
 	C.PredictCaffe(p.ctx, ptr)
 	predictSpan.Finish()
 
 	return nil
 }
 
-func (p *Predictor) ReadPredictions(ctx context.Context) (Predictions, error) {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "read_predictions")
+func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]float32, error) {
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "read_prediction_output")
 	defer span.Finish()
 
 	batchSize := p.options.BatchSize()
@@ -123,17 +122,9 @@ func (p *Predictor) ReadPredictions(ctx context.Context) (Predictions, error) {
 		return nil, errors.New("empty predictions")
 	}
 
-	slice := (*[1 << 30]C.float)(unsafe.Pointer(cPredictions))[:length:length]
+	slice := (*[1 << 30]float32)(unsafe.Pointer(cPredictions))[:length:length]
 
-	predictions := make([]Prediction, length)
-	for ii := 0; ii < length; ii++ {
-		predictions[ii] = Prediction{
-			Index:       ii % predLen,
-			Probability: float32(slice[ii]),
-		}
-	}
-
-	return predictions, nil
+	return slice, nil
 }
 
 func (p *Predictor) Close() {
