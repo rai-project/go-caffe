@@ -133,7 +133,7 @@ func (p *Predictor) ReadPredictions(ctx context.Context) (Predictions, error) {
 		}
 	}
 
-	return predictions
+	return predictions, nil
 }
 
 func (p *Predictor) Close() {
