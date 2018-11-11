@@ -14,12 +14,15 @@ import (
 	"image"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/k0kubun/pp"
 
 	"github.com/rai-project/config"
+	"github.com/rai-project/dlframework"
+	"github.com/rai-project/dlframework/framework/feature"
 	"github.com/rai-project/dlframework/framework/options"
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
@@ -30,11 +33,11 @@ import (
 )
 
 var (
-	batchSize    = 64
-	model        = "bvlc_alexnet"
-	graph_url    = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
-	weights_url  = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
-	features_url = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
+	batchSize   = 64
+	model       = "bvlc_alexnet"
+	graph_url   = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
+	weights_url = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
+	synset_url  = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
 )
 
 // convert go Image to 1-dim array
@@ -67,7 +70,7 @@ func main() {
 	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
-	features := filepath.Join(dir, "synset.txt")
+	synset := filepath.Join(dir, "synset.txt")
 
 	if _, err := os.Stat(graph); os.IsNotExist(err) {
 		if _, err := downloadmanager.DownloadInto(graph_url, dir); err != nil {
@@ -80,9 +83,9 @@ func main() {
 			panic(err)
 		}
 	}
-	if _, err := os.Stat(features); os.IsNotExist(err) {
+	if _, err := os.Stat(synset); os.IsNotExist(err) {
 
-		if _, err := downloadmanager.DownloadInto(features_url, dir); err != nil {
+		if _, err := downloadmanager.DownloadInto(synset_url, dir); err != nil {
 			panic(err)
 		}
 	}
@@ -148,7 +151,7 @@ func main() {
 	C.cudaDeviceSynchronize()
 	C.cudaProfilerStop()
 
-  output, err := predictor.ReadPredictionOutput(ctx)
+	output, err := predictor.ReadPredictionOutput(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -180,6 +183,18 @@ func main() {
 		sort.Sort(dlframework.Features(rprobs))
 		features[ii] = rprobs
 	}
+
+	if true {
+		for i := 0; i < 1; i++ {
+			results := features[i]
+			top1 := results[0]
+			pp.Println(top1.Probability)
+			pp.Println(top1.GetClassification().GetName())
+		}
+	} else {
+		_ = features
+	}
+}
 
 func init() {
 	config.Init(
