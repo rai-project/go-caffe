@@ -61,7 +61,7 @@
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
-  revision = "f7d43ce0aa58cc7e33af425140e5a063e3f3a75f"
+  revision = "24918abba929282d6e405fedbc2ef68c3e894136"
 
 [[projects]]
   branch = "master"
@@ -110,8 +110,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "b20851c3cbaede4743ba0672171623986539f0b4"
-  version = "v1.15.70"
+  revision = "64fc3d5c40fffc817c1cc1c1d89a6e482bf1120d"
+  version = "v1.15.77"
 
 [[projects]]
   branch = "master"
@@ -278,7 +278,7 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "75dceb112b174be156fa9952e66d3e99945572b4"
+  revision = "52132540909e117f2b98b0694383dc0ab1e1deca"
 
 [[projects]]
   branch = "master"
@@ -317,7 +317,7 @@
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "4bda8fa99001c61db3cad96b421d4c12a81f256d"
+  revision = "7ee49f69de937ddc17eb72bc669c020b33c364d4"
 
 [[projects]]
   digest = "0:"
@@ -570,10 +570,11 @@
   name = "github.com/rai-project/dlframework"
   packages = [
     ".",
+    "framework/feature",
     "framework/options",
   ]
   pruneopts = "UT"
-  revision = "e78a4a7b7b214ab72989d82c02393850266e4c0e"
+  revision = "8ffb7db4aec288ca7bd8f56ebf296841e082db89"
 
 [[projects]]
   branch = "master"
@@ -592,7 +593,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "136f45b1d25cceefd78c6c29fe451904255694f2"
+  revision = "28071b0af94546f640e4b19deb1b32a94f57336c"
 
 [[projects]]
   branch = "master"
@@ -624,7 +625,7 @@
   name = "github.com/rai-project/nvidia-smi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3f69165f7c774af0126349bb4d148ba84a1e5152"
+  revision = "bad2efdde8617f86ff24dd63155c974dcf1cfe9e"
 
 [[projects]]
   branch = "master"
@@ -658,7 +659,7 @@
     "zipkin",
   ]
   pruneopts = "UT"
-  revision = "5ac201825115d67fc81f1f0cfd1c78c9d9d30baf"
+  revision = "b8169d08c8bbfc193d3aaabab5e91ddb37f9d660"
 
 [[projects]]
   branch = "master"
@@ -666,7 +667,7 @@
   name = "github.com/rai-project/utils"
   packages = ["."]
   pruneopts = "UT"
-  revision = "6708a9c28d4e0c3c6bd19213f4920a16f43865d4"
+  revision = "4f4bcfa3ccfa76a563dead2cf999310718bf9461"
 
 [[projects]]
   branch = "master"
@@ -763,7 +764,7 @@
     "remote",
   ]
   pruneopts = "UT"
-  revision = "b7a3b954760cf2c8e97dbcf7f842e721b8d24110"
+  revision = "ae103d7e593e371c69e832d5eb3347e2b80cbbc9"
 
 [[projects]]
   digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
@@ -853,7 +854,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   branch = "master"
@@ -869,15 +870,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "10aee181995363b41f712a55844a0dd52ea04646"
+  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
 
 [[projects]]
   branch = "master"
-  digest = "1:9f303486d623f840492bfeb48eb906a94e9d3fe638a761639b72ce64bf7bfcc3"
+  digest = "0:"
   name = "golang.org/x/sync"
   packages = ["syncmap"]
   pruneopts = "UT"
-  revision = "1d60e4601c6fd243af51cc01ddf169918a5407ca"
+  revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
 
 [[projects]]
   branch = "master"
@@ -888,7 +889,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "3a76605856fddce5718553cbb8bd50ca492a7274"
+  revision = "93218def8b18e66adbdab3eca8ec334700329f1f"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -922,7 +923,7 @@
     "googleapis/rpc/status",
   ]
   pruneopts = "UT"
-  revision = "c830210a61dfaa790e1920f8d0470fc27bc2efbe"
+  revision = "b5d43981345bdb2c233eb4bf3277847b48c6fdc6"
 
 [[projects]]
   digest = "0:"
@@ -960,6 +961,17 @@
   version = "v1.16.0"
 
 [[projects]]
+  branch = "v2"
+  digest = "0:"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    "bson",
+    "internal/json",
+  ]
+  pruneopts = "UT"
+  revision = "9856a29383ce1c59f308dd1cf0363a79b5bef6b5"
+
+[[projects]]
   digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -980,6 +992,8 @@
     "github.com/k0kubun/pp",
     "github.com/pkg/errors",
     "github.com/rai-project/config",
+    "github.com/rai-project/dlframework",
+    "github.com/rai-project/dlframework/framework/feature",
     "github.com/rai-project/dlframework/framework/options",
     "github.com/rai-project/downloadmanager",
     "github.com/rai-project/go-cupti",

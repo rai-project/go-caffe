@@ -5,9 +5,7 @@
 Please refer to the `scripts` folder or the `LIBRARY INSTALLATION` section in the [dockefiles](dockerfiles) to install caffe on your system. OpenBLAS is used.
 
 - The default blas is OpenBLAS.
-  {{% notice note %}}
   The default OpenBLAS path for mac os is `/usr/local/opt/openblas` if installed throught homebrew (openblas is keg-only, which means it was not symlinked into /usr/local, because macOS provides BLAS and LAPACK in the Accelerate framework).
-  {{% /notice %}}
 
 - The default caffe installation path is `/opt/caffe` for linux, darwin and ppc64le without powerai; `/opt/DL/caffe` for ppc64le with powerai.
 
@@ -29,9 +27,11 @@ For example,
 
 ## Run the examples
 
-Before running any example, please do `go build` to check the caffe installation and library paths set-up.
+Before running any example,
 
-Also make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
+- please do `go build` to check the caffe installation and library paths set-up
+- make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
+- `export DYLD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH` or `export LD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH`
 
 ### batch
 
