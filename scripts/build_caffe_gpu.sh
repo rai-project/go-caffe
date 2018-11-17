@@ -8,7 +8,7 @@ if [ ! -d "$CAFFE_SRC_DIR" ]; then
   git clone --single-branch --branch $FRAMEWORK_VERSION --recursive https://github.com/BVLC/caffe.git $CAFFE_SRC_DIR
 fi
 
-if [ ! -d "$CAFFE_SRC_DIR" ]; then
+if [ ! -d "$CAFFE_DIST_DIR" ]; then
   mkdir -p $CAFFE_DIST_DIR
 fi
 
@@ -18,7 +18,7 @@ cd $CAFFE_SRC_DIR && mkdir -p build && cd build && \
     -DCMAKE_CXX_STANDARD=11 \
     -DCMAKE_CXX_FLAGS=-std=c++11 \
     -DBLAS=open \
-    -DBUILD_python=OFF \
+    -DBUILD_python=ON \
     -DUSE_OPENCV=OFF \
     -DUSE_NCCL=OFF \
     -DCPU_ONLY=OFF \

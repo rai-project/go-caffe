@@ -13,6 +13,8 @@ Please refer to the `scripts` folder or the `LIBRARY INSTALLATION` section in th
 
 See [lib.go](lib.go) for details.
 
+After installing Caffe, run `export DYLD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH` on mac os or `export LD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH`on linux.
+
 ## Use Other Libary Paths
 
 To use different library paths, change CGO_CFLAGS, CGO_CXXFLAGS and CGO_LDFLAGS enviroment variables.
@@ -25,23 +27,25 @@ For example,
     export CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/nvidia/lib64 -L /usr/local/cuda-9.2/nvvm/lib64 -L /usr/local/cuda-9.2/lib64 -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/targets/x86_64-linux/lib/stubs/ -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/extras/CUPTI/lib64"
 ```
 
+Run `go build` in to check the caffe installation and library paths set-up.
+
 ## Run the examples
 
-Before running any example,
+Make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
 
-- please do `go build` to check the caffe installation and library paths set-up
-- make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
-- `export DYLD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH` or `export LD_LIBRARY_PATH=/opt/caffe/lib:$DYLD_LIBRARY_PATH`
+The default is to use GPU, if you don't have a GPU, do `go build -tags nogpu` instead of `go build`.
 
 ### batch
 
 This example is to show how to use mlmodelscope tracing to profile the inference.
 
 ```
-  cd example/batch_nvprof
-  go install
-  nvprof --profile-from-start off ./batch_nvprof
+  cd example/batch
+  go build
+  ./batch
 ```
+
+Then you can go to `localhost:16686` to look at the trace of that inference.
 
 ### batch_nvprof
 
@@ -49,7 +53,7 @@ You need GPU and CUDA to run this example. This example is to show how to use nv
 
 ```
   cd example/batch_nvprof
-  go install
+  go build
   nvprof --profile-from-start off ./batch_nvprof
 ```
 

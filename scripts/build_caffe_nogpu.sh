@@ -19,7 +19,7 @@ cd $CAFFE_SRC_DIR && rm -rf build && mkdir build && cd build && \
     -DCMAKE_CXX_FLAGS=-std=c++11 \
     -DBLAS=open \
     -DBUILD_python=ON \
-    -DUSE_OPENCV=ON \
+    -DUSE_OPENCV=OFF \
     -DCPU_ONLY=ON \
     -DUSE_CUDNN=OFF \
     -DUSE_NCCL=OFF \
