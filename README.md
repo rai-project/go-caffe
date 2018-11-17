@@ -2,7 +2,7 @@
 
 ## Caffe Installation
 
-Please refer to the `scripts` folder or the `LIBRARY INSTALLATION` section in the [dockefiles](dockerfiles) to install caffe on your system. OpenBLAS is used.
+Please refer to [scripts](scripts) or the `LIBRARY INSTALLATION` section in the [dockefiles](dockerfiles) to install caffe on your system. OpenBLAS is used.
 
 If you get an error about not being able to write to `/opt` then perform the following
 
@@ -40,7 +40,7 @@ Run `go build` in to check the Caffe installation and library paths set-up.
 
 Make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
 
-The default is to use GPU, if you don't have a GPU, do `go build -tags nogpu` instead of `go build`.
+On linux, the default is to use GPU, if you don't have a GPU, do `go build -tags nogpu` instead of `go build`.
 
 ### batch
 
