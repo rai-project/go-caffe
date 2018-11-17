@@ -4,6 +4,13 @@
 
 Please refer to the `scripts` folder or the `LIBRARY INSTALLATION` section in the [dockefiles](dockerfiles) to install caffe on your system. OpenBLAS is used.
 
+If you get an error about not being able to write to `/opt` then perform the following
+
+```
+sudo mkdir -p /opt/caffe
+sudo chown -R `whoami` /opt/caffe
+```
+
 - The default blas is OpenBLAS.
   The default OpenBLAS path for mac os is `/usr/local/opt/openblas` if installed throught homebrew (openblas is keg-only, which means it was not symlinked into /usr/local, because macOS provides BLAS and LAPACK in the Accelerate framework).
 
@@ -27,7 +34,7 @@ For example,
     export CGO_LDFLAGS="${CGO_LDFLAGS} -L /usr/local/nvidia/lib64 -L /usr/local/cuda-9.2/nvvm/lib64 -L /usr/local/cuda-9.2/lib64 -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/targets/x86_64-linux/lib/stubs/ -L /usr/local/cuda-9.2/lib64/stubs -L /usr/local/cuda-9.2/extras/CUPTI/lib64"
 ```
 
-Run `go build` in to check the caffe installation and library paths set-up.
+Run `go build` in to check the Caffe installation and library paths set-up.
 
 ## Run the examples
 
