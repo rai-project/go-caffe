@@ -4,10 +4,9 @@ sudo: required
 services:
   - docker
 before_install:
-  - cd dockerfiles
-  - make docker_build_cpu
-  - make docker_build_gpu
+  - cd {TRAVIS_BUILD_DIR}/dockerfiles
+  - make docker_build
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - make docker_push_cpu
-  - make docker_push_gpu
+  - cd {TRAVIS_BUILD_DIR}/dockerfiles
+  - make docker_push
