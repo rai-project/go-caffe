@@ -593,7 +593,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "6f9f2d02082838a11fa6ca04fee56433277f0c98"
+  revision = "9e59ca72e67122e92e114aa4593fc45019dfa246"
 
 [[projects]]
   branch = "master"
