@@ -1,6 +1,6 @@
 # Go Bindings for Caffe [![Build Status](https://travis-ci.org/rai-project/go-caffe.svg?branch=master)](https://travis-ci.org/rai-project/go-caffe)
 
-## Caffe Installation
+## Caffe nstallation
 
 Please refer to [scripts](scripts) or the `LIBRARY INSTALLATION` section in the [dockefiles](dockerfiles) to install caffe on your system. OpenBLAS is used.
 
@@ -36,7 +36,7 @@ For example,
 
 Run `go build` in to check the Caffe installation and library paths set-up.
 
-## Run the examples
+## Run The Examples
 
 Make sure you have already [install mlmodelscope dependences](https://docs.mlmodelscope.org/installation/source/dependencies/) and [set up the external services](https://docs.mlmodelscope.org/installation/source/external_services/).
 
