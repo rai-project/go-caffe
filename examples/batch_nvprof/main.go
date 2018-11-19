@@ -27,7 +27,6 @@ import (
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
-	"github.com/rai-project/tracer"
 
 	_ "github.com/rai-project/tracer/jaeger"
 )
@@ -64,8 +63,6 @@ func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 }
 
 func main() {
-	defer tracer.Close()
-
 	dir, _ := filepath.Abs("../tmp")
 	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
@@ -120,9 +117,6 @@ func main() {
 	}
 
 	ctx := context.Background()
-
-	span, ctx := tracer.StartSpanFromContext(ctx, tracer.FULL_TRACE, "caffe_batch_nvprof")
-	defer span.Finish()
 
 	predictor, err := caffe.New(
 		ctx,

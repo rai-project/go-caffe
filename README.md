@@ -1,4 +1,4 @@
-# Go Bindings for Caffe Prediction [![Build Status](https://travis-ci.org/rai-project/go-caffe.svg?branch=master)](https://travis-ci.org/rai-project/go-caffe)
+# Go Bindings for Caffe [![Build Status](https://travis-ci.org/rai-project/go-caffe.svg?branch=master)](https://travis-ci.org/rai-project/go-caffe)
 
 ## Caffe Installation
 
