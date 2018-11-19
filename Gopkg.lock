@@ -317,7 +317,7 @@
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "cd71cead8c7158223dfb2b25daa6c9ee577f660e"
+  revision = "ffc6e96b5b40f06b5e95141610c43aba78e4e4ae"
 
 [[projects]]
   digest = "0:"
@@ -562,7 +562,7 @@
   name = "github.com/rai-project/config"
   packages = ["."]
   pruneopts = "UT"
-  revision = "628ac79ac6e3bc58c01dc06e9c2fd0220094ed32"
+  revision = "4d0de45fe6c1a55b23670fb8d402451709cf21ba"
 
 [[projects]]
   branch = "master"
@@ -582,7 +582,7 @@
   name = "github.com/rai-project/downloadmanager"
   packages = ["."]
   pruneopts = "UT"
-  revision = "419eb566d9547f217f43da6dabab4a888ab263b3"
+  revision = "abede5faa82fac78258b905c466590fd71113935"
 
 [[projects]]
   branch = "master"
@@ -593,7 +593,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "28071b0af94546f640e4b19deb1b32a94f57336c"
+  revision = "6f9f2d02082838a11fa6ca04fee56433277f0c98"
 
 [[projects]]
   branch = "master"
@@ -609,7 +609,7 @@
   name = "github.com/rai-project/logger"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1489285c3ccf666d2983e3746486db940813c60d"
+  revision = "3edfaed4af1c2be49ae65399a82fab15780e6549"
 
 [[projects]]
   branch = "master"
@@ -617,7 +617,7 @@
   name = "github.com/rai-project/machine"
   packages = ["os"]
   pruneopts = "UT"
-  revision = "49b3430c3dec8bfdd1424390669eed088b3eb3d0"
+  revision = "e20c9a49017c471cbd3cbcb38d88347c794bc83d"
 
 [[projects]]
   branch = "master"
@@ -625,7 +625,7 @@
   name = "github.com/rai-project/nvidia-smi"
   packages = ["."]
   pruneopts = "UT"
-  revision = "bad2efdde8617f86ff24dd63155c974dcf1cfe9e"
+  revision = "9318a34c190dad876a01bd2b5093dc6235d1c763"
 
 [[projects]]
   branch = "master"
@@ -633,7 +633,7 @@
   name = "github.com/rai-project/nvml-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fafad6695983303fbc70d31b48814d121994df62"
+  revision = "225e3d3419d503d559a36ddd5c3ba4466c9de299"
 
 [[projects]]
   branch = "master"
@@ -641,7 +641,7 @@
   name = "github.com/rai-project/tegra"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c0fcae3ed932917905c46494a2cc9b2c4a47d1e8"
+  revision = "1d9901ca382bfae82f47b1ddb5fb67a019d254e8"
 
 [[projects]]
   branch = "master"
@@ -659,7 +659,7 @@
     "zipkin",
   ]
   pruneopts = "UT"
-  revision = "b8169d08c8bbfc193d3aaabab5e91ddb37f9d660"
+  revision = "b82207c34738938df7b8bf363cf421652d72ec97"
 
 [[projects]]
   branch = "master"
@@ -667,7 +667,7 @@
   name = "github.com/rai-project/utils"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4f4bcfa3ccfa76a563dead2cf999310718bf9461"
+  revision = "be23e9dad62b9c5de665f502450144abd61d31a6"
 
 [[projects]]
   branch = "master"
@@ -675,7 +675,7 @@
   name = "github.com/rai-project/uuid"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9408958525cb3486f7ef41bf5691d4d9e081b08e"
+  revision = "2a4c8b922cc6a17bd16f236d4bb06134972289f2"
 
 [[projects]]
   branch = "master"
@@ -683,7 +683,7 @@
   name = "github.com/rai-project/vipertags"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8dc2a1a8a7a32a0a2d482d545cc579e5fe839356"
+  revision = "8cbaab517f5d43e2d0bb7f1b237a0dfdc551cc81"
 
 [[projects]]
   branch = "master"
