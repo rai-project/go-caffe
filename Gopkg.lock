@@ -61,7 +61,7 @@
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
-  revision = "24918abba929282d6e405fedbc2ef68c3e894136"
+  revision = "0882354f28a259b7715df10a729cd76c3e8254a3"
 
 [[projects]]
   branch = "master"
@@ -110,8 +110,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "64fc3d5c40fffc817c1cc1c1d89a6e482bf1120d"
-  version = "v1.15.77"
+  revision = "5ebc7a404e942062fd3aa7ff50975498716eb990"
+  version = "v1.15.78"
 
 [[projects]]
   branch = "master"
@@ -317,7 +317,7 @@
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "7ee49f69de937ddc17eb72bc669c020b33c364d4"
+  revision = "cd71cead8c7158223dfb2b25daa6c9ee577f660e"
 
 [[projects]]
   digest = "0:"
@@ -764,7 +764,7 @@
     "remote",
   ]
   pruneopts = "UT"
-  revision = "ae103d7e593e371c69e832d5eb3347e2b80cbbc9"
+  revision = "06c7c0d9b3c7cfca13deff6e353a052e08828ad4"
 
 [[projects]]
   digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
