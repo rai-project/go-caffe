@@ -61,7 +61,7 @@
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
-  revision = "0882354f28a259b7715df10a729cd76c3e8254a3"
+  revision = "aa177ea4b30b2fe2711ced7b79cfd5947711146f"
 
 [[projects]]
   branch = "master"
@@ -574,7 +574,7 @@
     "framework/options",
   ]
   pruneopts = "UT"
-  revision = "8ffb7db4aec288ca7bd8f56ebf296841e082db89"
+  revision = "723c0322c2045e4b41c8f24332d8d43d82d858e6"
 
 [[projects]]
   branch = "master"
