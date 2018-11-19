@@ -47,6 +47,9 @@ RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION 
   -DUSE_NCCL=OFF \
   -DCPU_ONLY=OFF \
   -DUSE_CUDNN=ON \
+  -DCUDA_ARCH_NAME=Manual \
+  -DCUDA_ARCH_BIN="35 52 60 61 70" \
+  -DCUDA_ARCH_PTX="61 70" \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \
