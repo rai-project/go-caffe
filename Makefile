@@ -19,13 +19,8 @@ install-deps:
 	go get -u -v github.com/gogo/protobuf/protoc-gen-gofast
 	go get -u -v github.com/gogo/protobuf/protoc-gen-gogofaster
 	go get -u -v github.com/gogo/protobuf/protoc-gen-gogoslick
-
-glide-install:
-	glide install --force
-
-logrus-fix:
-	rm -fr vendor/github.com/sirupsen
-	find vendor -type f -exec sed -i 's/sirupsen/sirupsen/g' {} +
+	go get github.com/golang/dep
+	dep ensure -v
 
 generate: clean
 	protoc --gogofaster_out=import_path=proto:proto -Iproto -I$(GOPATH)/src proto/caffe.proto
