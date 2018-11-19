@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   liblmdb-dev \
   libprotobuf-dev \
   libsnappy-dev \
+  libopenblas-dev \
   protobuf-compiler && \
   rm -rf /var/lib/apt/lists/*
 
