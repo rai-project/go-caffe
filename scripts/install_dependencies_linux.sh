@@ -20,4 +20,5 @@ apt-get update && apt-get install -y --no-install-recommends \
         python-numpy \
         python-pip \
         python-setuptools \
-        python-scipy 
+        python-scipy  \
+	libopenblas-dev
