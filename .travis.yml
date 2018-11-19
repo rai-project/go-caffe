@@ -8,3 +8,5 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/dockerfiles
   - make docker_build
   - make docker_push
+after_script:
+  - curl -X POST https://hooks.microbadger.com/images/carml/go-caffe/U9dbcjcraU2tNes2UqN_WuUNEfo=

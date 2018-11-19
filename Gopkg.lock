@@ -633,7 +633,7 @@
   name = "github.com/rai-project/nvml-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "225e3d3419d503d559a36ddd5c3ba4466c9de299"
+  revision = "4ecfe802fabb03890e795c5c1375c2d95ae717f4"
 
 [[projects]]
   branch = "master"
