@@ -1,4 +1,4 @@
-FROM carml/base:ppc64le-gpu-latest
+FROM carml/base:ppc64le-cpu-latest
 MAINTAINER Abdul Dakkak <dakkak@illinois.edu>
 
 # Build-time metadata as defined at http://label-schema.org
