@@ -6,7 +6,13 @@ services:
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - cd ${TRAVIS_BUILD_DIR}/dockerfiles
-  - make docker_build
-  - make docker_push
+  - make docker_build_gpu
+  - printf '%20s\n' | tr ' ' - # an hline
+  - make docker_push_gpu
+  - printf '%20s\n' | tr ' ' - # an hline
+  - make docker_build_cpu
+  - printf '%20s\n' | tr ' ' - # an hline
+  - make docker_push_cpu
+  - printf '%20s\n' | tr ' ' - # an hline
 after_script:
   - curl -X POST https://hooks.microbadger.com/images/carml/go-caffe/U9dbcjcraU2tNes2UqN_WuUNEfo=
