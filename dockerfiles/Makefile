@@ -1,8 +1,8 @@
 
 default: docker_build_cpu
 
-# Build Docker image
-build: docker_build output
+build: docker_build output ## Build Docker image
+push: docker_push output ## Push Docker image
 
 # Build and push Docker image
 release: docker_build docker_push
