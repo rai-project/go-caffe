@@ -574,7 +574,7 @@
     "framework/options",
   ]
   pruneopts = "UT"
-  revision = "13b48c88d5875c99e6845279ad3a25117a4281ad"
+  revision = "36ee9f0c9d53b95e55c137cac63110fa820909e4"
 
 [[projects]]
   branch = "master"
@@ -593,7 +593,7 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "c65e88a8f6fa6a2fcd9ff164428e3dc3090ad86d"
+  revision = "ffa685874f19a86b0e6cbf9c8e1085d26987e999"
 
 [[projects]]
   branch = "master"
@@ -659,7 +659,7 @@
     "zipkin",
   ]
   pruneopts = "UT"
-  revision = "99de7d4e81ce7fc75f5d12a31cddd5db8f233281"
+  revision = "2f4b316a31705c787d114355f8cf4f54718e7e69"
 
 [[projects]]
   branch = "master"
