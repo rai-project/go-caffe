@@ -41,11 +41,12 @@ RUN git clone --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.c
   && cmake .. \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
+  -DCMAKE_CXX_FLAGS=-std=c++11 \
   -DBLAS=open \
-  -DBUILD_python=OFF \
+  -DBUILD_python=ON \
   -DUSE_OPENCV=OFF \
-  -DUSE_NCCL=OFF \
   -DCPU_ONLY=ON \
+  -DUSE_NCCL=OFF \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \
@@ -59,6 +60,6 @@ ENV PKG github.com/rai-project/go-caffe
 WORKDIR $GOPATH/src/$PKG
 
 RUN git clone --depth=1 https://${PKG}.git . && \
-  dep ensure -v && \
+  dep ensure -vendor-only -v && \
   go install -a -tags=nogpu -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"&& \
   rm -fr vendor

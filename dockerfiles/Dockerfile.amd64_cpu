@@ -41,11 +41,12 @@ RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION 
   && cmake .. \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
+  -DCMAKE_CXX_FLAGS=-std=c++11 \
   -DBLAS=open \
-  -DBUILD_python=OFF \
+  -DBUILD_python=ON \
   -DUSE_OPENCV=OFF \
-  -DUSE_NCCL=OFF \
   -DCPU_ONLY=ON \
+  -DUSE_NCCL=OFF \
   && make -j"$(nproc)" install \
   && ldconfig \
   && make clean \

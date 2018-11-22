@@ -21,6 +21,5 @@ cd $CAFFE_SRC_DIR && rm -rf build && mkdir build && cd build && \
     -DBUILD_python=ON \
     -DUSE_OPENCV=OFF \
     -DCPU_ONLY=ON \
-    -DUSE_CUDNN=OFF \
     -DUSE_NCCL=OFF \
     && make -j"$(nproc)" install
