@@ -24,4 +24,4 @@ jobs:
       - CPU
       - GPU
     steps:
-      - script: 'curl -X POST https://hooks.microbadger.com/images/carml/go-caffe/U9dbcjcraU2tNes2UqN_WuUNEfo=
+      - script: 'curl -X POST https://hooks.microbadger.com/images/carml/go-caffe/U9dbcjcraU2tNes2UqN_WuUNEfo='
