@@ -8,6 +8,6 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/dockerfiles
   - make pull
   - travis_wait 50 make build
-  - make push;make push
+  - travis_retry make push
 after_script:
   - curl -X POST https://hooks.microbadger.com/images/carml/go-caffe/U9dbcjcraU2tNes2UqN_WuUNEfo=
