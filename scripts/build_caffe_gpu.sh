@@ -20,11 +20,11 @@ cd $CAFFE_SRC_DIR && mkdir -p build && cd build && \
     -DBLAS=open \
     -DBUILD_python=ON \
     -DUSE_OPENCV=OFF \
-    -DUSE_NCCL=OFF \
     -DCPU_ONLY=OFF \
-    -DCUDA_ARCH_NAME=Manual \
-    -DCUDA_ARCH_BIN="30 35 50 52 60 61 70" \
-    -DCUDA_ARCH_PTX="30 35 50 52 60 61 70" \
     -DUSE_CUDNN=ON \
+    -DUSE_NCCL=OFF \
+    -DCUDA_ARCH_NAME=Manual \
+    -DCUDA_ARCH_BIN="30 35 37 50 52 53 60 61 62 70 75" \
+    -DCUDA_ARCH_PTX="62 70 75" \
     -DCUDNN_ROOT=/usr/include \
     && make -j"$(nproc)" install
