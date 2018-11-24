@@ -6,7 +6,7 @@ services:
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - cd ${TRAVIS_BUILD_DIR}/dockerfiles
-  - make pull
+  - make docker_pull
   - travis_wait 50 make build
   - travis_retry make push
 after_script:
