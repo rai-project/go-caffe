@@ -1,0 +1,71 @@
+FROM carml/base:amd64-cpu-mlperf-latest
+MAINTAINER Abdul Dakkak <dakkak@illinois.edu>
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
+ARG ARCH
+ARG FRAMEWORK_VERSION
+LABEL org.carml.go-caffe.build-date=$BUILD_DATE \
+  org.carml.go-caffe.name="go-caffe bindings for go" \
+  org.carml.go-caffe.description="" \
+  org.carml.go-caffe.url="https://www.carml.org/" \
+  org.carml.go-caffe.vcs-ref=$VCS_REF \
+  org.carml.go-caffe.vcs-url=$VCS_URL \
+  org.carml.go-caffe.vendor="CarML" \
+  org.carml.go-caffe.arch=$ARCH \
+  org.carml.go-caffe.version=$VERSION \
+  org.carml.go-caffe.framework_version=$FRAMEWORK_VERSION \
+  org.carml.go-caffe.schema-version="1.0"
+
+########## DEPENDENCIES INSTALLATION ###################
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  libboost-all-dev \
+  libgflags-dev \
+  libgoogle-glog-dev \
+  libhdf5-serial-dev \
+  libleveldb-dev \
+  liblmdb-dev \
+  libprotobuf-dev \
+  libsnappy-dev \
+  libopenblas-dev \
+  protobuf-compiler \
+  python-dev \
+  python-numpy \
+  python-pip \
+  python-setuptools \
+  python-scipy  && \
+  rm -rf /var/lib/apt/lists/*
+
+########## LIBRARY INSTALLATION ###################
+ENV CAFFE_DIST_DIR=/opt/caffe
+
+RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION https://github.com/BVLC/caffe.git && cd caffe && \
+  mkdir build && cd build \
+  && cmake .. \
+  -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
+  -DCMAKE_CXX_STANDARD=11 \
+  -DCMAKE_CXX_FLAGS_RELEASE=-O2\ -g\ -Wall\ -Werror=format-security\ -Werror=implicit-function-declaration\ -Wl,-z,defs\ -Wl,-z,now\ -fasynchronous-unwind-tables\ -fexceptions\ -grecord-gcc-switches\ -mno-avx\ -mno-aes\
+  -DBLAS=open \
+  -DBUILD_python=ON \
+  -DUSE_OPENCV=OFF \
+  -DCPU_ONLY=ON \
+  -DUSE_NCCL=OFF \
+  && make -j"$(nproc)" install \
+  && ldconfig \
+  && make clean \
+  && cd .. \
+  && rm -rf build
+
+RUN echo "$CAFFE_DIST_DIR/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig
+
+########## GO BINDING INSTALLATION ###################
+ENV PKG github.com/rai-project/go-caffe
+WORKDIR $GOPATH/src/$PKG
+
+RUN git clone --depth=1 https://${PKG}.git . && \
+  dep ensure -v && \
+  go install -a -tags=nogpu -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"&& \
+  rm -fr vendor

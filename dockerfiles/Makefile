@@ -62,12 +62,16 @@ docker_build_cpu:  # Build CPU Docker image
 	@docker build $(BUILD_ARGS) \
 		-f Dockerfile.$(ARCH)_cpu \
 		-t "$(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG)" .
-
+docker_build_cpu_mlperf:  # Build CPU Docker image as per MlPerf constraints
+	@docker build $(BUILD_ARGS) \
+		-f Dockerfile.$(ARCH)_cpu_mlperf \
+		-t "$(DOCKER_IMAGE):$(ARCH)-cpu-mlperf-$(DOCKER_TAG)" .
 docker_build: docker_build_cpu docker_build_gpu
 
 docker_pull_cpu:
 	docker pull carml/base:$(ARCH)-cpu-latest
-
+docker_pull_cpu_mlperf:
+	docker pull carml/base:$(ARCH)-cpu-mlperf-latest
 docker_pull_gpu:
 	docker pull carml/base:$(ARCH)-gpu-latest
 
@@ -77,6 +81,11 @@ docker_push_cpu: # Tag image as latest and Push to DockerHub
 	docker tag $(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-cpu-latest
 	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG)
 	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-latest
+
+docker_push_cpu_mlperf: # Tag image as latest and Push to DockerHub
+	docker tag $(DOCKER_IMAGE):$(ARCH)-cpu-mlperf-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-cpu-mlperf-latest
+	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-mlperf-$(DOCKER_TAG)
+	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-mlperf-latest
 
 docker_push_gpu: # Tag image as latest and Push to DockerHub
 	docker tag $(DOCKER_IMAGE):$(ARCH)-gpu-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-gpu-latest
