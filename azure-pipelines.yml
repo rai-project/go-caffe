@@ -9,6 +9,16 @@ jobs:
           make docker_pull_cpu
           make docker_build_cpu
           ./push_cpu.sh
+  - job: CPU
+    pool:
+      vmImage: 'Ubuntu 16.04'
+      steps:
+      - bash: |
+          docker login -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
+          cd dockerfiles
+          make docker_pull_cpu_mlperf
+          make docker_build_cpu_mlperf
+          ./push_cpu_mlperf.sh 
   - job: GPU
     pool:
       vmImage: 'Ubuntu 16.04'

@@ -47,7 +47,7 @@ RUN git clone --single-branch --depth=1 --recursive --branch=$FRAMEWORK_VERSION 
   && cmake .. \
   -DCMAKE_INSTALL_PREFIX=$CAFFE_DIST_DIR \
   -DCMAKE_CXX_STANDARD=11 \
-  -DCMAKE_CXX_FLAGS_RELEASE=-O2\ -g\ -Wall\ -Werror=format-security\ -Werror=implicit-function-declaration\ -Wl,-z,defs\ -Wl,-z,now\ -fasynchronous-unwind-tables\ -fexceptions\ -grecord-gcc-switches\ -mno-avx\ -mno-aes\ -fno-tree-vectorize\
+  -DCMAKE_CXX_FLAGS_RELEASE=$CXX_FLAGS \
   -DBLAS=open \
   -DBUILD_python=ON \
   -DUSE_OPENCV=OFF \
