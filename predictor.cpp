@@ -137,11 +137,14 @@ void Predictor::Predict(float *inputData) {
   if (mode_ == Caffe::CPU) {
     blob->set_cpu_data(inputData);
   } else {
+#ifndef CPU_ONLY
     blob->set_gpu_data(inputData);
     blob->mutable_gpu_data();
+#endif
   }
 
   const std::vector<caffe::Blob<float> *> bottom{blob};
+#if 0
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr && profile_enabled_ == false) {
@@ -151,6 +154,7 @@ void Predictor::Predict(float *inputData) {
     net_->add_after_forward(end_profile);
     profile_enabled_ = true;
   }
+#endif
 
   // net_->set_debug_info(true);
   const auto rr = net_->Forward(bottom);
