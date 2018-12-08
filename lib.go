@@ -3,8 +3,8 @@ package caffe
 // #cgo LDFLAGS: -lstdc++ -lglog -lboost_system
 // #cgo CXXFLAGS: -std=c++11 -I${SRCDIR}/cbits -O3 -Wall -g
 // #cgo CXXFLAGS: -Wno-sign-compare -Wno-unused-function -DBLAS=open -Wno-unused-local-typedef
-// #cgo darwin CXXFLAGS: -I/opt/caffe/include -I/usr/local/opt/openblas/include -DCPU_ONLY=1
-// #cgo darwin LDFLAGS: -lcaffe -L/opt/caffe/lib
+// #cgo darwin CXXFLAGS: -I/Users/ayushi/Desktop/caffe/include -I/Users/ayushi/Desktop/caffe/build/src -I/usr/local/opt/openblas/include -DCPU_ONLY=1
+// #cgo darwin LDFLAGS: -lcaffe -L/Users/ayushi/Desktop/caffe/build/lib/
 // #cgo !darwin,nogpu CXXFLAGS: -DCPU_ONLY=1
 // #cgo !darwin,!nogpu CXXFLAGS: -I/usr/local/cuda/include
 // #cgo !darwin,!nogpu LDFLAGS: -lcublas -lcudnn -L/usr/local/cuda/lib64 -L/usr/local/cuda
