@@ -158,9 +158,9 @@ void Predictor::Predict(float *inputData) {
 
   // net_->set_debug_info(true);
   const auto rr = net_->Forward(bottom);
-  const auto output_layer = rr[0];
+  const auto output_layer = net_->output_blobs()[0];
 
-  pred_len_ = output_layer->channels();
+  pred_len_ = output_layer->height();
   result_ = output_layer->cpu_data();
 }
 

@@ -4,7 +4,6 @@ import (
 	_ "bufio"
 	"context"
 	"fmt"
-	"reflect"
 	"image"
 	_ "os"
 	"path/filepath"
@@ -20,16 +19,14 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	_ "github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
-	cupti "github.com/rai-project/go-cupti"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	"github.com/rai-project/tracer"
 	_ "github.com/rai-project/tracer/all"
-	"github.com/rai-project/tracer/ctimer"
 )
 
 var (
-	batchSize   = 1
-	model = "SSD_VOC0712"
+	batchSize = 1
+	// model     = "SSD_VOC0712"
 )
 
 // convert go Image to 1-dim array
@@ -58,18 +55,16 @@ func cvtImageTo1DArray(src image.Image, mean []float32) ([]float32, error) {
 func main() {
 	defer tracer.Close()
 
-	dir, _ := filepath.Abs("../tmp")
-	dir = filepath.Join(dir, model)
+	dir, _ := filepath.Abs("../SSD_300x300")
+	// dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
 	weights := filepath.Join(dir, "VGG_VOC0712_SSD_300x300_iter_120000.caffemodel")
-	labelmap := filepath.Join(dir, "labelmap_voc.prototxt")
+	// labelmap := filepath.Join(dir, "labelmap_voc.prototxt")
 
-	 _ = labelmap
-
+	// _ = labelmap
 
 	imgDir, _ := filepath.Abs("../_fixtures")
 	imagePath := filepath.Join(imgDir, "fish-bike.jpg")
-
 
 	img, err := imgio.Open(imagePath)
 	if err != nil {
@@ -79,7 +74,7 @@ func main() {
 	var input []float32
 	for ii := 0; ii < batchSize; ii++ {
 		resized := transform.Resize(img, 300, 300, transform.Linear)
-		res, err := cvtImageTo1DArray(resized, []float32{104,117,123}) // BGR
+		res, err := cvtImageTo1DArray(resized, []float32{104, 117, 123}) // BGR
 		if err != nil {
 			panic(err)
 		}
@@ -118,49 +113,45 @@ func main() {
 		panic(err)
 	}
 
-	var cu *cupti.CUPTI
-	if nvidiasmi.HasGPU {
-		cu, err = cupti.New(cupti.Context(ctx))
-		if err != nil {
-			panic(err)
-		}
-	}
+	// var cu *cupti.CUPTI
+	// if nvidiasmi.HasGPU {
+	// 	cu, err = cupti.New(cupti.Context(ctx))
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// }
 
-	predictor.StartProfiling("predict", "")
+	// predictor.StartProfiling("predict", "")
 
-	err = predictor.Predict(ctx, input)
-	if err != nil {
-		panic(err)
-	}
+	// err = predictor.Predict(ctx, input)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	predictor.EndProfiling()
+	// predictor.EndProfiling()
 
-	if nvidiasmi.HasGPU {
-		cu.Wait()
-		cu.Close()
-	}
+	// if nvidiasmi.HasGPU {
+	// 	cu.Wait()
+	// 	cu.Close()
+	// }
 
-	profBuffer, err := predictor.ReadProfile()
-	if err != nil {
-		panic(err)
-	}
-	predictor.DisableProfiling()
+	// profBuffer, err := predictor.ReadProfile()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// predictor.DisableProfiling()
 
-	t, err := ctimer.New(profBuffer)
-	if err != nil {
-		panic(err)
-	}
-	t.Publish(ctx, tracer.FRAMEWORK_TRACE)
+	// t, err := ctimer.New(profBuffer)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// t.Publish(ctx, tracer.FRAMEWORK_TRACE)
 
 	output, err := predictor.ReadPredictionOutput(ctx)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(reflect.TypeOf(output))
-	fmt.Printf("%v", output)
-
-
-
+	fmt.Println(output)
 
 	// //Postprocessing
 
