@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"unsafe"
 
+  // "github.com/k0kubun/pp"
   "gorgonia.org/tensor"
 	"github.com/rai-project/tracer"
 	"github.com/rai-project/nvidia-smi"
@@ -105,9 +106,16 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
   span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
   defer span.Finish()
 
+  p.SetInput(0, data)
+
 	C.PredictCaffe(p.handle)
 
 	return nil
+}
+
+func (p *Predictor) SetInput(idx int, data []float32) {
+	ptr := (*C.float)(unsafe.Pointer(&data[0]))
+  C.SetInputCaffe(p.handle, C.int(idx), ptr, C.size_t(len(data)))
 }
 
 func (p *Predictor) GetOutputShape(idx int) []int {
@@ -127,7 +135,9 @@ func prod(sz []int) int {
 func (p *Predictor) GetOutputData(idx int) []float32 {
   shape := p.GetOutputShape(idx)
   sz := prod(shape)
+
   data := C.GetOutputDataCaffe(p.handle, C.int(idx))
+
 	return (*[1 << 30]float32)(unsafe.Pointer(data))[:sz:sz]
 }
 

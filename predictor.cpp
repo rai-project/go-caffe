@@ -148,8 +148,8 @@ void Predictor::Predict() {
 #endif
 
   // net_->set_debug_info(true);
-  const auto rr = net_->Forward(input_blobs_);
-  output_blobs_ = net_->output_blobs();
+  output_blobs_ = net_->Forward(input_blobs_);
+  // output_blobs_ = net_->output_blobs();
 }
 
 void Predictor::SetInput(int idx, float *data, size_t sz) {
@@ -233,6 +233,7 @@ const int *GetOutputShapeCaffe(PredictorHandle pred, int idx, int *len) {
   }
   auto shape = predictor->GetOutputShape(idx);
   *len = shape.size();
+  std::cout << "len(size) = " << shape.size()[0] << "\n";
   return shape.data();
 }
 
