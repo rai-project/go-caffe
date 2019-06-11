@@ -1,8 +1,9 @@
 {
   "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
   "files.associations": {
-    "*.cu": "c",
+    "*.mc": "cpp",
     "*.js": "javascriptreact",
+    "*.cu": "c",
     "Dockerfile.*": "dockerfile",
     ".aliases": "bat",
     ".env": "bat",
@@ -42,6 +43,25 @@
     "chrono": "cpp",
     "atomic": "cpp",
     "ios": "cpp",
-    "system_error": "cpp"
+    "system_error": "cpp",
+    "cctype": "cpp",
+    "clocale": "cpp",
+    "cmath": "cpp",
+    "cstdio": "cpp",
+    "cstdlib": "cpp",
+    "cstring": "cpp",
+    "cwchar": "cpp",
+    "cwctype": "cpp",
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "condition_variable": "cpp",
+    "cstdint": "cpp",
+    "memory_resource": "cpp",
+    "iosfwd": "cpp",
+    "iostream": "cpp",
+    "limits": "cpp",
+    "mutex": "cpp",
+    "ostream": "cpp",
+    "streambuf": "cpp"
   }
 }

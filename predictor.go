@@ -112,10 +112,35 @@ func (p *Predictor) Predict(ctx context.Context, data []tensor.Tensor) error {
 	return nil
 }
 
+func (p *Predictor) GetOutputShape(ctx context.Context, int idx) []int {
+  var sz int64
+  data := C.GetOutputShapeCaffe(p.handle, idx, (*C.int64_t)(unsafe.Pointer(&sz)))
+
+	return (*[1 << 30]int)(unsafe.Pointer(data))[:sz:sz]
+}
+
+func prod(sz []int) int {
+  res := 1 
+  for _, a := range sz {
+    res *= a
+  }
+  return res
+}
+
+func (p *Predictor) GetOutput(ctx context.Context, int idx) []float32 {
+ 
+  shape := p.GetOutputShape(ctx, idx)
+  sz := prod(shape)
+
+  data := C.GetOutputDataCaffe(p.handle, idx)
+	return (*[1 << 30]float32)(unsafe.Pointer(data))[:sz:sz]
+}
+
 func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]float32, error) {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_prediction_output")
 	defer span.Finish()
 
+  
 	batchSize := p.options.BatchSize()
 	predLen := int(C.GetPredLenCaffe(p.handle))
 	length := batchSize * predLen

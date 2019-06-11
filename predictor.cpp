@@ -83,7 +83,11 @@ class Predictor {
   Predictor(const string &model_file, const string &trained_file,
             int batch_size, caffe::Caffe::Brew mode);
 
-  void Predict(float *inputData);
+  void Predict();
+
+  void SetInput(int index, float *data, size_t size);
+  float *GetOutputData(int idx);
+  std::vector<int> GetOutputShape(int idx);
 
   void setMode() {
     Caffe::set_mode(mode_);
@@ -97,8 +101,9 @@ class Predictor {
   int batch_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
   int pred_len_;
-  std::vector<float *> results_{nullptr};
-  int *output_indexes_;
+  std::vector<float *> inputs_{nullptr};
+  std::vector<caffe::Blob<float> *> input_blobs_{nullptr};
+  std::vector<caffe::Blob<float> *> output_blobs_{nullptr};
   profile *prof_{nullptr};
   bool profile_enabled_{false};
 };
@@ -150,14 +155,10 @@ void Predictor::Predict() {
   // net_->set_debug_info(true);
   const auto rr = net_->Forward(bottom);
 
-  for (int ii = 0; ii < output_indexes_.size(); ii++) {
-    const auto output_layer = net_->output_blobs()[output_indexes_[ii]];
-    pred_len_ += output_layer->height();
-    results_[ii] = output_layer->cpu_data();
-  }
+  output_blobs_ = net_->output_blobs();
 }
 
-void Predictor::SetInput(int index, void *data, size_t size) {
+void Predictor::SetInput(int index, float *data, size_t size) {
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
 
   if (mode_ == Caffe::CPU) {
@@ -169,18 +170,24 @@ void Predictor::SetInput(int index, void *data, size_t size) {
 #endif
   }
 
-  const std::vector<caffe::Blob<float> *> bottom{blob};
+  input_blobs_.emplace_back(blob)
 }
 
-size_t Predictor::GetOutputSize(int index) {}
+std::vector<int> Predictor::GetOutputShape(int idx) {
+  auto output_layer = output_blobs_[idx];
+  return output_layer->shape();
+}
 
-void Predictor::GetOutputData(int index) {}
+float *Predictor::GetOutputData(int idx) {
+  auto output_layer = output_blobs_[idx];
+  return output_layer->cpu_data();
+}
 
 PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
-                          std::vector<int> output_indexes, int mode) {
+                          int mode) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch_size,
-                                   output_indexes, (caffe::Caffe::Brew)mode);
+                                   (caffe::Caffe::Brew)mode);
     return (void *)ctx;
   } catch (const std::invalid_argument &ex) {
     LOG(ERROR) << "exception: " << ex.what();
@@ -202,21 +209,39 @@ void SetModeCaffe(int mode) {
 
 void InitCaffe() { ::google::InitGoogleLogging("go-caffe"); }
 
-void PredictCaffe(PredictorContext pred, float *inputData) {
+void PredictCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
   }
-  predictor->Predict(inputData);
+  predictor->Predict();
   return;
 }
 
-const std::vector<float *> GetPredictionsCaffe(PredictorContext pred) {
+void SetInputCaffe(PredictorContext pred, float *data, size_t sz) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return;
+  }
+  predictor->SetInput(pred, data, sz);
+}
+
+const float *GetOutputDataCaffe(PredictorContext pred, int idx) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
   }
-  return predictor->results_;
+  return predictor->GetOutput(idx);
+}
+
+const int *GetOutputShapeCaffe(PredictorContext pred, int idx, int *len) {
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    return nullptr;
+  }
+  auto shape = predictor->GetOutputShape(idx);
+  *len = shape.size();
+  return shape.data();
 }
 
 void DeleteCaffe(PredictorContext pred) {
