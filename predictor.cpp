@@ -97,18 +97,21 @@ class Predictor {
   int batch_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
   int pred_len_;
-  const float *result_{nullptr};
+  std::vector<float *> results_{nullptr};
+  int *output_indexes_;
   profile *prof_{nullptr};
   bool profile_enabled_{false};
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch_size, caffe::Caffe::Brew mode) {
+                     int batch_size, std::vector<int> output_indexes,
+                     caffe::Caffe::Brew mode) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
 
   mode_ = mode;
+  output_indexes_ = output_indexes;
 
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
@@ -127,24 +130,12 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->Reshape();
 }
 
-void Predictor::Predict(float *inputData) {
+void Predictor::Predict() {
   setMode();
 
-  result_ = nullptr;
+  results_ = nullptr;
 
-  auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-
-  if (mode_ == Caffe::CPU) {
-    blob->set_cpu_data(inputData);
-  } else {
-#ifndef CPU_ONLY
-    blob->set_gpu_data(inputData);
-    blob->mutable_gpu_data();
-#endif
-  }
-
-  const std::vector<caffe::Blob<float> *> bottom{blob};
-#if 0
+#if 1
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr && profile_enabled_ == false) {
@@ -158,17 +149,38 @@ void Predictor::Predict(float *inputData) {
 
   // net_->set_debug_info(true);
   const auto rr = net_->Forward(bottom);
-  const auto output_layer = net_->output_blobs()[0];
 
-  pred_len_ = output_layer->height();
-  result_ = output_layer->cpu_data();
+  for (int ii = 0; ii < output_indexes_.size(); ii++) {
+    const auto output_layer = net_->output_blobs()[output_indexes_[ii]];
+    pred_len_ += output_layer->height();
+    results_[ii] = output_layer->cpu_data();
+  }
 }
 
+void Predictor::SetInput(int index, void *data, size_t size) {
+  auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
+
+  if (mode_ == Caffe::CPU) {
+    blob->set_cpu_data(inputData);
+  } else {
+#ifndef CPU_ONLY
+    blob->set_gpu_data(inputData);
+    blob->mutable_gpu_data();
+#endif
+  }
+
+  const std::vector<caffe::Blob<float> *> bottom{blob};
+}
+
+size_t Predictor::GetOutputSize(int index) {}
+
+void Predictor::GetOutputData(int index) {}
+
 PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
-                          int mode) {
+                          std::vector<int> output_indexes, int mode) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch_size,
-                                   (caffe::Caffe::Brew)mode);
+                                   output_indexes, (caffe::Caffe::Brew)mode);
     return (void *)ctx;
   } catch (const std::invalid_argument &ex) {
     LOG(ERROR) << "exception: " << ex.what();
@@ -199,12 +211,12 @@ void PredictCaffe(PredictorContext pred, float *inputData) {
   return;
 }
 
-const float *GetPredictionsCaffe(PredictorContext pred) {
+const std::vector<float *> GetPredictionsCaffe(PredictorContext pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
   }
-  return predictor->result_;
+  return predictor->results_;
 }
 
 void DeleteCaffe(PredictorContext pred) {
