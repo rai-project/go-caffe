@@ -18,6 +18,8 @@
 #define DEBUG_STMT
 #endif
 
+#define ENABLE_PROFILING 1
+
 using namespace caffe;
 using std::string;
 using json = nlohmann::json;
@@ -82,11 +84,9 @@ class Predictor {
  public:
   Predictor(const string &model_file, const string &trained_file,
             int batch_size, caffe::Caffe::Brew mode);
-
   void Predict();
-
-  void SetInput(int index, float *data, size_t size);
-  float *GetOutputData(int idx);
+  void SetInput(int idx, float *data, size_t size);
+  const float *GetOutputData(int idx);
   std::vector<int> GetOutputShape(int idx);
 
   void setMode() {
@@ -100,7 +100,7 @@ class Predictor {
   int width_, height_, channels_;
   int batch_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
-  int pred_len_;
+  // int pred_len_;
   std::vector<float *> inputs_{nullptr};
   std::vector<caffe::Blob<float> *> input_blobs_{nullptr};
   std::vector<caffe::Blob<float> *> output_blobs_{nullptr};
@@ -109,20 +109,17 @@ class Predictor {
 };
 
 Predictor::Predictor(const string &model_file, const string &trained_file,
-                     int batch_size, std::vector<int> output_indexes,
-                     caffe::Caffe::Brew mode) {
+                     int batch_size, caffe::Caffe::Brew mode) {
   /* Load the network. */
   net_.reset(new Net<float>(model_file, TEST));
   net_->CopyTrainedLayersFrom(trained_file);
 
-  mode_ = mode;
-  output_indexes_ = output_indexes;
-
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
   CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
 
-  const auto input_layer = net_->input_blobs()[0];
+  mode_ = mode;
 
+  const auto input_layer = net_->input_blobs()[0];
   width_ = input_layer->width();
   height_ = input_layer->height();
   channels_ = input_layer->channels();
@@ -138,9 +135,7 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
 void Predictor::Predict() {
   setMode();
 
-  results_ = nullptr;
-
-#if 1
+#if ENABLE_PROFILING
   StartProfile<float> *start_profile = nullptr;
   EndProfile<float> *end_profile = nullptr;
   if (prof_ != nullptr && profile_enabled_ == false) {
@@ -153,24 +148,21 @@ void Predictor::Predict() {
 #endif
 
   // net_->set_debug_info(true);
-  const auto rr = net_->Forward(bottom);
-
+  const auto rr = net_->Forward(input_blobs_);
   output_blobs_ = net_->output_blobs();
 }
 
-void Predictor::SetInput(int index, float *data, size_t size) {
+void Predictor::SetInput(int idx, float *data, size_t sz) {
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
-
   if (mode_ == Caffe::CPU) {
-    blob->set_cpu_data(inputData);
+    blob->set_cpu_data(data);
   } else {
 #ifndef CPU_ONLY
-    blob->set_gpu_data(inputData);
+    blob->set_gpu_data(data);
     blob->mutable_gpu_data();
 #endif
   }
-
-  input_blobs_.emplace_back(blob)
+  input_blobs_[idx] = blob;
 }
 
 std::vector<int> Predictor::GetOutputShape(int idx) {
@@ -178,13 +170,13 @@ std::vector<int> Predictor::GetOutputShape(int idx) {
   return output_layer->shape();
 }
 
-float *Predictor::GetOutputData(int idx) {
+const float *Predictor::GetOutputData(int idx) {
   auto output_layer = output_blobs_[idx];
   return output_layer->cpu_data();
 }
 
-PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
-                          int mode) {
+PredictorHandle NewCaffe(char *model_file, char *trained_file, int batch_size,
+                         int mode) {
   try {
     const auto ctx = new Predictor(model_file, trained_file, batch_size,
                                    (caffe::Caffe::Brew)mode);
@@ -209,7 +201,7 @@ void SetModeCaffe(int mode) {
 
 void InitCaffe() { ::google::InitGoogleLogging("go-caffe"); }
 
-void PredictCaffe(PredictorContext pred) {
+void PredictCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -218,23 +210,23 @@ void PredictCaffe(PredictorContext pred) {
   return;
 }
 
-void SetInputCaffe(PredictorContext pred, float *data, size_t sz) {
+void SetInputCaffe(PredictorHandle pred, int idx, float *data, size_t sz) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
   }
-  predictor->SetInput(pred, data, sz);
+  predictor->SetInput(idx, data, sz);
 }
 
-const float *GetOutputDataCaffe(PredictorContext pred, int idx) {
+const float *GetOutputDataCaffe(PredictorHandle pred, int idx) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
   }
-  return predictor->GetOutput(idx);
+  return predictor->GetOutputData(idx);
 }
 
-const int *GetOutputShapeCaffe(PredictorContext pred, int idx, int *len) {
+const int *GetOutputShapeCaffe(PredictorHandle pred, int idx, int *len) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
@@ -244,7 +236,7 @@ const int *GetOutputShapeCaffe(PredictorContext pred, int idx, int *len) {
   return shape.data();
 }
 
-void DeleteCaffe(PredictorContext pred) {
+void DeleteCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -257,7 +249,7 @@ void DeleteCaffe(PredictorContext pred) {
   delete predictor;
 }
 
-void StartProfilingCaffe(PredictorContext pred, const char *name,
+void StartProfilingCaffe(PredictorHandle pred, const char *name,
                          const char *metadata) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
@@ -276,7 +268,7 @@ void StartProfilingCaffe(PredictorContext pred, const char *name,
   }
 }
 
-void EndProfilingCaffe(PredictorContext pred) {
+void EndProfilingCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -286,7 +278,7 @@ void EndProfilingCaffe(PredictorContext pred) {
   }
 }
 
-void DisableProfilingCaffe(PredictorContext pred) {
+void DisableProfilingCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -296,7 +288,7 @@ void DisableProfilingCaffe(PredictorContext pred) {
   }
 }
 
-char *ReadProfileCaffe(PredictorContext pred) {
+char *ReadProfileCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return strdup("");
@@ -309,7 +301,7 @@ char *ReadProfileCaffe(PredictorContext pred) {
   return strdup(cstr);
 }
 
-int GetWidthCaffe(PredictorContext pred) {
+int GetWidthCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -317,7 +309,7 @@ int GetWidthCaffe(PredictorContext pred) {
   return predictor->width_;
 }
 
-int GetHeightCaffe(PredictorContext pred) {
+int GetHeightCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -325,7 +317,7 @@ int GetHeightCaffe(PredictorContext pred) {
   return predictor->height_;
 }
 
-int GetChannelsCaffe(PredictorContext pred) {
+int GetChannelsCaffe(PredictorHandle pred) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return 0;
@@ -333,10 +325,10 @@ int GetChannelsCaffe(PredictorContext pred) {
   return predictor->channels_;
 }
 
-int GetPredLenCaffe(PredictorContext pred) {
-  auto predictor = (Predictor *)pred;
-  if (predictor == nullptr) {
-    return 0;
-  }
-  return predictor->pred_len_;
-}
+// int GetPredLenCaffe(PredictorHandle pred) {
+//   auto predictor = (Predictor *)pred;
+//   if (predictor == nullptr) {
+//     return 0;
+//   }
+//   return predictor->pred_len_;
+// }

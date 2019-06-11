@@ -7,37 +7,41 @@ extern "C" {
 
 #include <stddef.h>
 
-typedef void *PredictorContext;
+typedef void *PredictorHandle;
 
-PredictorContext NewCaffe(char *model_file, char *trained_file, int batch_size,
-                          int mode);
+PredictorHandle NewCaffe(char *model_file, char *trained_file, int batch_size,
+                         int mode);
 
 void SetModeCaffe(int mode);
 
 void InitCaffe();
 
-void PredictCaffe(PredictorContext pred, float *inputData);
+void PredictCaffe(PredictorHandle pred);
 
-const float *GetPredictionsCaffe(PredictorContext pred);
+void SetInputCaffe(PredictorHandle pred, int idx, float *data, size_t sz);
 
-void DeleteCaffe(PredictorContext pred);
+const float *GetOutputDataCaffe(PredictorHandle pred, int idx);
 
-void StartProfilingCaffe(PredictorContext pred, const char *name,
+const int *GetOutputShapeCaffe(PredictorHandle pred, int idx, int *len);
+
+void DeleteCaffe(PredictorHandle pred);
+
+void StartProfilingCaffe(PredictorHandle pred, const char *name,
                          const char *metadata);
 
-void EndProfilingCaffe(PredictorContext pred);
+void EndProfilingCaffe(PredictorHandle pred);
 
-void DisableProfilingCaffe(PredictorContext pred);
+void DisableProfilingCaffe(PredictorHandle pred);
 
-char *ReadProfileCaffe(PredictorContext pred);
+char *ReadProfileCaffe(PredictorHandle pred);
 
-int GetWidthCaffe(PredictorContext pred);
+int GetWidthCaffe(PredictorHandle pred);
 
-int GetHeightCaffe(PredictorContext pred);
+int GetHeightCaffe(PredictorHandle pred);
 
-int GetChannelsCaffe(PredictorContext pred);
+int GetChannelsCaffe(PredictorHandle pred);
 
-int GetPredLenCaffe(PredictorContext pred);
+// int GetPredLenCaffe(PredictorHandle pred);
 
 #ifdef __cplusplus
 }

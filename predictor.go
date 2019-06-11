@@ -24,7 +24,7 @@ const (
 )
 
 type Predictor struct {
-  handle     C.PredictorContext
+  handle     C.PredictorHandle
 	inputs  []tensor.Tensor
 	options *options.Options
 }
@@ -61,7 +61,7 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	}
 
 	return &Predictor{
-		ctx: C.NewCaffe(
+		handle: C.NewCaffe(
 			modelFileString,
 			weightsFileString,
 			C.int(options.BatchSize()),
@@ -83,8 +83,8 @@ func init() {
 	C.InitCaffe()
 }
 
-func (p *Predictor) Predict(ctx context.Context, data []tensor.Tensor) error {
-// func (p *Predictor) Predict(ctx context.Context, data []float32) error {
+// func (p *Predictor) Predict(ctx context.Context, data []tensor.Tensor) error {
+func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 	if data == nil || len(data) < 1 {
 		return fmt.Errorf("intput data nil or empty")
 	}
@@ -102,57 +102,45 @@ func (p *Predictor) Predict(ctx context.Context, data []tensor.Tensor) error {
 		data = append(data, padding...)
 	}
 
-	ptr := (*C.float)(unsafe.Pointer(&data[0]))
-
   span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
   defer span.Finish()
 
-	C.PredictCaffe(p.handle, ptr)
+	C.PredictCaffe(p.handle)
 
 	return nil
 }
 
-func (p *Predictor) GetOutputShape(ctx context.Context, int idx) []int {
+func (p *Predictor) GetOutputShape(idx int) []int {
   var sz int64
-  data := C.GetOutputShapeCaffe(p.handle, idx, (*C.int64_t)(unsafe.Pointer(&sz)))
-
+  data := C.GetOutputShapeCaffe(p.handle, C.int(idx), (*C.int)(unsafe.Pointer(&sz)))
 	return (*[1 << 30]int)(unsafe.Pointer(data))[:sz:sz]
 }
 
 func prod(sz []int) int {
-  res := 1 
+  res := 1
   for _, a := range sz {
     res *= a
   }
   return res
 }
 
-func (p *Predictor) GetOutput(ctx context.Context, int idx) []float32 {
- 
-  shape := p.GetOutputShape(ctx, idx)
+func (p *Predictor) GetOutputData(idx int) []float32 {
+  shape := p.GetOutputShape(idx)
   sz := prod(shape)
-
-  data := C.GetOutputDataCaffe(p.handle, idx)
+  data := C.GetOutputDataCaffe(p.handle, C.int(idx))
 	return (*[1 << 30]float32)(unsafe.Pointer(data))[:sz:sz]
 }
 
 func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]float32, error) {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_prediction_output")
-	defer span.Finish()
-
+  defer span.Finish()
   
-	batchSize := p.options.BatchSize()
-	predLen := int(C.GetPredLenCaffe(p.handle))
-	length := batchSize * predLen
-
-	cPredictions := C.GetPredictionsCaffe(p.handle)
-	if cPredictions == nil {
-		return nil, errors.New("empty predictions")
+	outputData :=p.GetOutputData(0)
+	if outputData == nil {
+		return nil, errors.New("empty output data")
 	}
 
-	slice := (*[1 << 30]float32)(unsafe.Pointer(cPredictions))[:length:length]
-
-	return slice, nil
+	return outputData, nil
 }
 
 func (p *Predictor) Close() {
