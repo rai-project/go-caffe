@@ -210,7 +210,7 @@ void PredictCaffe(PredictorHandle pred) {
   return;
 }
 
-void SetInputCaffe(PredictorHandle pred, int idx, float *data, size_t sz) {
+void SetInputCaffe(PredictorHandle pred, int32_t idx, float *data, size_t sz) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
@@ -226,15 +226,18 @@ const float *GetOutputDataCaffe(PredictorHandle pred, int idx) {
   return predictor->GetOutputData(idx);
 }
 
-const int *GetOutputShapeCaffe(PredictorHandle pred, int idx, int *len) {
+const int *GetOutputShapeCaffe(PredictorHandle pred, int32_t idx,
+                               int32_t *len) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return nullptr;
   }
-  auto shape = predictor->GetOutputShape(idx);
+  const auto shape = predictor->GetOutputShape(idx);
   *len = shape.size();
-  std::cout << "len(size) = " << shape.size()[0] << "\n";
-  return shape.data();
+  const auto byte_count = shape.size() * sizeof(int);
+  int *res = (int *)malloc(byte_count);
+  memcpy(res, shape.data(), byte_count);
+  return res;
 }
 
 void DeleteCaffe(PredictorHandle pred) {

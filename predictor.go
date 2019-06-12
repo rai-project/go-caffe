@@ -9,14 +9,13 @@ import (
 	"context"
 	"fmt"
 	"unsafe"
+	//"github.com/k0kubun/pp"
 
-  // "github.com/k0kubun/pp"
-  "gorgonia.org/tensor"
 	"github.com/rai-project/tracer"
 	"github.com/rai-project/nvidia-smi"
 	"github.com/Unknwon/com"
 	"github.com/pkg/errors"
-	"github.com/rai-project/dlframework/framework/options"
+  "github.com/rai-project/dlframework/framework/options"
 )
 
 const (
@@ -26,7 +25,6 @@ const (
 
 type Predictor struct {
   handle     C.PredictorHandle
-	inputs  []tensor.Tensor
 	options *options.Options
 }
 
@@ -85,12 +83,21 @@ func init() {
 }
 
 // func (p *Predictor) Predict(ctx context.Context, data []tensor.Tensor) error {
-func (p *Predictor) Predict(ctx context.Context, data []float32) error {
-	if data == nil || len(data) < 1 {
+func (p *Predictor) Predict(ctx context.Context) error {
+  span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
+  defer span.Finish()
+
+	C.PredictCaffe(p.handle)
+
+	return nil
+}
+
+func (p *Predictor) SetInput(idx int, data []float32) error {
+  if data == nil || len(data) < 1 {
 		return fmt.Errorf("intput data nil or empty")
 	}
 
-	batchSize := p.options.BatchSize()
+  batchSize := p.options.BatchSize()
 	width := C.GetWidthCaffe(p.handle)
 	height := C.GetHeightCaffe(p.handle)
 	channels := C.GetChannelsCaffe(p.handle)
@@ -103,25 +110,22 @@ func (p *Predictor) Predict(ctx context.Context, data []float32) error {
 		data = append(data, padding...)
 	}
 
-  span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
-  defer span.Finish()
-
-  p.SetInput(0, data)
-
-	C.PredictCaffe(p.handle)
-
-	return nil
-}
-
-func (p *Predictor) SetInput(idx int, data []float32) {
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
   C.SetInputCaffe(p.handle, C.int(idx), ptr, C.size_t(len(data)))
+
+  return nil
 }
 
 func (p *Predictor) GetOutputShape(idx int) []int {
-  var sz int64
-  data := C.GetOutputShapeCaffe(p.handle, C.int(idx), (*C.int)(unsafe.Pointer(&sz)))
-	return (*[1 << 30]int)(unsafe.Pointer(data))[:sz:sz]
+  var sz int32
+  cdata := C.GetOutputShapeCaffe(p.handle, C.int32_t(idx), (*C.int32_t)(unsafe.Pointer(&sz)))
+  res := make([]int, sz)
+  data := (*[1 << 30]C.int32_t)(unsafe.Pointer(cdata))[:sz:sz]
+  for ii := 0 ; ii< int(sz); ii++ {
+    res[ii] = int(data[ii])
+  }
+  C.free(unsafe.Pointer(cdata))
+	return res
 }
 
 func prod(sz []int) int {
@@ -136,16 +140,16 @@ func (p *Predictor) GetOutputData(idx int) []float32 {
   shape := p.GetOutputShape(idx)
   sz := prod(shape)
 
-  data := C.GetOutputDataCaffe(p.handle, C.int(idx))
+  data := C.GetOutputDataCaffe(p.handle, C.int32_t(idx))
 
 	return (*[1 << 30]float32)(unsafe.Pointer(data))[:sz:sz]
 }
 
-func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]float32, error) {
+func (p *Predictor) ReadOutputData(ctx context.Context, idx int ) ([]float32, error) {
 	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_prediction_output")
   defer span.Finish()
   
-	outputData :=p.GetOutputData(0)
+	outputData :=p.GetOutputData(idx)
 	if outputData == nil {
 		return nil, errors.New("empty output data")
 	}
