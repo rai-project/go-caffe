@@ -19,7 +19,6 @@ import (
 	"github.com/anthonynsimon/bild/imgio"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/k0kubun/pp"
-
 	"github.com/rai-project/config"
 	"github.com/rai-project/dlframework"
 	"github.com/rai-project/dlframework/framework/feature"
@@ -27,16 +26,20 @@ import (
 	"github.com/rai-project/downloadmanager"
 	"github.com/rai-project/go-caffe"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
-
 	_ "github.com/rai-project/tracer/jaeger"
 )
 
 var (
-	batchSize   = 64
+	batchSize   = 1
 	model       = "bvlc_alexnet"
+	shape       = []int{1, 3, 227, 227}
+	mean        = []float32{123, 117, 104}
+	scale       = []float32{1, 1, 1}
+	imgDir, _   = filepath.Abs("../_fixtures")
+	imgPath     = filepath.Join(imgDir, "platypus.jpg")
 	graph_url   = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
-	synset_url  = "http://data.dmlc.ml/mxnet/models/imagenet/synset.txt"
+	synset_url  = "http://s3.amazonaws.com/store.carml.org/synsets/imagenet/synset.txt"
 )
 
 // convert go Image to 1-dim array
@@ -66,7 +69,7 @@ func main() {
 	dir, _ := filepath.Abs("../tmp")
 	dir = filepath.Join(dir, model)
 	graph := filepath.Join(dir, "deploy.prototxt")
-	weights := filepath.Join(dir, "bvlc_alexnet.caffemodel")
+	weights := filepath.Join(dir, model+".caffemodel")
 	synset := filepath.Join(dir, "synset.txt")
 
 	if _, err := os.Stat(graph); os.IsNotExist(err) {
@@ -87,18 +90,18 @@ func main() {
 		}
 	}
 
-	imgDir, _ := filepath.Abs("../_fixtures")
-	imagePath := filepath.Join(imgDir, "platypus.jpg")
-
-	img, err := imgio.Open(imagePath)
+	img, err := imgio.Open(imgPath)
 	if err != nil {
 		panic(err)
 	}
 
+	height := shape[2]
+	width := shape[3]
+
 	var input []float32
 	for ii := 0; ii < batchSize; ii++ {
-		resized := transform.Resize(img, 227, 227, transform.Linear)
-		res, err := cvtImageTo1DArray(resized, []float32{123, 117, 104})
+		resized := transform.Resize(img, height, width, transform.Linear)
+		res, err := cvtRGBImageToNCHW1DArray(resized, mean, scale)
 		if err != nil {
 			panic(err)
 		}

@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"unsafe"
-	//"github.com/k0kubun/pp"
 
 	"github.com/rai-project/tracer"
 	"github.com/rai-project/nvidia-smi"

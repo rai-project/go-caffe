@@ -1,4 +1,6 @@
-# Batch Image Classification with Profiling
+# Caffe Image Classification in Go with Profiling
+
+The two examples show how to run caffe image classificaiton models in Go with nvprof and MLModelScope profiling.
 
 ## With nvprof
 
@@ -24,6 +26,6 @@ Then run the example by
 cd batch
 go run main.go
 ```
-Go to ```xxx:16686``` to see the trace
+Go to ```localhost:16686``` to see the trace
 
 
