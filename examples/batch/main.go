@@ -30,8 +30,8 @@ var (
 	batchSize   = 1
 	model       = "bvlc_alexnet"
 	shape       = []int{1, 3, 227, 227}
-	mean        = []float32{123, 117, 104}
-	scale       = []float32{1, 1, 1}
+	mean        = []float32{0.482353, 0.458824, 0.407843}
+	scale       = []float32{1.0, 1.0, 1.0}
 	imgDir, _   = filepath.Abs("../_fixtures")
 	imgPath     = filepath.Join(imgDir, "platypus.jpg")
 	graph_url   = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"

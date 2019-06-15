@@ -10,3 +10,5 @@ cifar-test-leveldb
 .vscode
 
 single
+main
+batch
