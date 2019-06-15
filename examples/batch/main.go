@@ -28,7 +28,7 @@ import (
 
 var (
 	batchSize   = 1
-	model       = "squee"
+	model       = "bvlc_alexnet"
 	shape       = []int{1, 3, 227, 227}
 	mean        = []float32{123, 117, 104}
 	scale       = []float32{1, 1, 1}
