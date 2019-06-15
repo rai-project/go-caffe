@@ -32,8 +32,8 @@ var (
 	shape       = []int{1, 3, 227, 227}
 	mean        = []float32{0.482353, 0.458824, 0.407843}
 	scale       = []float32{1.0, 1.0, 1.0}
-	imgDir, _   = filepath.Abs("../_fixtures")
-	imgPath     = filepath.Join(imgDir, "platypus.jpg")
+	imgDir, _   = filepath.Abs("../../_fixtures")
+	imgPath     = filepath.Join(imgDir, "cat.jpg")
 	graph_url   = "https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/deploy.prototxt"
 	weights_url = "http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel"
 	synset_url  = "http://s3.amazonaws.com/store.carml.org/synsets/imagenet/synset.txt"
