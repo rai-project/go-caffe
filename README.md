@@ -18,7 +18,6 @@ go get -v github.com/rai-project/go-caffe
 
 The repo requires Caffe and other Go packages.
 
-
 ### Caffe C Library
 
 The Caffe C library is expected to be under `/opt/caffe`.
