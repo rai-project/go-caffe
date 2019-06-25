@@ -85,7 +85,7 @@ class Predictor {
   Predictor(const string &model_file, const string &trained_file,
             int batch_size, caffe::Caffe::Brew mode);
   void Predict();
-  void SetInput(int idx, float *data, size_t size);
+  void SetInput(int idx, float *data);
   const float *GetOutputData(int idx);
   std::vector<int> GetOutputShape(int idx);
 
@@ -100,8 +100,6 @@ class Predictor {
   int width_, height_, channels_;
   int batch_;
   caffe::Caffe::Brew mode_{Caffe::CPU};
-  // int pred_len_;
-  std::vector<float *> inputs_{nullptr};
   std::vector<caffe::Blob<float> *> input_blobs_{nullptr};
   std::vector<caffe::Blob<float> *> output_blobs_{nullptr};
   profile *prof_{nullptr};
@@ -115,7 +113,6 @@ Predictor::Predictor(const string &model_file, const string &trained_file,
   net_->CopyTrainedLayersFrom(trained_file);
 
   CHECK_EQ(net_->num_inputs(), 1) << "Network should have exactly one input.";
-  CHECK_EQ(net_->num_outputs(), 1) << "Network should have exactly one output.";
 
   mode_ = mode;
 
@@ -152,7 +149,7 @@ void Predictor::Predict() {
   // output_blobs_ = net_->output_blobs();
 }
 
-void Predictor::SetInput(int idx, float *data, size_t sz) {
+void Predictor::SetInput(int idx, float *data) {
   auto blob = new caffe::Blob<float>(batch_, channels_, height_, width_);
   if (mode_ == Caffe::CPU) {
     blob->set_cpu_data(data);
@@ -210,12 +207,12 @@ void PredictCaffe(PredictorHandle pred) {
   return;
 }
 
-void SetInputCaffe(PredictorHandle pred, int32_t idx, float *data, size_t sz) {
+void SetInputCaffe(PredictorHandle pred, int32_t idx, float *data) {
   auto predictor = (Predictor *)pred;
   if (predictor == nullptr) {
     return;
   }
-  predictor->SetInput(idx, data, sz);
+  predictor->SetInput(idx, data);
 }
 
 const float *GetOutputDataCaffe(PredictorHandle pred, int idx) {
@@ -328,11 +325,3 @@ int GetChannelsCaffe(PredictorHandle pred) {
   }
   return predictor->channels_;
 }
-
-// int GetPredLenCaffe(PredictorHandle pred) {
-//   auto predictor = (Predictor *)pred;
-//   if (predictor == nullptr) {
-//     return 0;
-//   }
-//   return predictor->pred_len_;
-// }

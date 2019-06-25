@@ -110,7 +110,7 @@ func (p *Predictor) SetInput(idx int, data []float32) error {
 	}
 
 	ptr := (*C.float)(unsafe.Pointer(&data[0]))
-  C.SetInputCaffe(p.handle, C.int(idx), ptr, C.size_t(len(data)))
+  C.SetInputCaffe(p.handle, C.int(idx), ptr)
 
   return nil
 }

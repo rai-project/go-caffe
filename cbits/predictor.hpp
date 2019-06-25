@@ -18,7 +18,7 @@ void InitCaffe();
 
 void PredictCaffe(PredictorHandle pred);
 
-void SetInputCaffe(PredictorHandle pred, int idx, float *data, size_t sz);
+void SetInputCaffe(PredictorHandle pred, int idx, float *data);
 
 const float *GetOutputDataCaffe(PredictorHandle pred, int idx);
 
