@@ -24,6 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/rai-project/go-caffe"
 
 [[constraint]]
   branch = "master"
@@ -44,10 +47,6 @@
 [[override]]
   branch = "master"
   name = "github.com/ianlancetaylor/cgosymbolizer"
-
-[[constraint]]
-  name = "github.com/k0kubun/pp"
-  version = "2.3.0"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -88,6 +87,10 @@
 [[override]]
   branch = "master"
   name = "github.com/apache/thrift"
+
+[[override]]
+  name = "github.com/k0kubun/pp"
+  version = "3.0.1"
 
 [prune]
   go-tests = true
