@@ -9,7 +9,7 @@ jobs:
           cd dockerfiles
           make docker_pull_cpu
           make docker_build_cpu
-          ./push_cpu.sh
+          ./push.sh docker_push_cpu
   - job: MLPerf_CPU
     timeoutInMinutes: 0
     pool:
@@ -20,7 +20,7 @@ jobs:
           cd dockerfiles
           make docker_pull_cpu_mlperf
           make docker_build_cpu_mlperf
-          ./push_cpu_mlperf.sh
+          ./push.sh docker_push_cpu_mlperf
   - job: GPU
     timeoutInMinutes: 0
     pool:
@@ -31,7 +31,7 @@ jobs:
           cd dockerfiles
           make docker_pull_gpu
           make docker_build_gpu
-          ./push_gpu.sh
+          ./push.sh docker_push_gpu
   - job: Update_Microbadger
     dependsOn:
       - CPU
