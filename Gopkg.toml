@@ -26,10 +26,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rai-project/go-caffe"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/GeertJohan/go-sourcepath"
 
 [[constraint]]
